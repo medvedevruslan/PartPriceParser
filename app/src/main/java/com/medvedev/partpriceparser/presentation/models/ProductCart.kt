@@ -1,9 +1,7 @@
 package com.medvedev.partpriceparser.presentation.models
 
-import java.net.URL
-
 data class ProductCart(
-    val linkToProduct:URL,
+    val linkToProduct: String,
     val imageUrl: String,
     val price: String,
     val name: String,

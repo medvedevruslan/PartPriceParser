@@ -4,7 +4,6 @@ import com.medvedev.partpriceparser.feature_parsers.automotors.AutoMotorsParser
 import com.medvedev.partpriceparser.presentation.models.ParserData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import java.net.URL
 
 
 class GetProductsUseCase {
@@ -15,7 +14,8 @@ class GetProductsUseCase {
         return flow {
             autoMotorsParser.getProduct(article).collect { result ->
                 val parserData = ParserData(
-                    link = URL(autoMotorsParser.linkToSite),
+                    halfLinkSearchCatalog = autoMotorsParser.linkToSite + autoMotorsParser.partOfLinkToCatalog,
+                    linkToSite = autoMotorsParser.linkToSite,
                     siteName = autoMotorsParser.siteName,
                     productList = result
                 )

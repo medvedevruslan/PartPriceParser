@@ -8,6 +8,7 @@ interface ProductParser {
 
     val linkToSite: String
     val siteName: String
+    val partOfLinkToCatalog: String
 
     suspend fun getProduct(articleToSearch: String): Flow<Resource<List<ProductCart>>>
 

@@ -9,13 +9,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import java.net.URL
 import java.util.Locale
 
-class AutoMotorsParser : ProductParser {
+class AutoMotorsParser() : ProductParser {
 
     override val linkToSite: String = "https://auto-motors.ru"
     override val siteName: String = "АВТОМОТОРС"
+    override val partOfLinkToCatalog: String = "/catalog/?q="
 
     override suspend fun getProduct(articleToSearch: String): Flow<Resource<List<ProductCart>>> {
 
@@ -24,7 +24,7 @@ class AutoMotorsParser : ProductParser {
                 emit(Resource.Loading())
 
                 val document: Document =
-                    Jsoup.connect("$linkToSite/catalog/?q=$articleToSearch") // 740.1003010-20 пример
+                    Jsoup.connect("$linkToSite$partOfLinkToCatalog$articleToSearch") // 740.1003010-20 пример
                         .timeout(10 * 1000).get()
 
                 // parseText = document.text()
@@ -96,7 +96,7 @@ class AutoMotorsParser : ProductParser {
 
                     productList.add(
                         ProductCart(
-                            linkToProduct = URL(linkToSite + halfLinkToProduct),
+                            linkToProduct = linkToSite + halfLinkToProduct,
                             imageUrl = linkToSite + imgSrc,
                             price = if (!price.isNullOrEmpty()) price else "Неизвестно",
                             name = name,

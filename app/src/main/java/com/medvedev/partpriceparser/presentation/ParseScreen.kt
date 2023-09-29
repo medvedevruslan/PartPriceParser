@@ -30,6 +30,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -56,7 +57,6 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.medvedev.partpriceparser.core.util.Resource
 import com.medvedev.partpriceparser.core.util.UIEvents
-import com.medvedev.partpriceparser.core.util.printD
 import com.medvedev.partpriceparser.presentation.models.ParserData
 import com.medvedev.partpriceparser.presentation.models.ProductCart
 import kotlinx.coroutines.flow.collectLatest
@@ -73,8 +73,7 @@ fun ParseScreen(viewModel: ParserViewModel) {
                     snackbarHostState.showSnackbar(message = event.message)
                 }
 
-                is UIEvents.NavigateEvent -> {
-                    /* todo расписать события навигации*/
+                is UIEvents.NavigateEvent -> {/* todo расписать события навигации*/
                 }
             }
         }
@@ -107,7 +106,16 @@ fun ParseScreenContent(modifier: Modifier = Modifier, viewModel: ParserViewModel
                             .background(color = MaterialTheme.colorScheme.background)
                             .padding(horizontal = 5.dp)
                     ) {
-                        ItemLazyColumn(parserData = parserData)
+
+                        val localContext = LocalContext.current
+
+                        ItemLazyColumn(
+                            parserData = parserData, actionGoToBrowser = { link ->
+                                viewModel.openBrowser(
+                                    context = localContext, linkToSite = link
+                                )
+                            }, searchText = viewModel.textSearch.value
+                        )
                     }
                 }
             }
@@ -116,7 +124,9 @@ fun ParseScreenContent(modifier: Modifier = Modifier, viewModel: ParserViewModel
 }
 
 @Composable
-fun ItemLazyColumn(parserData: ParserData) {
+fun ItemLazyColumn(
+    parserData: ParserData, actionGoToBrowser: (String) -> Unit, searchText: String
+) {
 
     val listSize = parserData.productList.data?.size ?: 1
 
@@ -126,22 +136,32 @@ fun ItemLazyColumn(parserData: ParserData) {
             .border(
                 border = BorderStroke(2.dp, color = MaterialTheme.colorScheme.secondary),
                 shape = RoundedCornerShape(8.dp)
-            ),
-        shape = RoundedCornerShape(13.dp)
+            ), shape = RoundedCornerShape(13.dp)
     ) {
-        LazyColumn(modifier = Modifier.height((90 * listSize + 60).dp)) {
+        LazyColumn(modifier = Modifier.height((90 * listSize + 80).dp)) {
             item {
                 Row(
-                    modifier = Modifier
-                        .padding(3.dp)
-                        .padding(start = 10.dp)
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(
-                        text = parserData.siteName,
-                        modifier = Modifier
-                            .width(200.dp)
-                    )
-                    Text(text = parserData.link.toString())
+                    GoToLinkButton(
+                        modifier = Modifier.weight(1f),
+                        actionGoToBrowser = { actionGoToBrowser.invoke(parserData.linkToSite) },
+                        parserData = parserData
+                    ) {
+                        Text(
+                            text = parserData.siteName, modifier = Modifier.width(150.dp)
+                        )
+                        Text(text = parserData.linkToSite)
+                    }
+
+                    GoToLinkButton(
+                        modifier = Modifier.weight(1f),
+                        actionGoToBrowser = { actionGoToBrowser.invoke(parserData.halfLinkSearchCatalog + searchText) },
+                        parserData = parserData
+                    ) {
+                        Text(text = parserData.halfLinkSearchCatalog + searchText)
+                    }
                 }
 
                 Divider(
@@ -162,47 +182,58 @@ fun ItemLazyColumn(parserData: ParserData) {
                 is Resource.Success -> {
                     parserData.productList.data?.let {
                         items(items = it) { productCart ->
-                            ProductCardItem(productCart = productCart, itemsHeight = 90.dp)
+                            ProductCardItem(
+                                productCart = productCart,
+                                itemsHeight = 90.dp,
+                                actionGoToBrowser = actionGoToBrowser
+                            )
                         }
                     }
                 }
             }
         }
-        /*ScrollableTabRow(selectedTabIndex =) {
-
-        }*/
-
-
     }
 }
 
 @Composable
-fun ProductCardItem(productCart: ProductCart, itemsHeight: Dp) {
-    Card(
-        modifier = Modifier
-            .padding(top = 5.dp)
-            .padding(horizontal = 7.dp) // todo вернуть отступы
-            .border(
-                border = BorderStroke(
-                    2.dp,
-                    color = MaterialTheme.colorScheme.secondaryContainer
-                ),
-                shape = RoundedCornerShape(15.dp)
-            )
-            .clickable { }, // todo написать при нажатии переход на страницу товара $productCart.linkToProduct
-    ) {
+fun GoToLinkButton(
+    modifier: Modifier = Modifier,
+    actionGoToBrowser: (String) -> Unit,
+    parserData: ParserData,
+    content: @Composable () -> Unit
+) {
+    OutlinedButton(modifier = modifier
+        .padding(start = 5.dp)
+        .padding(end = 5.dp),
+        shape = RoundedCornerShape(8.dp),
+        onClick = {
+            actionGoToBrowser.invoke(parserData.linkToSite)
+        }) {
+        content()
+    }
+}
+
+
+@Composable
+fun ProductCardItem(
+    productCart: ProductCart, itemsHeight: Dp, actionGoToBrowser: (String) -> Unit
+) {
+    Card(modifier = Modifier
+        .padding(top = 5.dp)
+        .padding(horizontal = 7.dp)
+        .border(
+            border = BorderStroke(
+                2.dp, color = MaterialTheme.colorScheme.secondaryContainer
+            ), shape = RoundedCornerShape(15.dp)
+        )
+        .clickable {
+            actionGoToBrowser.invoke(productCart.linkToProduct)
+        }) {
         Surface {
             Row(modifier = Modifier.fillMaxWidth()) {
-
-                LaunchedEffect(key1 = true) {
-                    "productCart imgSrc: ${productCart.imageUrl}".printD
-                }
-
                 AsyncImage(
                     model = ImageRequest.Builder(context = LocalContext.current)
-                        .data(productCart.imageUrl)
-                        .crossfade(true)
-                        .build(),
+                        .data(productCart.imageUrl).crossfade(true).build(),
                     // model = productCart.imageUrl,
                     contentDescription = "part_image: ${productCart.name}",
                     modifier = Modifier
@@ -219,8 +250,7 @@ fun ProductCardItem(productCart: ProductCart, itemsHeight: Dp) {
                     Row(modifier = Modifier.padding(top = 5.dp)) {
                         Text(
                             text = productCart.name,
-                            modifier = Modifier
-                                .weight(5f),
+                            modifier = Modifier.weight(5f),
                             style = MaterialTheme.typography.titleMedium
                         )
                         Text(
@@ -279,29 +309,23 @@ fun SearchBarArticle(viewModel: ParserViewModel) {
             .padding(horizontal = 10.dp)
             .height(60.dp)
     ) {
-        OutlinedTextField(
-            trailingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Clear,
-                    contentDescription = "clear",
-                    modifier = Modifier.clickable { viewModel.clearSearchText() }
-                )
-            },
+        OutlinedTextField(trailingIcon = {
+            Icon(imageVector = Icons.Default.Clear,
+                contentDescription = "clear",
+                modifier = Modifier.clickable { viewModel.clearSearchText() })
+        },
             placeholder = {
                 Text(text = "введите необходимый артикул")
             },
             keyboardActions = KeyboardActions { viewModel.parseProducts(viewModel.textSearch.value) },
             keyboardOptions = KeyboardOptions(
-                autoCorrect = true,
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Search
+                autoCorrect = true, keyboardType = KeyboardType.Text, imeAction = ImeAction.Search
             ),
             modifier = Modifier.weight(0.8f),
             value = viewModel.textSearch.value,
             onValueChange = {
                 viewModel.changeTextSearch(it)
-            }
-        )
+            })
         OutlinedIconButton(
             modifier = Modifier
                 .width(70.dp)
@@ -327,32 +351,25 @@ fun CustomScaffold(
     snackbarHostState: SnackbarHostState,
     content: @Composable (paddingValues: PaddingValues) -> Unit
 ) {
-    Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = {
-            TopAppBar(
-                modifier = Modifier.height(50.dp),
-                title = {
-                    Surface(tonalElevation = 5.dp) {
-                        Text(
-                            text = "Парсер артикула:",
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 12.dp),
-                            fontSize = 18.sp,
-                            style = MaterialTheme.typography.headlineSmall,
-                            textAlign = TextAlign.Start,
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.mediumTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(5.dp)
-                )
+    Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }, topBar = {
+        TopAppBar(
+            modifier = Modifier.height(50.dp), title = {
+                Surface(tonalElevation = 5.dp) {
+                    Text(
+                        text = "Парсер артикула:",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 12.dp),
+                        fontSize = 18.sp,
+                        style = MaterialTheme.typography.headlineSmall,
+                        textAlign = TextAlign.Start,
+                    )
+                }
+            }, colors = TopAppBarDefaults.mediumTopAppBarColors(
+                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(5.dp)
             )
-        })
-    { paddingValues ->
+        )
+    }) { paddingValues ->
         content(paddingValues)
     }
 }
-
-
-
