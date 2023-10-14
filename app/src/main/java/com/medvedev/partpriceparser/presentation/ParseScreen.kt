@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -50,6 +51,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -95,10 +97,10 @@ fun ParseScreenContent(modifier: Modifier = Modifier, viewModel: ParserViewModel
 
         Surface(
             modifier = Modifier
-                .padding(top = 10.dp)
+                .padding(top = 5.dp)
                 .padding(horizontal = 5.dp)
         ) {
-            LazyColumn(modifier = Modifier.height(1000.dp)) {
+            LazyColumn(modifier = Modifier.fillMaxHeight()) {
                 items(items = viewModel.foundedProductList) { parserData ->
                     Surface(
                         modifier = Modifier
@@ -110,11 +112,13 @@ fun ParseScreenContent(modifier: Modifier = Modifier, viewModel: ParserViewModel
                         val localContext = LocalContext.current
 
                         ItemLazyColumn(
-                            parserData = parserData, actionGoToBrowser = { link ->
+                            parserData = parserData,
+                            actionGoToBrowser = { link ->
                                 viewModel.openBrowser(
                                     context = localContext, linkToSite = link
                                 )
-                            }, searchText = viewModel.textSearch.value
+                            },
+                            searchText = viewModel.textSearch.value
                         )
                     }
                 }
@@ -138,31 +142,52 @@ fun ItemLazyColumn(
                 shape = RoundedCornerShape(8.dp)
             ), shape = RoundedCornerShape(13.dp)
     ) {
-        LazyColumn(modifier = Modifier.height((90 * listSize + 80).dp)) {
+        LazyColumn(modifier = Modifier.height((90 * listSize + 65).dp)) {
             item {
-                Row(
+                OutlinedButton(
+                    contentPadding = PaddingValues(4.dp),
+                    modifier = Modifier
+                        .padding(horizontal = 4.dp)
+                        .fillMaxWidth(),
+                    shape = RoundedCornerShape(4.dp),
+                    onClick = {
+                        actionGoToBrowser.invoke(parserData.halfLinkSearchCatalog + searchText)
+                    }
+                ) {
+                    Text(
+                        modifier = Modifier.padding(2.dp),
+                        text = parserData.halfLinkSearchCatalog + searchText,
+                        style = MaterialTheme.typography.bodySmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+
+                /*Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     GoToLinkButton(
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 3.dp),
                         actionGoToBrowser = { actionGoToBrowser.invoke(parserData.linkToSite) },
                         parserData = parserData
                     ) {
-                        Text(
-                            text = parserData.siteName, modifier = Modifier.width(150.dp)
-                        )
-                        Text(text = parserData.linkToSite)
+                        TextLink(parserData.linkToSite)
                     }
 
                     GoToLinkButton(
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(end = 3.dp),
                         actionGoToBrowser = { actionGoToBrowser.invoke(parserData.halfLinkSearchCatalog + searchText) },
                         parserData = parserData
                     ) {
-                        Text(text = parserData.halfLinkSearchCatalog + searchText)
+                        TextLink(text = parserData.halfLinkSearchCatalog + searchText)
                     }
-                }
+                }*/
 
                 Divider(
                     modifier = Modifier.padding(horizontal = 7.dp),
@@ -196,16 +221,27 @@ fun ItemLazyColumn(
 }
 
 @Composable
+fun TextLink(text: String) {
+    Text(
+        modifier = Modifier.padding(2.dp),
+        text = text,
+        style = MaterialTheme.typography.bodySmall,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis
+    )
+}
+
+@Composable
 fun GoToLinkButton(
     modifier: Modifier = Modifier,
     actionGoToBrowser: (String) -> Unit,
     parserData: ParserData,
     content: @Composable () -> Unit
 ) {
-    OutlinedButton(modifier = modifier
-        .padding(start = 5.dp)
-        .padding(end = 5.dp),
-        shape = RoundedCornerShape(8.dp),
+    OutlinedButton(
+        contentPadding = PaddingValues(4.dp),
+        modifier = modifier.padding(0.dp),
+        shape = RoundedCornerShape(4.dp),
         onClick = {
             actionGoToBrowser.invoke(parserData.linkToSite)
         }) {
@@ -219,12 +255,12 @@ fun ProductCardItem(
     productCart: ProductCart, itemsHeight: Dp, actionGoToBrowser: (String) -> Unit
 ) {
     Card(modifier = Modifier
-        .padding(top = 5.dp)
-        .padding(horizontal = 7.dp)
+        .padding(top = 3.dp)
+        .padding(horizontal = 3.dp)
         .border(
             border = BorderStroke(
-                2.dp, color = MaterialTheme.colorScheme.secondaryContainer
-            ), shape = RoundedCornerShape(15.dp)
+                1.dp, color = MaterialTheme.colorScheme.secondaryContainer
+            ), shape = RoundedCornerShape(4.dp)
         )
         .clickable {
             actionGoToBrowser.invoke(productCart.linkToProduct)
@@ -251,34 +287,37 @@ fun ProductCardItem(
                         Text(
                             text = productCart.name,
                             modifier = Modifier.weight(5f),
-                            style = MaterialTheme.typography.titleMedium
+                            style = MaterialTheme.typography.labelMedium
                         )
                         Text(
                             text = productCart.brand,
                             modifier = Modifier.weight(5f),
-                            style = MaterialTheme.typography.titleMedium
+                            style = MaterialTheme.typography.labelLarge
                         )
                     }
-                    Text(text = productCart.article)
+
+                    Text(
+                        text = productCart.article,
+                        style = MaterialTheme.typography.labelSmall + MaterialTheme.typography.labelLarge
+                    )
                     Text(
                         text = productCart.additionalArticles,
-                        style = MaterialTheme.typography.labelSmall,
+                        style = MaterialTheme.typography.bodySmall,
                         maxLines = 2
                     )
                 }
                 Column(
                     modifier = Modifier
                         .height(itemsHeight)
-                        .weight(1.5f)
-                    // .weight(0.4f)
+                        .weight(2f)
                 ) {
                     Text(
                         text = productCart.price,
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.labelMedium,
                         modifier = Modifier.padding(top = 5.dp)
                     )
-                    Text(text = productCart.existence)
-                    Text(text = productCart.quantity.toString())
+                    Text(text = productCart.existence, style = MaterialTheme.typography.bodySmall)
+                    Text(text = productCart.quantity.toString(), style = MaterialTheme.typography.bodyMedium)
                 }
             }
         }
@@ -306,31 +345,39 @@ fun SearchBarArticle(viewModel: ParserViewModel) {
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
+            .padding(top = 4.dp)
             .padding(horizontal = 10.dp)
-            .height(60.dp)
+            .height(50.dp)
     ) {
-        OutlinedTextField(trailingIcon = {
-            Icon(imageVector = Icons.Default.Clear,
-                contentDescription = "clear",
-                modifier = Modifier.clickable { viewModel.clearSearchText() })
-        },
+        OutlinedTextField(
+            textStyle = MaterialTheme.typography.bodyMedium,
+            maxLines = 1,
+            trailingIcon = {
+                Icon(imageVector = Icons.Default.Clear,
+                    contentDescription = "clear",
+                    modifier = Modifier.clickable { viewModel.clearSearchText() })
+                           },
             placeholder = {
-                Text(text = "введите необходимый артикул")
+                Text(
+                    textAlign = TextAlign.Center,
+                    text = "введите необходимый артикул",
+                    style = MaterialTheme.typography.bodySmall,
+                )
             },
             keyboardActions = KeyboardActions { viewModel.parseProducts(viewModel.textSearch.value) },
             keyboardOptions = KeyboardOptions(
                 autoCorrect = true, keyboardType = KeyboardType.Text, imeAction = ImeAction.Search
             ),
-            modifier = Modifier.weight(0.8f),
+            modifier = Modifier
+                .weight(0.8f)
+                .padding(end = 1.dp),
             value = viewModel.textSearch.value,
             onValueChange = {
                 viewModel.changeTextSearch(it)
             })
         OutlinedIconButton(
             modifier = Modifier
-                .width(70.dp)
-                .height(50.dp)
-                .weight(0.2f)
+                .size(45.dp)
                 .padding(start = 3.dp),
             shape = RoundedCornerShape(8.dp),
             onClick = { viewModel.parseProducts(viewModel.textSearch.value) },
