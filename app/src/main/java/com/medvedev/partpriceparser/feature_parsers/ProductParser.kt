@@ -3,14 +3,39 @@ package com.medvedev.partpriceparser.feature_parsers
 import com.medvedev.partpriceparser.core.util.Resource
 import com.medvedev.partpriceparser.presentation.models.ProductCart
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 
-interface ProductParser {
+abstract class ProductParser {
 
-    val linkToSite: String
-    val siteName: String
-    val partOfLinkToCatalog: String
+    abstract val linkToSite: String
+    abstract val siteName: String
+    abstract val partOfLinkToCatalog: String
 
-    suspend fun getProduct(articleToSearch: String): Flow<Resource<List<ProductCart>>>
+    protected val documentCatalogAddressLink: (String) -> Document
+        get() = { articleToSearch ->
+            Jsoup.connect("$linkToSite$partOfLinkToCatalog$articleToSearch") // 740.1003010-20 пример
+                .timeout(10 * 1000).get()
+        }
+
+    protected val productList: MutableList<ProductCart> = mutableListOf()
+
+
+    suspend fun getProduct(articleToSearch: String): Flow<Resource<List<ProductCart>>> = flow {
+        try {
+            emit(Resource.Loading())
+            workWithServer(articleToSearch).collect {
+                emit(it)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emit(Resource.Error(e.toString()))
+        }
+    }
+
+
+    protected abstract val workWithServer: (String) -> Flow<Resource<List<ProductCart>>>
 
 }
 

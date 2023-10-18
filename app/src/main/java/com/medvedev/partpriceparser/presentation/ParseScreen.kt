@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -55,13 +54,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.medvedev.partpriceparser.core.util.Resource
 import com.medvedev.partpriceparser.core.util.UIEvents
 import com.medvedev.partpriceparser.presentation.models.ParserData
 import com.medvedev.partpriceparser.presentation.models.ProductCart
 import kotlinx.coroutines.flow.collectLatest
+
+const val ITEM_HEIGHT_IN_LAZY_COLUMN: Int = 130
 
 
 @Composable
@@ -112,13 +111,11 @@ fun ParseScreenContent(modifier: Modifier = Modifier, viewModel: ParserViewModel
                         val localContext = LocalContext.current
 
                         ItemLazyColumn(
-                            parserData = parserData,
-                            actionGoToBrowser = { link ->
+                            parserData = parserData, actionGoToBrowser = { link ->
                                 viewModel.openBrowser(
                                     context = localContext, linkToSite = link
                                 )
-                            },
-                            searchText = viewModel.textSearch.value
+                            }, searchText = viewModel.textSearch.value
                         )
                     }
                 }
@@ -142,18 +139,16 @@ fun ItemLazyColumn(
                 shape = RoundedCornerShape(8.dp)
             ), shape = RoundedCornerShape(13.dp)
     ) {
-        LazyColumn(modifier = Modifier.height((90 * listSize + 65).dp)) {
+        LazyColumn(modifier = Modifier.height((ITEM_HEIGHT_IN_LAZY_COLUMN * listSize + 65).dp)) {
             item {
-                OutlinedButton(
-                    contentPadding = PaddingValues(4.dp),
+                OutlinedButton(contentPadding = PaddingValues(4.dp),
                     modifier = Modifier
                         .padding(horizontal = 4.dp)
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(4.dp),
                     onClick = {
                         actionGoToBrowser.invoke(parserData.halfLinkSearchCatalog + searchText)
-                    }
-                ) {
+                    }) {
                     Text(
                         modifier = Modifier.padding(2.dp),
                         text = parserData.halfLinkSearchCatalog + searchText,
@@ -209,7 +204,7 @@ fun ItemLazyColumn(
                         items(items = it) { productCart ->
                             ProductCardItem(
                                 productCart = productCart,
-                                itemsHeight = 90.dp,
+                                itemsHeight = ITEM_HEIGHT_IN_LAZY_COLUMN.dp,
                                 actionGoToBrowser = actionGoToBrowser
                             )
                         }
@@ -238,8 +233,7 @@ fun GoToLinkButton(
     parserData: ParserData,
     content: @Composable () -> Unit
 ) {
-    OutlinedButton(
-        contentPadding = PaddingValues(4.dp),
+    OutlinedButton(contentPadding = PaddingValues(4.dp),
         modifier = modifier.padding(0.dp),
         shape = RoundedCornerShape(4.dp),
         onClick = {
@@ -267,7 +261,7 @@ fun ProductCardItem(
         }) {
         Surface {
             Row(modifier = Modifier.fillMaxWidth()) {
-                AsyncImage(
+                /*AsyncImage(
                     model = ImageRequest.Builder(context = LocalContext.current)
                         .data(productCart.imageUrl).crossfade(true).build(),
                     // model = productCart.imageUrl,
@@ -277,11 +271,12 @@ fun ProductCardItem(
                         .width(itemsHeight)
                         .height(itemsHeight)
                         .weight(1.5f)
-                )
+                )*/
                 Column(
                     modifier = Modifier
                         .height(itemsHeight)
                         .weight(7f)
+                        .padding(start = 5.dp)
                 ) {
                     Row(modifier = Modifier.padding(top = 5.dp)) {
                         Text(
@@ -309,7 +304,7 @@ fun ProductCardItem(
                 Column(
                     modifier = Modifier
                         .height(itemsHeight)
-                        .weight(2f)
+                        .weight(3f)
                 ) {
                     Text(
                         text = productCart.price,
@@ -317,7 +312,10 @@ fun ProductCardItem(
                         modifier = Modifier.padding(top = 5.dp)
                     )
                     Text(text = productCart.existence, style = MaterialTheme.typography.bodySmall)
-                    Text(text = productCart.quantity.toString(), style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        text = productCart.quantity.toString(),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                 }
             }
         }
@@ -349,14 +347,13 @@ fun SearchBarArticle(viewModel: ParserViewModel) {
             .padding(horizontal = 10.dp)
             .height(50.dp)
     ) {
-        OutlinedTextField(
-            textStyle = MaterialTheme.typography.bodyMedium,
+        OutlinedTextField(textStyle = MaterialTheme.typography.bodyMedium,
             maxLines = 1,
             trailingIcon = {
                 Icon(imageVector = Icons.Default.Clear,
                     contentDescription = "clear",
                     modifier = Modifier.clickable { viewModel.clearSearchText() })
-                           },
+            },
             placeholder = {
                 Text(
                     textAlign = TextAlign.Center,

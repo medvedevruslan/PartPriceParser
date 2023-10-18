@@ -1,6 +1,6 @@
 package com.medvedev.partpriceparser.domain.use_cases
 
-import com.medvedev.partpriceparser.feature_parsers.automotors.AutoMotorsParser
+import com.medvedev.partpriceparser.feature_parsers.sources.AutoMotorsParser
 import com.medvedev.partpriceparser.presentation.models.ParserData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow

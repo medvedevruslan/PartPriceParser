@@ -1,31 +1,32 @@
-package com.medvedev.partpriceparser.feature_parsers.automotors
+package com.medvedev.partpriceparser.feature_parsers.sources
 
 import com.medvedev.partpriceparser.core.util.Resource
 import com.medvedev.partpriceparser.core.util.html2text
-import com.medvedev.partpriceparser.core.util.printD
 import com.medvedev.partpriceparser.feature_parsers.ProductParser
 import com.medvedev.partpriceparser.presentation.models.ProductCart
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
+import timber.log.Timber
 import java.util.Locale
 
-class AutoMotorsParser() : ProductParser {
+
+
+class AutoMotorsParser : ProductParser() {
 
     override val linkToSite: String = "https://auto-motors.ru"
     override val siteName: String = "АВТОМОТОРС"
     override val partOfLinkToCatalog: String = "/catalog/?q="
 
-    override suspend fun getProduct(articleToSearch: String): Flow<Resource<List<ProductCart>>> {
+    val Any.printAM
+        get() = Timber.tag("developerAM").d(toString())
 
-        return flow {
-            try {
-                emit(Resource.Loading())
-
-                val document: Document =
+    @Suppress("OVERRIDE_BY_INLINE")
+    override inline val workWithServer: (String) -> Flow<Resource<List<ProductCart>>>
+        get() = { articleToSearch ->
+            flow {
+                /*val document: Document =
                     Jsoup.connect("$linkToSite$partOfLinkToCatalog$articleToSearch") // 740.1003010-20 пример
-                        .timeout(10 * 1000).get()
+                        .timeout(10 * 1000).get()*/
 
                 // parseText = document.text()
                 /*"tagName: ${document.tagName()}".printD
@@ -34,8 +35,11 @@ class AutoMotorsParser() : ProductParser {
                 "tagNameDiv: ${document.tagName("div")}".printD
                 "body: ${document.body()}".printD*/
 
-                val productList: MutableList<ProductCart> = mutableListOf()
-                val productElements = document.select("div.product-card-list")
+                // val productList: MutableList<ProductCart> = mutableListOf()
+
+                val actualDocument = documentCatalogAddressLink(articleToSearch)
+
+                    val productElements = actualDocument.select("div.product-card-list")
 
                 productElements.forEach { element ->
 
@@ -63,36 +67,36 @@ class AutoMotorsParser() : ProductParser {
                     // element.select("p.m_none").printD
 
                     val articleInfo = element.select("p.m_none")
-                    val article = articleInfo[0].text().html2text.apply { "article: $this".printD }
+                    val article = articleInfo[0].text().html2text.apply { "article: $this".printAM }
 
                     // val dopArticle = articleInfo[1].text().html2text.apply { "dopArticle: $this".printD }
                     val dopArticle =
                         if (articleInfo.size > 3) articleInfo[1].text().html2text else ""
-                    "dopArticle: $dopArticle".printD
+                    "dopArticle: $dopArticle".printAM
 
                     val existenceText = if (articleInfo.size > 3) {
-                        "article info size ${articleInfo.size}".printD
-                        (articleInfo[2].text().html2text.lowercase(Locale.getDefault()) + " " + articleInfo[3].text().html2text).apply { "existenceText1: $this".printD }
+                        "article info size ${articleInfo.size}".printAM
+                        (articleInfo[2].text().html2text.lowercase(Locale.getDefault()) + " " + articleInfo[3].text().html2text).apply { "existenceText1: $this".printAM }
                     } else {
-                        (articleInfo[1].text().html2text.lowercase(Locale.getDefault()) + " " + articleInfo[2].text().html2text).apply { "existenceText2: $this".printD }
+                        (articleInfo[1].text().html2text.lowercase(Locale.getDefault()) + " " + articleInfo[2].text().html2text).apply { "existenceText2: $this".printAM }
                     }
 
 
                     val infoProductElements = element.getElementsByAttribute("alt")
                     val alternativeName: String =
-                        infoProductElements.attr("alt").apply { "alternativeName: $this".printD }
-                    val imgSrc = infoProductElements.attr("src").apply { "imgSrc: $this".printD }
-                    val name = infoProductElements.attr("title").apply { "name: $this".printD }
+                        infoProductElements.attr("alt").apply { "alternativeName: $this".printAM }
+                    val imgSrc = infoProductElements.attr("src").apply { "imgSrc: $this".printAM }
+                    val name = infoProductElements.attr("title").apply { "name: $this".printAM }
 
                     val halfLinkToProduct =
                         element.select("a.link-fast-view")
-                            .attr("data-url").html2text.apply { "halfLink: $this".printD }
+                            .attr("data-url").html2text.apply { "halfLink: $this".printAM }
                     val brand = element.select("p.brand_name")
-                        .text().html2text.apply { "brand: $this".printD }
+                        .text().html2text.apply { "brand: $this".printAM }
 
                     val price: String? =
                         element.select("div.price").first()
-                            ?.html()?.html2text.apply { "price: $this".printD }
+                            ?.html()?.html2text.apply { "price: $this".printAM }
 
                     productList.add(
                         ProductCart(
@@ -135,10 +139,8 @@ class AutoMotorsParser() : ProductParser {
                 "linkHref: ${link.attr("href")}".printD
                 */
 
-            } catch (e: Exception) {
-                e.printStackTrace()
-                emit(Resource.Error(e.toString()))
+
             }
         }
-    }
+
 }
