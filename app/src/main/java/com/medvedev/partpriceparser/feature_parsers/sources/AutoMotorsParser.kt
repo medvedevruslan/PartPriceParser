@@ -102,8 +102,8 @@ class AutoMotorsParser : ProductParser() {
 
                     productList.add(
                         ProductCart(
-                            linkToProduct = linkToSite + halfLinkToProduct,
-                            imageUrl = linkToSite + imgSrc,
+                            fullLinkToProduct = linkToSite + halfLinkToProduct,
+                            fullImageUrl = linkToSite + imgSrc,
                             price = price,
                             name = name,
                             alternativeName = alternativeName,

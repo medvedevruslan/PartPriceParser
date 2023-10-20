@@ -26,6 +26,9 @@ class SkladTfkParser : ProductParser() {
     @Suppress("OVERRIDE_BY_INLINE")
     override inline val workWithServer: (String) -> Flow<Resource<List<ProductCart>>>
         get() = { articleToSearch ->
+
+            val nameSeparator = "(см."
+
             flow {
 
                 val actualDocument = documentCatalogAddressLink(articleToSearch)
@@ -35,7 +38,24 @@ class SkladTfkParser : ProductParser() {
                 productElements.forEach { element ->
                     val linkToProduct =
                         element.select("a").attr("href").apply { "linkToProduct: $this".printTFK }
-                    val name = element.select("img").attr("alt").apply { "name: $this".printTFK }
+                    val name: String =
+                        element.select("img").attr("alt").apply { "name: $this".printTFK }
+
+
+                    var additionalArticles = "-"
+
+                    val readyName = if (name.contains("(см.")) {
+
+                        val nameList = ArrayList<String>()
+                        nameList.addAll(name.split(nameSeparator))
+                        additionalArticles = "Доп.артикул: ${nameList[1].trim().removeSuffix(")")}"
+
+                        nameList.first()
+                    } else {
+                        name
+                    }
+
+
                     val imageUrl =
                         element.select("img").attr("src").apply { "imageUrl: $this".printTFK }
 
@@ -85,13 +105,13 @@ class SkladTfkParser : ProductParser() {
 
                     productList.add(
                         ProductCart(
-                            linkToProduct = linkToProduct,
-                            imageUrl = imageUrl,
+                            fullLinkToProduct = linkToSite + linkToProduct,
+                            fullImageUrl = linkToSite + imageUrl,
                             price = price,
-                            name = name,
+                            name = readyName,
                             alternativeName = "",
-                            article = article,
-                            additionalArticles = "",
+                            article = "Артикул: $article",
+                            additionalArticles = additionalArticles,
                             brand = brand,
                             quantity = null,
                             existence = existence,

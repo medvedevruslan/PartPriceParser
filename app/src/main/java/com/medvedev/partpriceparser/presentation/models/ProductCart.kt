@@ -1,8 +1,8 @@
 package com.medvedev.partpriceparser.presentation.models
 
 data class ProductCart(
-    val linkToProduct: String,
-    val imageUrl: String,
+    val fullLinkToProduct: String,
+    val fullImageUrl: String,
     val price: String?,
     val name: String,
     val alternativeName: String?,

@@ -117,7 +117,8 @@ fun ParseScreenContent(
                         val localContext = LocalContext.current
 
                         ItemLazyColumn(
-                            parserData = parserData, actionGoToBrowser = { link ->
+                            parserData = parserData,
+                            actionGoToBrowser = { link ->
                                 viewModel.openBrowser(
                                     context = localContext,
                                     linkToSite = link
@@ -133,7 +134,8 @@ fun ParseScreenContent(
 
 @Composable
 fun ItemLazyColumn(
-    parserData: ParserData, actionGoToBrowser: (String) -> Unit
+    parserData: ParserData,
+    actionGoToBrowser: (String) -> Unit
 ) {
 
     val listSize = parserData.productList.data?.size ?: 1
@@ -264,7 +266,7 @@ fun ProductCardItem(
             ), shape = RoundedCornerShape(4.dp)
         )
         .clickable {
-            actionGoToBrowser.invoke(productCart.linkToProduct)
+            actionGoToBrowser.invoke(productCart.fullLinkToProduct)
         }) {
         Surface {
             Row(modifier = Modifier.fillMaxWidth()) {
