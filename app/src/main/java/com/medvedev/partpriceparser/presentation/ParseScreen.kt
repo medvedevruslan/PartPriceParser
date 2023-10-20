@@ -81,12 +81,18 @@ fun ParseScreen(viewModel: ParserViewModel) {
     }
 
     CustomScaffold(snackbarHostState) {
-        ParseScreenContent(modifier = Modifier.padding(it), viewModel = viewModel)
+        ParseScreenContent(
+            modifier = Modifier.padding(it),
+            viewModel = viewModel
+        )
     }
 }
 
 @Composable
-fun ParseScreenContent(modifier: Modifier = Modifier, viewModel: ParserViewModel) {
+fun ParseScreenContent(
+    modifier: Modifier = Modifier,
+    viewModel: ParserViewModel
+) {
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.Center,
@@ -113,9 +119,10 @@ fun ParseScreenContent(modifier: Modifier = Modifier, viewModel: ParserViewModel
                         ItemLazyColumn(
                             parserData = parserData, actionGoToBrowser = { link ->
                                 viewModel.openBrowser(
-                                    context = localContext, linkToSite = link
+                                    context = localContext,
+                                    linkToSite = link
                                 )
-                            }, searchText = viewModel.textSearch.value
+                            }
                         )
                     }
                 }
@@ -126,7 +133,7 @@ fun ParseScreenContent(modifier: Modifier = Modifier, viewModel: ParserViewModel
 
 @Composable
 fun ItemLazyColumn(
-    parserData: ParserData, actionGoToBrowser: (String) -> Unit, searchText: String
+    parserData: ParserData, actionGoToBrowser: (String) -> Unit
 ) {
 
     val listSize = parserData.productList.data?.size ?: 1
@@ -147,11 +154,11 @@ fun ItemLazyColumn(
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(4.dp),
                     onClick = {
-                        actionGoToBrowser.invoke(parserData.halfLinkSearchCatalog + searchText)
+                        actionGoToBrowser.invoke(parserData.linkToSearchCatalog)
                     }) {
                     Text(
                         modifier = Modifier.padding(2.dp),
-                        text = parserData.halfLinkSearchCatalog + searchText,
+                        text = parserData.linkToSearchCatalog,
                         style = MaterialTheme.typography.bodySmall,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -215,7 +222,7 @@ fun ItemLazyColumn(
     }
 }
 
-@Composable
+/*@Composable
 fun TextLink(text: String) {
     Text(
         modifier = Modifier.padding(2.dp),
@@ -241,7 +248,7 @@ fun GoToLinkButton(
         }) {
         content()
     }
-}
+}*/
 
 
 @Composable
@@ -287,7 +294,7 @@ fun ProductCardItem(
                         Text(
                             text = productCart.brand,
                             modifier = Modifier.weight(5f),
-                            style = MaterialTheme.typography.labelLarge
+                            style = MaterialTheme.typography.labelMedium
                         )
                     }
 
@@ -296,7 +303,7 @@ fun ProductCardItem(
                         style = MaterialTheme.typography.labelSmall + MaterialTheme.typography.labelLarge
                     )
                     Text(
-                        text = productCart.additionalArticles,
+                        text = productCart.additionalArticles ?: "",
                         style = MaterialTheme.typography.bodySmall,
                         maxLines = 2
                     )
@@ -307,13 +314,16 @@ fun ProductCardItem(
                         .weight(3f)
                 ) {
                     Text(
-                        text = productCart.price,
+                        text = productCart.price ?: "-",
                         style = MaterialTheme.typography.labelMedium,
                         modifier = Modifier.padding(top = 5.dp)
                     )
-                    Text(text = productCart.existence, style = MaterialTheme.typography.bodySmall)
                     Text(
-                        text = productCart.quantity.toString(),
+                        text = productCart.existence ?: " - ",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    Text(
+                        text = productCart.quantity ?: "-",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }

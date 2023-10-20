@@ -10,12 +10,14 @@ import timber.log.Timber
 import java.util.Locale
 
 
-
 class AutoMotorsParser : ProductParser() {
 
     override val linkToSite: String = "https://auto-motors.ru"
     override val siteName: String = "АВТОМОТОРС"
-    override val partOfLinkToCatalog: String = "/catalog/?q="
+    override val partOfLinkToCatalog: (String) -> String
+        get() = { article ->
+            "/catalog/?q=$article"
+        }
 
     val Any.printAM
         get() = Timber.tag("developerAM").d(toString())
@@ -39,7 +41,7 @@ class AutoMotorsParser : ProductParser() {
 
                 val actualDocument = documentCatalogAddressLink(articleToSearch)
 
-                    val productElements = actualDocument.select("div.product-card-list")
+                val productElements = actualDocument.select("div.product-card-list")
 
                 productElements.forEach { element ->
 
@@ -102,13 +104,13 @@ class AutoMotorsParser : ProductParser() {
                         ProductCart(
                             linkToProduct = linkToSite + halfLinkToProduct,
                             imageUrl = linkToSite + imgSrc,
-                            price = if (!price.isNullOrEmpty()) price else "Неизвестно",
+                            price = price,
                             name = name,
                             alternativeName = alternativeName,
                             article = article,
                             additionalArticles = dopArticle,
                             brand = brand,
-                            quantity = 0,
+                            quantity = "",
                             existence = existenceText
                         )
                     )

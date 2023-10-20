@@ -11,11 +11,11 @@ abstract class ProductParser {
 
     abstract val linkToSite: String
     abstract val siteName: String
-    abstract val partOfLinkToCatalog: String
+    abstract val partOfLinkToCatalog: (String) -> String
 
     protected val documentCatalogAddressLink: (String) -> Document
-        get() = { articleToSearch ->
-            Jsoup.connect("$linkToSite$partOfLinkToCatalog$articleToSearch") // 740.1003010-20 пример
+        get() = { article ->
+            Jsoup.connect("$linkToSite${partOfLinkToCatalog(article)}") // 740.1003010-20 пример
                 .timeout(10 * 1000).get()
         }
 
@@ -24,6 +24,7 @@ abstract class ProductParser {
 
     suspend fun getProduct(articleToSearch: String): Flow<Resource<List<ProductCart>>> = flow {
         try {
+            if (productList.size > 0) productList.clear()
             emit(Resource.Loading())
             workWithServer(articleToSearch).collect {
                 emit(it)
