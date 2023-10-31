@@ -8,7 +8,7 @@ data class ProductCart(
     val alternativeName: String?,
     val article: String,
     val additionalArticles: String?,
-    val brand: String,
+    val brand: String?,
     val quantity: String?,
     val existence: String?
 )

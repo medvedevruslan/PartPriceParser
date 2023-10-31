@@ -294,7 +294,7 @@ fun ProductCardItem(
                             style = MaterialTheme.typography.labelMedium
                         )
                         Text(
-                            text = productCart.brand,
+                            text = productCart.brand ?: "-",
                             modifier = Modifier.weight(5f),
                             style = MaterialTheme.typography.labelMedium
                         )

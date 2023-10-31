@@ -36,7 +36,7 @@ class SkladTfkParser : ProductParser() {
                 val productElements = actualDocument.select("td.table-body-image")
 
                 productElements.forEach { element ->
-                    val linkToProduct =
+                    val partLinkToProduct =
                         element.select("a").attr("href").apply { "linkToProduct: $this".printTFK }
                     val name: String =
                         element.select("img").attr("alt").apply { "name: $this".printTFK }
@@ -60,7 +60,7 @@ class SkladTfkParser : ProductParser() {
                         element.select("img").attr("src").apply { "imageUrl: $this".printTFK }
 
                     val innerDocument: Document =
-                        Jsoup.connect("$linkToSite$linkToProduct").timeout(10 * 1000).get()
+                        Jsoup.connect("$linkToSite$partLinkToProduct").timeout(10 * 1000).get()
 
                     val productInfo = innerDocument.select("span.tovarcard-top-prop")
 
@@ -105,7 +105,7 @@ class SkladTfkParser : ProductParser() {
 
                     productList.add(
                         ProductCart(
-                            fullLinkToProduct = linkToSite + linkToProduct,
+                            fullLinkToProduct = linkToSite + partLinkToProduct,
                             fullImageUrl = linkToSite + imageUrl,
                             price = price,
                             name = readyName,
