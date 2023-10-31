@@ -25,6 +25,7 @@ import org.jsoup.Connection
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import timber.log.Timber
+import java.util.Locale
 
 class ParserViewModel : ViewModel() {
 
@@ -43,23 +44,28 @@ class ParserViewModel : ViewModel() {
     }
 
 
-    private val Any.printRT
+    private val Any.printAM
         get() = Timber.tag("developerRT").d(toString())
 
     fun temporaryParseProducts(articleToSearch: String) {
 
         viewModelScope.launch(Dispatchers.IO) {
 
-            val linkToSite = "https://tdriat.ru"
-            val siteName = "ООО «ТД «РИАТ-Запчасть»"
+            val linkToSite: String = "https://auto-motors.ru"
 
             val localPartOfLinkToCatalog: (String) -> String = { article ->
-                "/poisk/$article"
+                "/catalog/?q=$article"
             }
 
             val cookieResponse: Connection.Response =
-                Jsoup.connect("$linkToSite${localPartOfLinkToCatalog(articleToSearch)}")
-                    .method(Connection.Method.GET)
+                Jsoup.connect("https://auto-motors.ru/AM_autorize_AUT/")
+                    .data(
+                        "USER_LOGIN", "info@dvizh-dvizh.ru",
+                        "USER_PASSWORD", "info@dvizh-dvizh.ru",
+                        "USER_REMEMBER", "Y",
+                        "AUTH_ACTION", "Войти"
+                    )
+                    .method(Connection.Method.POST)
                     .execute()
 
             val cookies = cookieResponse.cookies()
@@ -71,199 +77,92 @@ class ParserViewModel : ViewModel() {
                     .cookies(cookies)
                     .post()
 
-            val productElements = document.select("tr.cart_table_item")
+            /*val document: Document =
+                                Jsoup.connect("$linkToSite$partOfLinkToCatalog$articleToSearch") // 740.1003010-20 пример
+                                    .timeout(10 * 1000).get()*/
+
+            // parseText = document.text()
+            /*"tagName: ${document.tagName()}".printD
+            "head: ${document.head()}".printD
+            "tag: ${document.tag()}".printD
+            "tagNameDiv: ${document.tagName("div")}".printD
+            "body: ${document.body()}".printD*/
+
+            // val productList: MutableList<ProductCart> = mutableListOf()
+
+
+            val productElements = document.select("div.product-card-list")
 
             productElements.forEach { element ->
 
-                "productElements: $element".printRT
-
-                val partLinkToProduct = element.select("a").attr("href")
-                    .apply { "partLinkToProduct: $this".printRT } //
-
-                val imageUrl: String? = element.select("img.img-responsive").attr("src")
-                    .apply { "imageUrl: $this".printRT }//
-
-                val name: String =
-                    element.select("td.product-name")
-                        .select("a")
-                        .textNodes()
-                        .first()
-                        .text().html2text
-                        .apply { "name: $this".printRT } //
-
-                val article = element
-                    .select("td.product-name")
-                    .after("a")
-                    .textNodes()
-                    .first()
-                    .text().html2text.trim()
-                    .apply { "article: $this".printRT }
-
-                var price =
-                    element.select("td.product-price").select("span.amount").text().html2text
-                        .apply { "price: $this".printRT }
-
-                val existence: String =
-                    element.select("span.amount").select("small").text().html2text
-                        .apply { "existence: $this".printRT }
-
-                if (existence.isNotBlank()) {
-                    if (price.contains(existence)) {
-                        price = price.removeSuffix(existence).trim()
-                        "price is cleaned: $price".printRT
-                    }
-                }
-
-                val innerDocument = Jsoup.connect("$linkToSite$partLinkToProduct")
-                    .timeout(30 * 1000).get()
+                /*val price1 = element.getElementsMatchingOwnText("₽").first()?.html()?.let { Jsoup.parse(it).text() }.apply { printD }*/
 
 
-                /*val productInfoA = innerDocument.select("div.summary")
-                    .apply { "productInfoA: $this".printRT }
+                //val linkToPicture = element.select("img").apply { printD }
 
 
-                val priceA = productInfoA.select("span.amount")
-                    .apply { "priceA: $this".printRT }*/
+                /* element.getElementsMatchingOwnText("/brands/brand/?brand_name").printD
+                 element.getElementsByAttributeStarting("/brands/brand/?brand_name").printD
+                 element.getElementsContainingOwnText("/brands/brand/?brand_name").printD
+                 element.getElementsByAttributeValueContaining("a","href").printD*/
 
-                val productInfo = innerDocument.select("p.taller")
-                    .apply { "productInfo: $this".printRT }
+                // element.select("a").attr("href").printD
 
-                var brand = ""
+                // val alternativeArticle = element.select("p.m_none hidden").apply { printD }
 
-                productInfo[0].select("b").mapIndexed { productIndex, productElement ->
-                    productElement.text().html2text.removeSuffix(":").also { textElement ->
-                        if (textElement.contains("Производитель")) {
-
-                            brand = productInfo[0].getElementsMatchingText("Производитель")
-                                .textNodes()[1].toString().trim()
-                                .apply { "brand: $this".printRT }
-
-                            "data contains brand: $productIndex".printRT
-                        }
-                    }
-                }
-
-                /*
-                                element.getElementsMatchingOwnText("href").apply { "getE1: $this".printRT }
-                                element.getElementsByAttributeStarting("href").apply { "getE2: $this".printRT }
-                                element.getElementsContainingOwnText("href").apply { "getE3: $this".printRT }
-                                element.getElementsByAttributeValueContaining("href", "product-name:")
-                                    .apply { "getE4: $this".printRT }
-                                element.getElementsByAttribute("href").apply { "getE5: $this".printRT }*/
-
-
-                /*
-                val partLinkToProduct =
-                    element.select("a").attr("href")
-                .apply { "partLinkToProduct: $this".printRT } //
-
-                var name = element.select("img").attr("alt").html2text
-                    .apply { "name: $this".printRT }//
-
-
-                val imageUrl =
-                    element.select("img.img-responsive").attr("src")
-                .apply { "imageUrl: $this".printRT }//
-                */
-
-
-                /*val article =
-                    element.allElements[0].allElements[2]
-                        .apply { "article: $this".printRT }*/
-
-                //https://tdriat.ru
-
-
-                /*element.allElements[0].allElements.forEachIndexed { index, element ->
-                    "foreach`s$index: $element".printRT
-                    element.allElements.forEachIndexed { innerIndex, innerElement ->
-                        "inner foreach`s: $index - $innerIndex: $innerElement".printRT
-                        innerElement.allElements.forEachIndexed { inner2Index, inner2Element ->
-                            "inner 2 foreach`s: $index - $innerIndex - $inner2Index: $inner2Element".printRT
-                        }
-                    }
+                /*val article = element.select("p.m_none").apply { printD }
+                article.forEachIndexed { index, element ->
+                    "$index $element".printD
                 }*/
 
 
-                /*element.allElements.forEach {
-                    "productElementsForEach: ${it.allElements}".printRT
-                }*/
+                // element.select("p.m_none").printD
 
-                "\n".printRT
-            }
+                val articleInfo = element.select("p.m_none")
+                val article = articleInfo[0].text().html2text.apply { "article: $this".printAM }
 
+                // val dopArticle = articleInfo[1].text().html2text.apply { "dopArticle: $this".printD }
+                val dopArticle =
+                    if (articleInfo.size > 3) articleInfo[1].text().html2text else ""
+                "dopArticle: $dopArticle".printAM
 
-            /*
-            val fullLinkToProduct: String,
-            val fullImageUrl: String,
-            val price: String?,
-            val name: String,
-            val alternativeName: String?,
-            val article: String,
-            val additionalArticles: String?,
-            val brand: String,
-            val quantity: String?,
-            val existence: String?
-             */
-
-
-            /*productElements.forEachIndexed { index, element ->
-                val linkToProduct =
-                    element.select("a").attr("href").apply { "linkToProduct: $this".printTFK }
-                val name = element.select("img").attr("alt").apply { "name: $this".printTFK }
-                val imageUrl =
-                    element.select("img").attr("src").apply { "imageUrl: $this".printTFK }
-                val alternativeName: String = ""
-
-                val innerDocument: Document =
-                    Jsoup.connect("$linkToSite$linkToProduct").timeout(10 * 1000).get()
-
-                val productInfo = innerDocument.select("span.tovarcard-top-prop")
-
-                val article =
-                    productInfo[0].child(1).text().html2text.apply { "article: $this".printTFK }
-                val brand =
-                    productInfo[1].child(1).text().html2text.apply { "brand: $this".printTFK }
-
-
-                // val spanArticle = productInfo.select("span.tovarcard-top-prop").apply { "spanArticle: $this".printTFK }
-                // val article = productInfo.text().html2text.apply { "article: $this".printTFK }
-                *//*productInfo[0].getElementsMatchingOwnText("Артикул:").apply { "getE1: $this".printTFK }
-                productInfo[0].getElementsByAttributeStarting("Артикул:").apply { "getE2: $this".printTFK }
-                productInfo[0].getElementsContainingOwnText("Артикул:").apply { "getE3: $this".printTFK }
-                productInfo[0].getElementsByAttributeValueContaining("span","Артикул:").apply { "getE4: $this".printTFK }
-                productInfo[0].getElementsByAttribute("Артикул:").apply { "getE5: $this".printTFK }*//*
-
-                *//*productInfo[0].allElements.forEach {
-                    "productInfoForEach: $it".printTFK
-                }*//*
-
-                *//* val article1 = productInfo.attr("div.tovarcard-top-props span span").apply { "article1: $this".printTFK }
-                 val article3 = productInfo.attr("div.tovarcard-top-props span span").apply { "article3: $this".printTFK }
-                 // val article2 = productInfo.attr("Артикул:").apply { "article2: $this".printTFK }
-                 val brand = productInfo.attr("Производитель::").apply { "brand: $this".printTFK }*//*
-
-
-                val innerProductElements = innerDocument.select("div.tbody")
-                // .apply { "innerProductElements: $this".printTFK }
-
-
-                innerProductElements.forEachIndexed { innerIndex, innerElement ->
-
-                    val price = innerElement.select("div.td_cena").first()?.text()?.html2text
-                        .apply { "price: $this".printTFK }
-
-
-                    val existenceText =
-                        innerElement.select("div.td_quantity").first()?.text()?.html2text
-                            .apply { "existenceText: $this".printTFK }
+                val existenceText = if (articleInfo.size > 3) {
+                    "article info size ${articleInfo.size}".printAM
+                    (articleInfo[2].text().html2text.lowercase(Locale.getDefault()) + " " + articleInfo[3].text().html2text).apply { "existenceText1: $this".printAM }
+                } else {
+                    (articleInfo[1].text().html2text.lowercase(Locale.getDefault()) + " " + articleInfo[2].text().html2text).apply { "existenceText2: $this".printAM }
                 }
-                "\n".printTFK
+
+
+                val infoProductElements = element.getElementsByAttribute("alt")
+                val alternativeName: String =
+                    infoProductElements.attr("alt").apply { "alternativeName: $this".printAM }
+                val imgSrc = infoProductElements.attr("src").apply { "imgSrc: $this".printAM }
+                val name = infoProductElements.attr("title").apply { "name: $this".printAM }
+
+                val halfLinkToProduct =
+                    element.select("a.link-fast-view")
+                        .attr("data-url").html2text.apply { "halfLink: $this".printAM }
+                val brand = element.select("p.brand_name")
+                    .text().html2text.apply { "brand: $this".printAM }
+
+                val price: String? =
+                    element.select("div.price").first()
+                        ?.html()?.html2text.apply { "price: $this".printAM }
+
+
+
+
+
+
+
+
+
+
+                "\n".printAM
             }
-*/
         }
     }
-
 
     @OptIn(InternalCoroutinesApi::class)
     fun parseProducts(article: String) {
@@ -273,8 +172,6 @@ class ParserViewModel : ViewModel() {
                 .buffer(10)
                 .collect { data ->
                     synchronized(Object()) {
-                        "size: ${_foundedProductList.size}".printD
-
                         val iterator: MutableIterator<ParserData> = _foundedProductList.iterator()
 
                         while (iterator.hasNext()) {
@@ -283,28 +180,6 @@ class ParserViewModel : ViewModel() {
                                 iterator.remove()
                             }
                         }
-
-
-                        /*for (i in 0 until _foundedProductList.size) {
-                            "Index: $i".printD
-                            if (_foundedProductList[i].siteName == data.siteName) {
-                                _foundedProductList.removeAt(i)
-                            }
-                        }*/
-
-
-                        /*_foundedProductList.forEachIndexed { index, parserData ->
-                            if (parserData.siteName == data.siteName) {
-                                val valueToDelete = _foundedProductList[index]
-
-                                val list: MutableList<ParserData> =
-                                    mutableStateListOf<ParserData>().apply {
-                                        add(_foundedProductList[index])
-                                    }
-
-                                _foundedProductList.removeAll(list)
-                            }
-                        }*/
                         _foundedProductList.add(data)
                     }
                 }

@@ -6,6 +6,9 @@ import com.medvedev.partpriceparser.feature_parsers.ProductParser
 import com.medvedev.partpriceparser.presentation.models.ProductCart
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import org.jsoup.Connection
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 import timber.log.Timber
 import java.util.Locale
 
@@ -26,22 +29,30 @@ class AutoMotorsParser : ProductParser() {
     override inline val workWithServer: (String) -> Flow<Resource<List<ProductCart>>>
         get() = { articleToSearch ->
             flow {
-                /*val document: Document =
-                    Jsoup.connect("$linkToSite$partOfLinkToCatalog$articleToSearch") // 740.1003010-20 пример
-                        .timeout(10 * 1000).get()*/
 
-                // parseText = document.text()
-                /*"tagName: ${document.tagName()}".printD
-                "head: ${document.head()}".printD
-                "tag: ${document.tag()}".printD
-                "tagNameDiv: ${document.tagName("div")}".printD
-                "body: ${document.body()}".printD*/
+                val authLink = "https://auto-motors.ru/AM_autorize_AUT/"
 
-                // val productList: MutableList<ProductCart> = mutableListOf()
+                val authCookies: Connection.Response =
+                    Jsoup.connect(authLink)
+                        .data(
+                            "USER_LOGIN", "info@dvizh-dvizh.ru",
+                            "USER_PASSWORD", "info@dvizh-dvizh.ru",
+                            "USER_REMEMBER", "Y",
+                            "AUTH_ACTION", "Войти"
+                        )
+                        .method(Connection.Method.POST)
+                        .execute()
 
-                val actualDocument = documentCatalogAddressLink(articleToSearch)
+                val cookies = authCookies.cookies()
 
-                val productElements = actualDocument.select("div.product-card-list")
+                val document: Document =
+                    Jsoup.connect("$linkToSite${partOfLinkToCatalog(articleToSearch)}") // 740.1003010-20 пример
+                        .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36")
+                        .timeout(10 * 1000)
+                        .cookies(cookies)
+                        .post()
+
+                val productElements = document.select("div.product-card-list")
 
                 productElements.forEach { element ->
 
