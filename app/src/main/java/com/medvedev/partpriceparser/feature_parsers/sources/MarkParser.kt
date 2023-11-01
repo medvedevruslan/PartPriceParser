@@ -102,7 +102,7 @@ class MarkParser : ProductParser() {
                             price = price,
                             name = name,
                             alternativeName = "",
-                            article = article,
+                            article = "Артикул: $article",
                             additionalArticles = "",
                             brand = brand,
                             quantity = quantity,

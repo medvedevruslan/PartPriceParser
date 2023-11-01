@@ -37,39 +37,62 @@ class KamaCenterParser : ProductParser() {
                         .post()
 
                 val productElements = document
+                    .select("div.content")
                     .select("div.products-list")
                     .select("div.products-list__item")
 
                 productElements.forEach { element ->
 
-                    val imageUrl = element.select("div.products-image").select("img").attr("src")
+                    val imageUrl = element
+                        .select("div.products-image")
+                        .select("img")
+                        .attr("src")
                         .apply { "imageUrl: $this".printKC }
 
-                    val partLinkToProduct = element.select("a.products-name__name").attr("href")
+                    val partLinkToProduct = element
+                        .select("a.products-name__name")
+                        .attr("href")
                         .apply { "linkToProduct: $this".printKC }
 
-                    val name = element.select("a.products-name__name").textNodes().safeTakeFirst
+                    val name = element
+                        .select("a.products-name__name")
+                        .textNodes().safeTakeFirst
                         .apply { "name: $this".printKC }
 
-                    val price =
-                        element.select("span.products-priceinfo__price").textNodes().safeTakeFirst
-                            .apply { "price: $this".printKC }
+                    val price = element
+                        .select("span.products-priceinfo__price")
+                        .textNodes().safeTakeFirst
+                        .let {
+                            if (it.isNotEmpty()) "$it ₽" else it
+                        }
+                        .apply { "price: $this".printKC }
 
 
-                    val articleHtml = element.select("table.products-table").select("td")
-                        .apply { "article: $this".printKC }
+                    val articleHtml = element
+                        .select("table.products-table")
+                        .select("td")
 
                     var textArticle = ""
 
-                    if (articleHtml[0].toString() == "Артикул") {
+                    if (articleHtml[0].text().html2text == "Артикул") {
                         textArticle = articleHtml[1].text().html2text
                         "textArticle: $textArticle".printKC
                     }
 
-                    val existence = element.select("a.products__getmore").textNodes().safeTakeFirst
+                    element.select("a.products__getmore")
+                        .textNodes().safeTakeFirst.apply { "existenceOriginal: $this".printKC }
+
+
+                    val existence = element
+                        .select("a.products__getmore")
+                        .textNodes().safeTakeFirst
+                        .let {
+                            if (it == "Уведомить о наличии") "нет в наличии" else it
+                        }
                         .apply { "existence: $this".printKC }
 
-                    val innerDocument = Jsoup.connect(linkToSite + partLinkToProduct)
+                    val innerDocument = Jsoup
+                        .connect(linkToSite + partLinkToProduct)
                         .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36")
                         .timeout(10 * 1000)
                         .post()
@@ -77,17 +100,18 @@ class KamaCenterParser : ProductParser() {
                     val productInfo = innerDocument.select("div.good-stocks__first")
                         .select("div.good-priceinfo-stocks")
 
-                    val quantity =
-                        productInfo.select("span.good-priceinfo-stocks__item").select("b")
-                            .textNodes().safeTakeFirst
-                            .apply { "quantity: $this".printKC }
+                    val quantity = productInfo
+                        .select("span.good-priceinfo-stocks__item")
+                        .select("b")
+                        .textNodes().safeTakeFirst
+                        .apply { "quantity: $this".printKC }
 
 
                     productList.add(
                         ProductCart(
                             fullLinkToProduct = linkToSite + partLinkToProduct,
                             fullImageUrl = linkToSite + imageUrl,
-                            price = "$price ₽",
+                            price = price,
                             name = name,
                             alternativeName = "",
                             article = "Артикул: $textArticle",

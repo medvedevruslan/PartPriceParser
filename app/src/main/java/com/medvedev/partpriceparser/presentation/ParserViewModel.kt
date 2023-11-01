@@ -153,24 +153,29 @@ class ParserViewModel : ViewModel() {
     fun parseProducts(articleToSearch: String) {
         viewModelScope.launch(Dispatchers.IO) {
             _foundedProductList.clear()
-            getProductsUseCase.execute(articleToSearch)
-                .buffer(10)
-                .collect { data ->
-                    synchronized(Object()) {
-                        val iterator: MutableIterator<ParserData> = _foundedProductList.iterator()
+            if (articleToSearch.isEmpty()) {
+                addUIEvent(UIEvents.SnackbarEvent(message = "Введите артикул"))
+            } else {
+                getProductsUseCase.execute(articleToSearch)
+                    .buffer(10)
+                    .collect { data ->
+                        synchronized(Object()) {
+                            val iterator: MutableIterator<ParserData> =
+                                _foundedProductList.iterator()
 
-                        while (iterator.hasNext()) {
-                            val value = iterator.next()
-                            if (value.siteName == data.siteName) {
-                                iterator.remove()
+                            while (iterator.hasNext()) {
+                                val value = iterator.next()
+                                if (value.siteName == data.siteName) {
+                                    iterator.remove()
+                                }
+                            }
+                            _foundedProductList.add(data)
+                            _foundedProductList.sortBy {
+                                it.siteName
                             }
                         }
-                        _foundedProductList.add(data)
-                        _foundedProductList.sortBy {
-                            it.siteName
-                        }
                     }
-                }
+            }
         }
     }
 

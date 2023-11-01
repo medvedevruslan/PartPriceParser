@@ -6,7 +6,6 @@ import com.medvedev.partpriceparser.feature_parsers.ProductParser
 import com.medvedev.partpriceparser.presentation.models.ProductCart
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import org.jsoup.Connection
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import timber.log.Timber
@@ -21,40 +20,34 @@ class RiatParser : ProductParser() {
     }
 
     val Any.printRT
-        get() = Timber.tag("developer TFK").d(toString())
+        get() = Timber.tag("developerRT").d(toString())
 
     @Suppress("OVERRIDE_BY_INLINE")
     override inline val workWithServer: (String) -> Flow<Resource<List<ProductCart>>>
         get() = { articleToSearch ->
             flow {
 
-                val cookieResponse: Connection.Response =
-                    Jsoup.connect("$linkToSite${partOfLinkToCatalog(articleToSearch)}")
-                        .data("username", "myUsername", "password", "myPassword")
-                        .method(Connection.Method.GET)
-                        .execute()
-
-                val cookies = cookieResponse.cookies()
-
                 val document: Document =
                     Jsoup.connect("$linkToSite${partOfLinkToCatalog(articleToSearch)}") // 740.1003010-20 пример
                         .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36")
-                        .referrer("$linkToSite${partOfLinkToCatalog(articleToSearch)}")
                         .timeout(10 * 1000)
-                        .cookies(cookies)
                         .post()
 
-                val productElements = document.select("tr.cart_table_item")
+                val productElements = document
+                    .select("table.table-catalog")
+                    .select("tr.cart_table_item")
+
+                productElements.isNullOrEmpty().printRT
 
                 productElements.forEach { element ->
 
                     "productElements: $element".printRT
 
                     val partLinkToProduct = element.select("a").attr("href")
-                        .apply { "partLinkToProduct: $this".printRT } //
+                        .apply { "partLinkToProduct: $this".printRT }
 
                     val imageUrl: String? = element.select("img.img-responsive").attr("src")
-                        .apply { "imageUrl: $this".printRT }//
+                        .apply { "imageUrl: $this".printRT }
 
                     val name: String =
                         element.select("td.product-name")
@@ -62,7 +55,7 @@ class RiatParser : ProductParser() {
                             .textNodes()
                             .first()
                             .text().html2text
-                            .apply { "name: $this".printRT } //
+                            .apply { "name: $this".printRT }
 
                     val article = element
                         .select("td.product-name")
@@ -87,16 +80,11 @@ class RiatParser : ProductParser() {
                         }
                     }
 
-                    val innerDocument = Jsoup.connect("$linkToSite$partLinkToProduct")
-                        .timeout(30 * 1000).get()
+                    val innerDocument = Jsoup
+                        .connect("$linkToSite$partLinkToProduct")
+                        // .timeout(10 * 1000)
+                        .get()
 
-
-                    /*val productInfoA = innerDocument.select("div.summary")
-                        .apply { "productInfoA: $this".printRT }
-
-
-                    val priceA = productInfoA.select("span.amount")
-                        .apply { "priceA: $this".printRT }*/
 
                     val productInfo = innerDocument.select("p.taller")
                         .apply { "productInfo: $this".printRT }
@@ -128,8 +116,8 @@ class RiatParser : ProductParser() {
                             existence = existence,
                         )
                     )
-                    emit(Resource.Success(data = productList))
                 }
+                emit(Resource.Success(data = productList))
             }
         }
 }

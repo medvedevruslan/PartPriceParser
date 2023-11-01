@@ -312,7 +312,7 @@ fun ProductCardItem(
 
                     Text(
                         text = productCart.article,
-                        style = MaterialTheme.typography.labelSmall + MaterialTheme.typography.labelLarge
+                        style = MaterialTheme.typography.labelSmall + MaterialTheme.typography.bodyMedium
                     )
                     Text(
                         text = productCart.additionalArticles ?: "",

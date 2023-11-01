@@ -44,7 +44,7 @@ class SkladTfkParser : ProductParser() {
                         element.select("img").attr("alt").apply { "name: $this".printTFK }
 
 
-                    var additionalArticles = "-"
+                    var additionalArticles = ""
 
                     val readyName = if (name.contains("(см.")) {
 
