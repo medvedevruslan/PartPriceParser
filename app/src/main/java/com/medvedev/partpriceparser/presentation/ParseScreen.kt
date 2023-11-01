@@ -52,7 +52,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.medvedev.partpriceparser.core.util.Resource
@@ -61,11 +60,10 @@ import com.medvedev.partpriceparser.presentation.models.ParserData
 import com.medvedev.partpriceparser.presentation.models.ProductCart
 import kotlinx.coroutines.flow.collectLatest
 
-const val ITEM_HEIGHT_IN_LAZY_COLUMN: Int = 130
-
 
 @Composable
 fun ParseScreen(viewModel: ParserViewModel) {
+
     val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(key1 = true) {
@@ -143,9 +141,6 @@ fun ItemLazyColumn(
     parserData: ParserData,
     actionGoToBrowser: (String) -> Unit
 ) {
-
-    val listSize = parserData.productList.data?.size ?: 1
-
     Surface(
         modifier = Modifier
             .background(color = MaterialTheme.colorScheme.surface)
@@ -154,76 +149,44 @@ fun ItemLazyColumn(
                 shape = RoundedCornerShape(8.dp)
             ), shape = RoundedCornerShape(13.dp)
     ) {
-        LazyColumn(
-            modifier = Modifier
-                .wrapContentHeight()
-                .height((ITEM_HEIGHT_IN_LAZY_COLUMN * listSize + 65).dp)
-        ) {
-            item {
-                OutlinedButton(contentPadding = PaddingValues(4.dp),
-                    modifier = Modifier
-                        .padding(horizontal = 4.dp)
-                        .fillMaxWidth(),
-                    shape = RoundedCornerShape(4.dp),
-                    onClick = {
-                        actionGoToBrowser.invoke(parserData.linkToSearchCatalog)
-                    }) {
-                    Text(
-                        modifier = Modifier.padding(2.dp),
-                        text = parserData.linkToSearchCatalog,
-                        style = MaterialTheme.typography.bodySmall,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
 
 
-                /*Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    GoToLinkButton(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(start = 3.dp),
-                        actionGoToBrowser = { actionGoToBrowser.invoke(parserData.linkToSite) },
-                        parserData = parserData
-                    ) {
-                        TextLink(parserData.linkToSite)
-                    }
-
-                    GoToLinkButton(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(end = 3.dp),
-                        actionGoToBrowser = { actionGoToBrowser.invoke(parserData.halfLinkSearchCatalog + searchText) },
-                        parserData = parserData
-                    ) {
-                        TextLink(text = parserData.halfLinkSearchCatalog + searchText)
-                    }
-                }*/
-
-                Divider(
-                    modifier = Modifier.padding(horizontal = 7.dp),
-                    color = MaterialTheme.colorScheme.secondary,
-                    thickness = 1.dp
+        Column(modifier = Modifier.wrapContentHeight()) {
+            OutlinedButton(contentPadding = PaddingValues(4.dp),
+                modifier = Modifier
+                    .padding(horizontal = 4.dp)
+                    .fillMaxWidth(),
+                shape = RoundedCornerShape(4.dp),
+                onClick = {
+                    actionGoToBrowser.invoke(parserData.linkToSearchCatalog)
+                }) {
+                Text(
+                    modifier = Modifier.padding(2.dp),
+                    text = parserData.linkToSearchCatalog,
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
+            Divider(
+                modifier = Modifier.padding(horizontal = 7.dp),
+                color = MaterialTheme.colorScheme.secondary,
+                thickness = 1.dp
+            )
             when (parserData.productList) {
                 is Resource.Loading -> {
-                    item { ProgressBar(modifier = Modifier.fillMaxSize()) }
+                    ProgressBar(modifier = Modifier.fillMaxSize())
                 }
 
                 is Resource.Error -> {
-                    item { Text(text = parserData.productList.message.toString()) }
+                    Text(text = parserData.productList.message.toString())
                 }
 
                 is Resource.Success -> {
-                    parserData.productList.data?.let {
-                        items(items = it) { productCart ->
+                    parserData.productList.data?.let { listData ->
+                        listData.forEach {
                             ProductCardItem(
-                                productCart = productCart,
-                                itemsHeight = ITEM_HEIGHT_IN_LAZY_COLUMN.dp,
+                                productCart = it,
                                 actionGoToBrowser = actionGoToBrowser
                             )
                         }
@@ -233,6 +196,7 @@ fun ItemLazyColumn(
         }
     }
 }
+
 
 /*@Composable
 fun TextLink(text: String) {
@@ -265,7 +229,8 @@ fun GoToLinkButton(
 
 @Composable
 fun ProductCardItem(
-    productCart: ProductCart, itemsHeight: Dp, actionGoToBrowser: (String) -> Unit
+    productCart: ProductCart,
+    actionGoToBrowser: (String) -> Unit
 ) {
     Card(modifier = Modifier
         .padding(top = 3.dp)
@@ -417,6 +382,9 @@ fun CustomScaffold(
     snackbarHostState: SnackbarHostState,
     content: @Composable (paddingValues: PaddingValues) -> Unit
 ) {
+
+    // todo добавить общий прогрессБар для отслеживания всех загрузок
+
     Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }, topBar = {
         TopAppBar(
             modifier = Modifier.height(50.dp), title = {
