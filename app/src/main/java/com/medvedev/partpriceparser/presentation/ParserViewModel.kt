@@ -14,6 +14,7 @@ import com.medvedev.partpriceparser.core.util.printD
 import com.medvedev.partpriceparser.core.util.safeTakeFirst
 import com.medvedev.partpriceparser.domain.use_cases.GetProductsUseCase
 import com.medvedev.partpriceparser.presentation.models.ParserData
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -27,6 +28,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import timber.log.Timber
 
+@HiltViewModel
 class ParserViewModel : ViewModel() {
 
     private val getProductsUseCase = GetProductsUseCase()

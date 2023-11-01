@@ -1,3 +1,4 @@
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -11,8 +12,8 @@ android {
         applicationId = "com.medvedev.partpriceparser"
         minSdk = 24
         targetSdk = 33
-        versionCode = 11
-        versionName = "0.1.10"
+        versionCode = 12
+        versionName = "0.1.11"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -77,4 +78,9 @@ dependencies {
 
     // Timber for logging
     implementation ("com.jakewharton.timber:timber:5.0.1")
+
+
+    // Hilt for DI
+    implementation ("com.google.dagger:hilt-android:2.46.1")
+    implementation ("androidx.hilt:hilt-navigation-compose:1.0.0")
 }

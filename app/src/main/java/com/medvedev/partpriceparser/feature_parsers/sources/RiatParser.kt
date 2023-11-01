@@ -49,13 +49,13 @@ class RiatParser : ProductParser() {
                     val imageUrl: String? = element.select("img.img-responsive").attr("src")
                         .apply { "imageUrl: $this".printRT }
 
-                    val name: String =
-                        element.select("td.product-name")
-                            .select("a")
-                            .textNodes()
-                            .first()
-                            .text().html2text
-                            .apply { "name: $this".printRT }
+                    val name: String = element
+                        .select("td.product-name")
+                        .select("a")
+                        .textNodes()
+                        .first()
+                        .text().html2text
+                        .apply { "name: $this".printRT }
 
                     val article = element
                         .select("td.product-name")
@@ -65,13 +65,16 @@ class RiatParser : ProductParser() {
                         .text().html2text.trim()
                         .apply { "article: $this".printRT }
 
-                    var price =
-                        element.select("td.product-price").select("span.amount").text().html2text
-                            .apply { "price: $this".printRT }
+                    var price = element
+                        .select("td.product-price")
+                        .select("span.amount")
+                        .text().html2text
+                        .apply { "price: $this".printRT }
 
-                    val existence: String =
-                        element.select("span.amount").select("small").text().html2text
-                            .apply { "existence: $this".printRT }
+                    val existence: String = element
+                        .select("span.amount")
+                        .select("small").text().html2text
+                        .apply { "existence: $this".printRT }
 
                     if (existence.isNotBlank()) {
                         if (price.contains(existence)) {
@@ -79,6 +82,9 @@ class RiatParser : ProductParser() {
                             "price is cleaned: $price".printRT
                         }
                     }
+
+                    price = if (price != "договорная") "$price ₽" else price
+
 
                     val innerDocument = Jsoup
                         .connect("$linkToSite$partLinkToProduct")

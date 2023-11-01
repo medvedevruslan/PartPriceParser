@@ -46,14 +46,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.medvedev.partpriceparser.core.util.Resource
 import com.medvedev.partpriceparser.core.util.UIEvents
 import com.medvedev.partpriceparser.presentation.models.ParserData
@@ -61,8 +65,11 @@ import com.medvedev.partpriceparser.presentation.models.ProductCart
 import kotlinx.coroutines.flow.collectLatest
 
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun ParseScreen(viewModel: ParserViewModel) {
+fun ParseScreen(viewModel: ParserViewModel = hiltViewModel()) {
+
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
 
@@ -81,14 +88,17 @@ fun ParseScreen(viewModel: ParserViewModel) {
 
     CustomScaffold(snackbarHostState) {
         ParseScreenContent(
+            keyboardController = keyboardController,
             modifier = Modifier.padding(it),
             viewModel = viewModel
         )
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ParseScreenContent(
+    keyboardController: SoftwareKeyboardController?,
     modifier: Modifier = Modifier,
     viewModel: ParserViewModel
 ) {
@@ -97,7 +107,10 @@ fun ParseScreenContent(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        SearchBarArticle(viewModel = viewModel)
+        SearchBarArticle(
+            keyboardController = keyboardController,
+            viewModel = viewModel
+        )
 
         Surface(
             modifier = Modifier
@@ -322,9 +335,12 @@ fun ProgressBar(modifier: Modifier = Modifier) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
-fun SearchBarArticle(viewModel: ParserViewModel) {
+fun SearchBarArticle(
+    keyboardController: SoftwareKeyboardController?,
+    viewModel: ParserViewModel
+) {
     Row(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
@@ -348,7 +364,10 @@ fun SearchBarArticle(viewModel: ParserViewModel) {
                     style = MaterialTheme.typography.bodySmall,
                 )
             },
-            keyboardActions = KeyboardActions { viewModel.parseProducts(viewModel.textSearch.value) },
+            keyboardActions = KeyboardActions {
+                keyboardController?.hide()
+                viewModel.parseProducts(viewModel.textSearch.value)
+            },
             keyboardOptions = KeyboardOptions(
                 autoCorrect = true, keyboardType = KeyboardType.Text, imeAction = ImeAction.Search
             ),
