@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -105,13 +106,18 @@ fun ParseScreenContent(
                 .padding(top = 5.dp)
                 .padding(horizontal = 5.dp)
         ) {
-            LazyColumn(modifier = Modifier.fillMaxHeight()) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .padding(bottom = 10.dp)
+            ) {
                 items(items = viewModel.foundedProductList) { parserData ->
                     Surface(
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(color = MaterialTheme.colorScheme.background)
                             .padding(horizontal = 5.dp)
+                            .padding(bottom = 3.dp)
                     ) {
 
                         val localContext = LocalContext.current
@@ -148,7 +154,11 @@ fun ItemLazyColumn(
                 shape = RoundedCornerShape(8.dp)
             ), shape = RoundedCornerShape(13.dp)
     ) {
-        LazyColumn(modifier = Modifier.height((ITEM_HEIGHT_IN_LAZY_COLUMN * listSize + 65).dp)) {
+        LazyColumn(
+            modifier = Modifier
+                .wrapContentHeight()
+                .height((ITEM_HEIGHT_IN_LAZY_COLUMN * listSize + 65).dp)
+        ) {
             item {
                 OutlinedButton(contentPadding = PaddingValues(4.dp),
                     modifier = Modifier
@@ -283,7 +293,7 @@ fun ProductCardItem(
                 )*/
                 Column(
                     modifier = Modifier
-                        .height(itemsHeight)
+                        .wrapContentHeight()
                         .weight(7f)
                         .padding(start = 5.dp)
                 ) {
@@ -312,7 +322,7 @@ fun ProductCardItem(
                 }
                 Column(
                     modifier = Modifier
-                        .height(itemsHeight)
+                        .wrapContentHeight()
                         .weight(3f)
                 ) {
                     Text(

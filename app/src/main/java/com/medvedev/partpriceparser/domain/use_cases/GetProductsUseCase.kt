@@ -1,6 +1,7 @@
 package com.medvedev.partpriceparser.domain.use_cases
 
 import com.medvedev.partpriceparser.feature_parsers.sources.AutoMotorsParser
+import com.medvedev.partpriceparser.feature_parsers.sources.MarkParser
 import com.medvedev.partpriceparser.feature_parsers.sources.RiatParser
 import com.medvedev.partpriceparser.feature_parsers.sources.SkladTfkParser
 import com.medvedev.partpriceparser.presentation.models.ParserData
@@ -18,13 +19,16 @@ class GetProductsUseCase {
 
     private val riatParser = RiatParser()
 
+    private val markParser = MarkParser()
+
     suspend fun execute(article: String): Flow<ParserData> {
         return channelFlow {
 
             launch(Dispatchers.IO) {
                 autoMotorsParser.getProduct(article).collect { result ->
                     val parserData = ParserData(
-                        linkToSearchCatalog = autoMotorsParser.linkToSite + autoMotorsParser.partOfLinkToCatalog(article),
+                        linkToSearchCatalog = autoMotorsParser.linkToSite +
+                                autoMotorsParser.partOfLinkToCatalog(article),
                         linkToSite = autoMotorsParser.linkToSite,
                         siteName = autoMotorsParser.siteName,
                         productList = result
@@ -36,7 +40,8 @@ class GetProductsUseCase {
             launch(Dispatchers.IO) {
                 skladTfkParser.getProduct(article).collect { result ->
                     val parserData = ParserData(
-                        linkToSearchCatalog = skladTfkParser.linkToSite + skladTfkParser.partOfLinkToCatalog(article),
+                        linkToSearchCatalog = skladTfkParser.linkToSite +
+                                skladTfkParser.partOfLinkToCatalog(article),
                         linkToSite = skladTfkParser.linkToSite,
                         siteName = skladTfkParser.siteName,
                         productList = result
@@ -48,9 +53,23 @@ class GetProductsUseCase {
             launch(Dispatchers.IO) {
                 riatParser.getProduct(article).collect { result ->
                     val parserData = ParserData(
-                        linkToSearchCatalog = riatParser.linkToSite + riatParser.partOfLinkToCatalog(article),
+                        linkToSearchCatalog = riatParser.linkToSite +
+                                riatParser.partOfLinkToCatalog(article),
                         linkToSite = riatParser.linkToSite,
                         siteName = riatParser.siteName,
+                        productList = result
+                    )
+                    send(parserData)
+                }
+            }
+
+            launch(Dispatchers.IO) {
+                markParser.getProduct(article).collect { result ->
+                    val parserData = ParserData(
+                        linkToSearchCatalog = markParser.linkToSite +
+                                markParser.partOfLinkToCatalog(article),
+                        linkToSite = markParser.linkToSite,
+                        siteName = markParser.siteName,
                         productList = result
                     )
                     send(parserData)
