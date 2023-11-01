@@ -9,6 +9,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.medvedev.partpriceparser.core.util.UIEvents
+import com.medvedev.partpriceparser.core.util.html2text
 import com.medvedev.partpriceparser.core.util.printD
 import com.medvedev.partpriceparser.core.util.safeTakeFirst
 import com.medvedev.partpriceparser.domain.use_cases.GetProductsUseCase
@@ -21,7 +22,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.internal.synchronized
 import kotlinx.coroutines.launch
-import org.jsoup.Connection
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import timber.log.Timber
@@ -43,97 +43,89 @@ class ParserViewModel : ViewModel() {
     }
 
 
-    private val Any.printMR
-        get() = Timber.tag("developerMR").d(toString())
+    private val Any.printKC
+        get() = Timber.tag("developerKC").d(toString())
 
     fun temporaryParseProducts(articleToSearch: String) {
 
         viewModelScope.launch(Dispatchers.IO) {
 
-            val linkToSite: String = "https://klassauto.ru"
+            val linkToSite: String = "https://kamacenter.ru"
 
-            val siteName = "Марк"
+            val siteName = "КамаЦентр"
 
             val localPartOfLinkToCatalog: (String) -> String = { article ->
-                "/search/?search=$article"
+                "/search/?searchword=$article"
             }
 
-            "fullLink: $linkToSite${localPartOfLinkToCatalog(articleToSearch)}$".printMR
+            val fullLink = linkToSite + localPartOfLinkToCatalog(articleToSearch)
 
-            val markLogin = "a9173959992@gmail.com"
-            val markPassword = "уке987гр"
-            val authLink = "https://klassauto.ru/cabinet/"
-
-            val authCookies: Connection.Response = Jsoup.connect(authLink)
-                .data(
-                    "AuthPhase", "1",
-                    "REQUESTED_FROM", "/",
-                    "REQUESTED_BY", "GET",
-                    "catalogue", "1",
-                    "sub", "7",
-                    "cc", "74",
-                    "AUTH_USER", "a9173959992@gmail.com",
-                    "AUTH_PW", "уке987гр",
-                    "submit", "Авторизоваться"
-                )
-                .method(Connection.Method.POST)
-                .execute()
-
-            val cookies = authCookies.cookies()
-
+            "fullLink: $fullLink".printKC
 
             val document: Document =
-                Jsoup.connect("$linkToSite${localPartOfLinkToCatalog(articleToSearch)}") // 740.1003010-20 пример
+                Jsoup.connect(fullLink) // 740.1003010-20 пример
                     .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36")
-                    .timeout(20 * 1000)
-                    .cookies(cookies)
+                    .timeout(10 * 1000)
                     .post()
 
             val productElements = document
-                .select("div.is-multiline")
-                .select("div.catalog-item__tile-item-content")
+                .select("div.products-list")
+                .select("div.products-list__item")
 
             productElements.forEach { element ->
 
-                val imageUrl = element.select("figure.image").select("img").attr("src")
-                    .apply { "imageUrl: $this".printMR }
+                val imageUrl = element.select("div.products-image").select("img").attr("src")
+                    .apply { "imageUrl: $this".printKC }
 
-                val price = element.select("span.price").textNodes().safeTakeFirst
-                    .apply { "price: $this".printMR }
+                val partLinkToProduct = element.select("a.products-name__name").attr("href")
+                    .apply { "linkToProduct: $this".printKC }
 
-                val brand =
-                    element.select("a.param-vendor-value").textNodes().safeTakeFirst
-                        .apply { "brand: $this".printMR }
+                val name = element.select("a.products-name__name").textNodes().safeTakeFirst
+                    .apply { "name: $this".printKC }
 
-                val article =
-                    element.select("span.param-article-value").textNodes().safeTakeFirst
-                        .apply { "article: $this".printMR }
+                val price =
+                    element.select("span.products-priceinfo__price").textNodes().safeTakeFirst
+                        .apply { "price: $this".printKC }
 
-                val name =
-                    element.select("a.catalog-item__tile-item-title").textNodes().safeTakeFirst
-                        .apply { "name: $this".printMR }
+                val brand = ""
 
-                val lintToProduct = element.select("a.catalog-item__tile-item-title").attr("href")
-                    .apply { "lintToProduct: $this".printMR }
+                val article = element.select("table.products-table").select("td")
+                    // .apply { "article: $this".printKC }
+
+                var textArticle = ""
+
+                if (article[0].toString() == "Артикул") {
+                    textArticle = article[1].text().html2text
+                    "textArticle: $textArticle".printKC
+                }
+
+                val existence = element.select("a.products__getmore").textNodes().safeTakeFirst
+                    .apply { "existence: $this".printKC }
+
+                val innerDocument = Jsoup.connect(linkToSite + partLinkToProduct)
+                    .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36")
+                    .timeout(10 * 1000)
+                    .post()
+
+                val productInfo = innerDocument.select("div.good-stocks__first")
+                    .select("div.good-priceinfo-stocks")
 
                 val quantity =
-                    element.select("span.stock-value").textNodes().safeTakeFirst
-                        .apply { "quantity: $this".printMR }
+                    productInfo.select("span.good-priceinfo-stocks__item").select("b")
+                        .textNodes().safeTakeFirst
+                        .apply { "quantity: $this".printKC }
 
 
-                val existence = element.select("span.stock-title").textNodes().safeTakeFirst
-                    .apply { "existence: $this".printMR }
-
-                "\n".printMR
+                "\n".printKC
             }
         }
     }
 
     @OptIn(InternalCoroutinesApi::class)
-    fun parseProducts(article: String) {
+    fun parseProducts(articleToSearch: String) {
         viewModelScope.launch(Dispatchers.IO) {
             _foundedProductList.clear()
-            getProductsUseCase.execute(article)
+            getProductsUseCase.execute(articleToSearch)
                 .buffer(10)
                 .collect { data ->
                     synchronized(Object()) {

@@ -1,6 +1,7 @@
 package com.medvedev.partpriceparser.domain.use_cases
 
 import com.medvedev.partpriceparser.feature_parsers.sources.AutoMotorsParser
+import com.medvedev.partpriceparser.feature_parsers.sources.KamaCenterParser
 import com.medvedev.partpriceparser.feature_parsers.sources.MarkParser
 import com.medvedev.partpriceparser.feature_parsers.sources.RiatParser
 import com.medvedev.partpriceparser.feature_parsers.sources.SkladTfkParser
@@ -20,6 +21,8 @@ class GetProductsUseCase {
     private val riatParser = RiatParser()
 
     private val markParser = MarkParser()
+    
+    private val kamaCenterParser = KamaCenterParser()
 
     suspend fun execute(article: String): Flow<ParserData> {
         return channelFlow {
@@ -70,6 +73,19 @@ class GetProductsUseCase {
                                 markParser.partOfLinkToCatalog(article),
                         linkToSite = markParser.linkToSite,
                         siteName = markParser.siteName,
+                        productList = result
+                    )
+                    send(parserData)
+                }
+            }
+
+            launch(Dispatchers.IO) {
+                kamaCenterParser.getProduct(article).collect { result ->
+                    val parserData = ParserData(
+                        linkToSearchCatalog = kamaCenterParser.linkToSite +
+                                kamaCenterParser.partOfLinkToCatalog(article),
+                        linkToSite = kamaCenterParser.linkToSite,
+                        siteName = kamaCenterParser.siteName,
                         productList = result
                     )
                     send(parserData)

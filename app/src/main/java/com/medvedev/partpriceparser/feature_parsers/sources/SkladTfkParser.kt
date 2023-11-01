@@ -13,6 +13,9 @@ import timber.log.Timber
 
 class SkladTfkParser : ProductParser() {
 
+    // todo магазин имеет несколько складов с разынм наличием и разными ценами, взят самый основной склад,
+    //  где больше всех наличие и самая актуально-низкая цена
+
     val Any.printTFK
         get() = Timber.tag("developerTFK").d(toString())
 
@@ -26,10 +29,9 @@ class SkladTfkParser : ProductParser() {
     @Suppress("OVERRIDE_BY_INLINE")
     override inline val workWithServer: (String) -> Flow<Resource<List<ProductCart>>>
         get() = { articleToSearch ->
-
-            val nameSeparator = "(см."
-
             flow {
+
+                val nameSeparator = "(см."
 
                 val actualDocument = documentCatalogAddressLink(articleToSearch)
 

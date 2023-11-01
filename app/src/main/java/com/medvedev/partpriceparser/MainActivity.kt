@@ -26,6 +26,8 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
+        // viewModel.temporaryParseProducts("740-1003010")
         // viewModel.temporaryParseProducts("740.1003010-20")
         // viewModel.temporaryParseProducts("агрегат")
     }

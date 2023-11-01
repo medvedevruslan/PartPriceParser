@@ -84,7 +84,7 @@ class MarkParser : ProductParser() {
 
                     val halfLinkToProduct =
                         element.select("a.catalog-item__tile-item-title").attr("href")
-                            .apply { "lintToProduct: $this".printMR }
+                            .apply { "linkToProduct: $this".printMR }
 
                     val quantity =
                         element.select("span.stock-value").textNodes().safeTakeFirst
