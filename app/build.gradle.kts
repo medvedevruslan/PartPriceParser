@@ -2,6 +2,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("io.sentry.android.gradle") version "3.14.0"
 }
 
 android {
@@ -12,8 +13,8 @@ android {
         applicationId = "com.medvedev.partpriceparser"
         minSdk = 24
         targetSdk = 33
-        versionCode = 12
-        versionName = "0.1.11"
+        versionCode = 13
+        versionName = "0.1.12"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -83,4 +84,7 @@ dependencies {
     // Hilt for DI
     implementation ("com.google.dagger:hilt-android:2.46.1")
     implementation ("androidx.hilt:hilt-navigation-compose:1.0.0")
+
+    // Sentry
+    implementation(dependencyNotation = "io.sentry:sentry-android:5.7.3")
 }

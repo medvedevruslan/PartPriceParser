@@ -27,6 +27,25 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- enable debug mode, it's disabled by default -->
+        <meta-data
+            android:name="io.sentry.debug"
+            android:value="true" />
+
+        <meta-data
+            android:name="io.sentry.dsn"
+            android:value="https://af50b7abfd00ae028eada4b0064dfae0@o1015213.ingest.sentry.io/4506155935727616" />
+
+        <meta-data
+            android:name="io.sentry.traces.sample-rate"
+            android:value="1.0" />
+
+        <!-- enable automatic breadcrumbs for user interactions (clicks, swipes, scrolls) -->
+        <meta-data
+            android:name="io.sentry.traces.user-interaction.enable"
+            android:value="true" />
+
     </application>
 
 </manifest>
