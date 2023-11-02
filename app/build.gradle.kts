@@ -13,8 +13,8 @@ android {
         applicationId = "com.medvedev.partpriceparser"
         minSdk = 24
         targetSdk = 33
-        versionCode = 13
-        versionName = "0.1.12"
+        versionCode = 14
+        versionName = "0.1.13"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

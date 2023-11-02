@@ -33,7 +33,7 @@ class KamaCenterParser : ProductParser() {
                 val document: Document =
                     Jsoup.connect(fullLink) // 740.1003010-20 пример
                         .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36")
-                        .timeout(10 * 1000)
+                        .timeout(20 * 1000)
                         .post()
 
                 val productElements = document

@@ -39,10 +39,5 @@ class MainActivity : ComponentActivity() {
         } catch (e: PackageManager.NameNotFoundException) {
             "Can`t catch versionName: $e".printE
         }
-
-
-        // viewModel.temporaryParseProducts("740-1003010")
-        // viewModel.temporaryParseProducts("740.1003010-20")
-        // viewModel.temporaryParseProducts("агрегат")
     }
 }
