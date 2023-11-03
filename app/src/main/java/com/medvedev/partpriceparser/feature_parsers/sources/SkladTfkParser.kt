@@ -20,7 +20,7 @@ class SkladTfkParser : ProductParser() {
         get() = Timber.tag("developerTFK").d(toString())
 
     override val linkToSite: String = "https://skladtfk.ru"
-    override val siteName: String = "STFK KAMAZ"
+    override val siteName: String = "СТФК"
     override val partOfLinkToCatalog: (String) -> String
         get() = { article ->
             "/catalog/search/?text=$article&s="

@@ -14,7 +14,7 @@ class RiatParser : ProductParser() {
 
 
     override val linkToSite: String = "https://tdriat.ru"
-    override val siteName: String = "ООО «ТД «РИАТ-Запчасть»"
+    override val siteName: String = "РИАТ"
     override val partOfLinkToCatalog: (String) -> String = { article ->
         "/poisk/$article"
     }
@@ -30,7 +30,7 @@ class RiatParser : ProductParser() {
                 val document: Document =
                     Jsoup.connect("$linkToSite${partOfLinkToCatalog(articleToSearch)}") // 740.1003010-20 пример
                         .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36")
-                        .timeout(10 * 1000)
+                        .timeout(20 * 1000)
                         .post()
 
                 val productElements = document
@@ -88,7 +88,7 @@ class RiatParser : ProductParser() {
 
                     val innerDocument = Jsoup
                         .connect("$linkToSite$partLinkToProduct")
-                        // .timeout(10 * 1000)
+                        .timeout(10 * 1000)
                         .get()
 
 

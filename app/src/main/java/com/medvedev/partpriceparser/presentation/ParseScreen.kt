@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -133,7 +134,7 @@ fun ParseScreenContent(
 
                         val localContext = LocalContext.current
 
-                        ItemLazyColumn(
+                        ItemColumn(
                             parserData = parserData,
                             actionGoToBrowser = { link ->
                                 viewModel.openBrowser(
@@ -150,19 +151,18 @@ fun ParseScreenContent(
 }
 
 @Composable
-fun ItemLazyColumn(
+fun ItemColumn(
     parserData: ParserData,
     actionGoToBrowser: (String) -> Unit
 ) {
     Surface(
         modifier = Modifier
-            .background(color = MaterialTheme.colorScheme.surface)
             .border(
                 border = BorderStroke(2.dp, color = MaterialTheme.colorScheme.secondary),
                 shape = RoundedCornerShape(8.dp)
-            ), shape = RoundedCornerShape(13.dp)
+            ),
+        shape = RoundedCornerShape(13.dp)
     ) {
-
 
         Column(modifier = Modifier.wrapContentHeight()) {
             OutlinedButton(contentPadding = PaddingValues(4.dp),
@@ -197,15 +197,16 @@ fun ItemLazyColumn(
 
                 is Resource.Success -> {
                     parserData.productList.data?.let { listData ->
-                        listData.forEach {
+                        listData.forEach { product ->
                             ProductCardItem(
-                                productCart = it,
+                                productCart = product,
                                 actionGoToBrowser = actionGoToBrowser
                             )
                         }
                     }
                 }
             }
+            Spacer(modifier = Modifier.height(3.dp))
         }
     }
 }
@@ -245,17 +246,25 @@ fun ProductCardItem(
     productCart: ProductCart,
     actionGoToBrowser: (String) -> Unit
 ) {
-    Card(modifier = Modifier
-        .padding(top = 3.dp)
-        .padding(horizontal = 3.dp)
-        .border(
-            border = BorderStroke(
-                1.dp, color = MaterialTheme.colorScheme.secondaryContainer
-            ), shape = RoundedCornerShape(4.dp)
-        )
-        .clickable {
-            actionGoToBrowser.invoke(productCart.fullLinkToProduct)
-        }) {
+    Card(
+        modifier = Modifier
+            .background(
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                shape = RoundedCornerShape(4.dp)
+            )
+            .padding(top = 3.dp)
+            .padding(horizontal = 3.dp)
+            .border(
+                border = BorderStroke(
+                    width = 2.dp,
+                    color = MaterialTheme.colorScheme.secondaryContainer
+                ),
+                shape = RoundedCornerShape(4.dp)
+            )
+            .clickable {
+                actionGoToBrowser.invoke(productCart.fullLinkToProduct)
+            },
+    ) {
         Surface {
             Row(modifier = Modifier.fillMaxWidth()) {
                 /*AsyncImage(
@@ -274,20 +283,22 @@ fun ProductCardItem(
                         .wrapContentHeight()
                         .weight(7f)
                         .padding(start = 5.dp)
+                        .padding(top = 5.dp)
+                        .padding(end = 4.dp)
                 ) {
-                    Row(modifier = Modifier.padding(top = 5.dp)) {
-                        Text(
-                            text = productCart.name,
-                            modifier = Modifier.weight(5f),
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                        Text(
-                            text = productCart.brand ?: "-",
-                            modifier = Modifier.weight(5f),
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                    }
-
+                    Text(
+                        text = productCart.name,
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                    Text(
+                        text = productCart.brand ?: "",
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                    Divider(
+                        modifier = Modifier.padding(horizontal = 7.dp),
+                        color = MaterialTheme.colorScheme.tertiary,
+                        thickness = 0.3.dp
+                    )
                     Text(
                         text = productCart.article,
                         style = MaterialTheme.typography.labelSmall + MaterialTheme.typography.bodyMedium
@@ -304,16 +315,16 @@ fun ProductCardItem(
                         .weight(3f)
                 ) {
                     Text(
-                        text = productCart.price ?: "-",
+                        text = productCart.price ?: "",
                         style = MaterialTheme.typography.labelMedium,
                         modifier = Modifier.padding(top = 5.dp)
                     )
                     Text(
-                        text = productCart.existence ?: " - ",
+                        text = productCart.existence ?: "",
                         style = MaterialTheme.typography.bodySmall
                     )
                     Text(
-                        text = productCart.quantity ?: "-",
+                        text = productCart.quantity ?: "",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }

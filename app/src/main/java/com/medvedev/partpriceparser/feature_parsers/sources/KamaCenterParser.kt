@@ -23,6 +23,7 @@ class KamaCenterParser : ProductParser() {
 
     val Any.printKC
         get() = Timber.tag("developerKC").d(toString())
+
     @Suppress("OVERRIDE_BY_INLINE")
     override inline val workWithServer: (String) -> Flow<Resource<List<ProductCart>>>
         get() = { articleToSearch ->
@@ -34,7 +35,7 @@ class KamaCenterParser : ProductParser() {
                 val document: Document =
                     Jsoup.connect(fullLink) // 740.1003010-20 пример
                         .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36")
-                        .timeout(20 * 1000)
+                        .timeout(30 * 1000)
                         .post()
 
                 val productElements = document
@@ -64,7 +65,7 @@ class KamaCenterParser : ProductParser() {
                         .select("span.products-priceinfo__price")
                         .textNodes().safeTakeFirst
                         .let {
-                            if (it.isNotEmpty()) "$it ₽" else it
+                            if (it.isNotEmpty()) "$it ₽" else ""
                         }
                         .apply { "price: $this".printKC }
 
@@ -95,7 +96,7 @@ class KamaCenterParser : ProductParser() {
                     val innerDocument = Jsoup
                         .connect(linkToSite + partLinkToProduct)
                         .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36")
-                        .timeout(10 * 1000)
+                        .timeout(20 * 1000)
                         .post()
 
                     val productInfo = innerDocument.select("div.good-stocks__first")

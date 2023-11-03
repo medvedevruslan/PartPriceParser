@@ -100,8 +100,9 @@ class ParserViewModel : ViewModel() {
                 element
                     .select("div.blklist_info")
                     .select("div.blk_listfirst")
-                    .apply{
-                        partLinkToProduct = select("div.blk_name").select("a").attr("href").html2text
+                    .apply {
+                        partLinkToProduct =
+                            select("div.blk_name").select("a").attr("href").html2text
                         name = select("div.blk_name").select("span").text().html2text
                         article = select("div.blk_art").select("span.art_value").text().html2text
                     }
@@ -115,26 +116,27 @@ class ParserViewModel : ViewModel() {
 
                 element.select("div.blklist_price")
                     .apply {
-                        price = select("div.blk_priceblock ").select("div.normal_price").select("span.cen").text()
+                        price = select("div.blk_priceblock ").select("div.normal_price")
+                            .select("span.cen").text()
                         existence = select("div.blk_stock").select("span").textNodes().safeTakeFirst
                     }
 
                 "price: $price".printNK
                 "existence: $existence".printNK
 
-/*
+                /*
 
 
-                val partLinkToProduct1 = element
-                    .select("div.blk_text")
-                    .select("div.blk_bordertext")
-                    .select("div.blk_name")
-                    .select("a")
-                    .attr("href")
-                    .apply { "halfLinkToProduct: $this".printNK }
+                                val partLinkToProduct1 = element
+                                    .select("div.blk_text")
+                                    .select("div.blk_bordertext")
+                                    .select("div.blk_name")
+                                    .select("a")
+                                    .attr("href")
+                                    .apply { "halfLinkToProduct: $this".printNK }
 
 
-                val brand = ""*//*element
+                                val brand = ""*//*element
                     .select("div.codes")
                     .select("div.small-text")
                     .select("a")
@@ -185,9 +187,7 @@ class ParserViewModel : ViewModel() {
                                 }
                             }
                             _foundedProductList.add(data)
-                            _foundedProductList.sortBy {
-                                it.siteName
-                            }
+                            _foundedProductList.sortBy { it.siteName }
                         }
                     }
             }

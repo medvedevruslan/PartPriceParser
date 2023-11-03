@@ -92,7 +92,7 @@ class NikoParser : ProductParser() {
                             price = price,
                             name = name,
                             alternativeName = "",
-                            article = article,
+                            article = "Артикул: $article",
                             additionalArticles = "",
                             brand = "",
                             quantity = null,
