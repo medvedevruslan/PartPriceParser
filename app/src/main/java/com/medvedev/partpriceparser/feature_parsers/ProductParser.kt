@@ -14,14 +14,7 @@ abstract class ProductParser {
     abstract val siteName: String
     abstract val partOfLinkToCatalog: (String) -> String
 
-    protected val documentCatalogAddressLink: (String) -> Document
-        get() = { article ->
-            Jsoup.connect("$linkToSite${partOfLinkToCatalog(article)}") // 740.1003010-20 пример
-                .timeout(10 * 1000).get()
-        }
-
     protected val productList: MutableList<ProductCart> = mutableListOf()
-
 
     suspend fun getProduct(articleToSearch: String): Flow<Resource<List<ProductCart>>> = flow {
         try {

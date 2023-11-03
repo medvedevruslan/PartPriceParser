@@ -33,7 +33,10 @@ class SkladTfkParser : ProductParser() {
 
                 val nameSeparator = "(см."
 
-                val actualDocument = documentCatalogAddressLink(articleToSearch)
+                val actualDocument = Jsoup
+                    .connect("$linkToSite${partOfLinkToCatalog(articleToSearch)}") // 740.1003010-20 пример
+                    .timeout(10 * 1000)
+                    .get()
 
                 val productElements = actualDocument.select("td.table-body-image")
 
