@@ -9,6 +9,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.medvedev.partpriceparser.core.util.UIEvents
+import com.medvedev.partpriceparser.core.util.html2text
 import com.medvedev.partpriceparser.core.util.printD
 import com.medvedev.partpriceparser.core.util.safeTakeFirst
 import com.medvedev.partpriceparser.domain.use_cases.GetProductsUseCase
@@ -52,14 +53,14 @@ class ParserViewModel : ViewModel() {
     }
 
 
-    private val Any.printAM
-        get() = Timber.tag("developerAM").d(toString())
+    private val Any.printNK
+        get() = Timber.tag("developeNk").d(toString())
 
     private fun temporaryParseProducts(articleToSearch: String) {
 
         viewModelScope.launch(Dispatchers.IO) {
 
-            val linkToSite: String = "https://midkam.ru"
+            val linkToSite: String = "https://нико.рф"
 
             val partOfLinkToCatalog: (String) -> String = { article ->
                 "/search/?nc_ctpl=2052&find=$article"
@@ -67,7 +68,7 @@ class ParserViewModel : ViewModel() {
 
             val fullLink = linkToSite + partOfLinkToCatalog(articleToSearch)
 
-            "fullLink: $fullLink".printAM
+            "fullLink: $fullLink".printNK
 
             val document: Document =
                 Jsoup.connect("$linkToSite${partOfLinkToCatalog(articleToSearch)}") // 740.1003010-20 пример
@@ -77,84 +78,88 @@ class ParserViewModel : ViewModel() {
 
 
             val productElements = document
-                .select("div.blk_items_spisok")
-                .select("div.product-item")
-                .apply { "productElements: $this".printAM }
+                .select("div.catalog-items-list")
+                .select("div.catalog-item")
+                .select("div.blklist_main")
+                .apply { "productElements: $this".printNK }
 
             productElements.forEach { element ->
 
-                val dopArticle = ""
-
-                val name = element
-                    .select("div.blk_text")
-                    .select("div.blk_bordertext")
-                    .select("div.blk_name")
-                    .select("a")
-                    .select("span")
-                    .textNodes().safeTakeFirst
-                    .apply { "name: $this".printAM }
-
-
                 val imageUrl = element
-                    .select("span.image_h")
+                    .select("div.blklist_photo")
+                    .select("div.image-default")
                     .select("img")
-                    .attr("src")
-                    .apply { "imageUrl: $this".printAM }
+                    .attr("data-src")
+                    .apply { "imageUrl: $this".printNK }
+
+                val dopArticle = ""
+                var name = ""
+                var article = ""
+                var partLinkToProduct = ""
+
+                element
+                    .select("div.blklist_info")
+                    .select("div.blk_listfirst")
+                    .apply{
+                        partLinkToProduct = select("div.blk_name").select("a").attr("href").html2text
+                        name = select("div.blk_name").select("span").text().html2text
+                        article = select("div.blk_art").select("span.art_value").text().html2text
+                    }
+
+                "partLinkToProduct: $partLinkToProduct".printNK
+                "name: $name".printNK
+                "article: $article".printNK
+
+                var price = ""
+                var existence = ""
+
+                element.select("div.blklist_price")
+                    .apply {
+                        price = select("div.blk_priceblock ").select("div.normal_price").select("span.cen").text()
+                        existence = select("div.blk_stock").select("span").textNodes().safeTakeFirst
+                    }
+
+                "price: $price".printNK
+                "existence: $existence".printNK
+
+/*
 
 
-                val partLinkToProduct = element
+                val partLinkToProduct1 = element
                     .select("div.blk_text")
                     .select("div.blk_bordertext")
                     .select("div.blk_name")
                     .select("a")
                     .attr("href")
-                    .apply { "halfLinkToProduct: $this".printAM }
+                    .apply { "halfLinkToProduct: $this".printNK }
 
 
-                val brand = ""/*element
+                val brand = ""*//*element
                     .select("div.codes")
                     .select("div.small-text")
                     .select("a")
                     .select("b")
                     .text().html2text
-                    .apply { "brand: $this".printAM }*/
+                    .apply { "brand: $this".printAM }*//*
 
-                val price = element
+                val price1 = element
                     .select("div.blk_buyinfo")
                     .select("span.cen")
                     .textNodes().safeTakeFirst
                     .let {
                         if (it.isNotEmpty()) "$it ₽" else it
                     }
-                    .apply { "price: $this".printAM }
+                    .apply { "price: $this".printNK }
 
                 val quantity = ""
 
-                val existence = element
+                val existence1 = element
                     .select("span.c_nalich")
                     .textNodes().safeTakeFirst
-                    .apply { "existence: $this".printAM }
-
-                val fullLinkToProduct = linkToSite + partLinkToProduct
-                    .apply { "fullLinkToProduct: $this".printAM }
-
-                val innerDocument: Document =
-                    Jsoup.connect(fullLinkToProduct)
-                        .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36")
-                        .timeout(10 * 1000)
-                        .get()
-
-                val article = innerDocument
-                    .select("div.c_article").let {
-                        (it.select("span.c_art_1").textNodes().safeTakeFirst) + " " +
-                                (it.select("span.art_num").textNodes().safeTakeFirst)
-                    }
-                    .apply { "article: $this".printAM }
+                    .apply { "existence: $this".printNK }*/
 
 
-
-
-                "\n".printAM
+                "\n".printNK
             }
         }
     }

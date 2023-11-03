@@ -19,27 +19,28 @@ class MidkamParser : ProductParser() {
     override val partOfLinkToCatalog: (String) -> String = { article ->
         "/search/?nc_ctpl=2052&find=$article"
     }
-    private val Any.printAM
+    val Any.printMK
         get() = Timber.tag("developerAM").d(toString())
-    override val workWithServer: (String) -> Flow<Resource<List<ProductCart>>>
+    @Suppress("OVERRIDE_BY_INLINE")
+    override inline val workWithServer: (String) -> Flow<Resource<List<ProductCart>>>
         get() = { articleToSearch ->
             flow {
 
                 val fullLink = linkToSite + partOfLinkToCatalog(articleToSearch)
 
-                "fullLink: $fullLink".printAM
+                "fullLink: $fullLink".printMK
 
                 val document: Document =
                     Jsoup.connect("$linkToSite${partOfLinkToCatalog(articleToSearch)}") // 740.1003010-20 пример
                         .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36")
-                        .timeout(10 * 1000)
+                        .timeout(20 * 1000)
                         .get()
 
 
                 val productElements = document
                     .select("div.blk_items_spisok")
                     .select("div.product-item")
-                    .apply { "productElements: $this".printAM }
+                    .apply { "productElements: $this".printMK }
 
                 productElements.forEach { element ->
 
@@ -50,14 +51,14 @@ class MidkamParser : ProductParser() {
                         .select("a")
                         .select("span")
                         .textNodes().safeTakeFirst
-                        .apply { "name: $this".printAM }
+                        .apply { "name: $this".printMK }
 
 
                     val imageUrl = element
                         .select("span.image_h")
                         .select("img")
                         .attr("src")
-                        .apply { "imageUrl: $this".printAM }
+                        .apply { "imageUrl: $this".printMK }
 
 
                     val partLinkToProduct = element
@@ -66,7 +67,7 @@ class MidkamParser : ProductParser() {
                         .select("div.blk_name")
                         .select("a")
                         .attr("href")
-                        .apply { "halfLinkToProduct: $this".printAM }
+                        .apply { "halfLinkToProduct: $this".printMK }
 
                     val price = element
                         .select("div.blk_buyinfo")
@@ -75,20 +76,20 @@ class MidkamParser : ProductParser() {
                         .let {
                             if (it.isNotEmpty()) "$it ₽" else it
                         }
-                        .apply { "price: $this".printAM }
+                        .apply { "price: $this".printMK }
 
                     val existence = element
                         .select("span.c_nalich")
                         .textNodes().safeTakeFirst
-                        .apply { "existence: $this".printAM }
+                        .apply { "existence: $this".printMK }
 
                     val fullLinkToProduct = linkToSite + partLinkToProduct
-                        .apply { "fullLinkToProduct: $this".printAM }
+                        .apply { "fullLinkToProduct: $this".printMK }
 
                     val innerDocument: Document =
                         Jsoup.connect(fullLinkToProduct)
                             .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36")
-                            .timeout(10 * 1000)
+                            .timeout(20 * 1000)
                             .get()
 
                     val article = innerDocument
@@ -96,7 +97,7 @@ class MidkamParser : ProductParser() {
                             (it.select("span.c_art_1").textNodes().safeTakeFirst) + " " +
                                     (it.select("span.art_num").textNodes().safeTakeFirst)
                         }
-                        .apply { "article: $this".printAM }
+                        .apply { "article: $this".printMK }
 
 
                     productList.add(

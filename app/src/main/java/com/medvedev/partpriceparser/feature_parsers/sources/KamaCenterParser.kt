@@ -21,9 +21,10 @@ class KamaCenterParser : ProductParser() {
         "/search/?searchword=$article"
     }
 
-    private val Any.printKC
+    val Any.printKC
         get() = Timber.tag("developerKC").d(toString())
-    override val workWithServer: (String) -> Flow<Resource<List<ProductCart>>>
+    @Suppress("OVERRIDE_BY_INLINE")
+    override inline val workWithServer: (String) -> Flow<Resource<List<ProductCart>>>
         get() = { articleToSearch ->
             flow {
                 val fullLink = linkToSite + partOfLinkToCatalog(articleToSearch)

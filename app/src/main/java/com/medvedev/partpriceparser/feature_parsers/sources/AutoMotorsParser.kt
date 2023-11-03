@@ -22,8 +22,8 @@ class AutoMotorsParser : ProductParser() {
             "/catalog/?q=$article"
         }
 
-    val Any.printAM
-        get() = Timber.tag("developerAM").d(toString())
+    val Any.printAU
+        get() = Timber.tag("developerAU").d(toString())
 
     @Suppress("OVERRIDE_BY_INLINE")
     override inline val workWithServer: (String) -> Flow<Resource<List<ProductCart>>>
@@ -60,32 +60,32 @@ class AutoMotorsParser : ProductParser() {
                         .select("div.art-list")
                         .select("p.m_none")
                         .textNodes().safeTakeFirst
-                        .apply { "article: $this".printAM }
+                        .apply { "article: $this".printAU }
 
                     val dopArticle = element.select("p.hidden").textNodes().safeTakeFirst
-                        .apply { "dopArticle: $this".printAM }
+                        .apply { "dopArticle: $this".printAU }
 
                     val infoProductElements = element.getElementsByAttribute("alt")
 
                     val alternativeName: String = infoProductElements.attr("alt")
-                        .apply { "alternativeName: $this".printAM }
+                        .apply { "alternativeName: $this".printAU }
 
                     val imgSrc = infoProductElements.attr("src")
-                        .apply { "imgSrc: $this".printAM }
+                        .apply { "imgSrc: $this".printAU }
 
                     val name = infoProductElements.attr("title")
-                        .apply { "name: $this".printAM }
+                        .apply { "name: $this".printAU }
 
                     val halfLinkToProduct = element
                         .select("a.link-fast-view")
                         .attr("data-url").html2text
-                        .apply { "halfLink: $this".printAM }
+                        .apply { "halfLink: $this".printAU }
 
                     val brand = element.select("p.brand_name").text().html2text
-                        .apply { "brand: $this".printAM }
+                        .apply { "brand: $this".printAU }
 
                     val price: String? = element.select("div.price").first()?.html()?.html2text
-                        .apply { "price: $this".printAM }
+                        .apply { "price: $this".printAU }
 
                     val quantity = element
                         .select("div.m_right20")
@@ -107,7 +107,7 @@ class AutoMotorsParser : ProductParser() {
                                 }
                             }
                         }
-                        .apply { "quantity: $this".printAM }
+                        .apply { "quantity: $this".printAU }
 
 
 

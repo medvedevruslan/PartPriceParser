@@ -21,10 +21,11 @@ class MarkParser : ProductParser() {
         "/search/?search=$article"
     }
 
-    private val Any.printMR
+    val Any.printMR
         get() = Timber.tag("developerMR").d(toString())
 
-    override val workWithServer: (String) -> Flow<Resource<List<ProductCart>>>
+    @Suppress("OVERRIDE_BY_INLINE")
+    override inline val workWithServer: (String) -> Flow<Resource<List<ProductCart>>>
         get() = { articleToSearch ->
             flow {
 

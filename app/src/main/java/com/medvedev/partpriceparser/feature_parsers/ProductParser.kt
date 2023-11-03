@@ -5,8 +5,6 @@ import com.medvedev.partpriceparser.presentation.models.ProductCart
 import io.sentry.Sentry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
 
 abstract class ProductParser {
 

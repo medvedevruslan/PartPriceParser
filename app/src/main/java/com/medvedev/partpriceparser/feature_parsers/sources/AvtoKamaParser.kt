@@ -21,18 +21,18 @@ class AvtoKamaParser : ProductParser() {
         "/search?searched=$article"
     }
 
+    val Any.printAK
+        get() = Timber.tag("developerAK").d(toString())
 
-    private val Any.printAM
-        get() = Timber.tag("developerAM").d(toString())
-
-    override val workWithServer: (String) -> Flow<Resource<List<ProductCart>>>
+    @Suppress("OVERRIDE_BY_INLINE")
+    override inline val workWithServer: (String) -> Flow<Resource<List<ProductCart>>>
         get() = { articleToSearch ->
             flow {
 
 
                 val fullLink = linkToSite + partOfLinkToCatalog(articleToSearch)
 
-                "fullLink: $fullLink".printAM
+                "fullLink: $fullLink".printAK
 
                 val document: Document =
                     Jsoup.connect("$linkToSite${partOfLinkToCatalog(articleToSearch)}") // 740.1003010-20 пример
@@ -55,7 +55,7 @@ class AvtoKamaParser : ProductParser() {
                             val articleText = it.textNodes().safeTakeFirst
                             "$articleText $articleName"
                         }
-                        .apply { "article: $this".printAM }
+                        .apply { "article: $this".printAK }
 
 
                     val existence = element
@@ -63,28 +63,28 @@ class AvtoKamaParser : ProductParser() {
                         .select("div.flex")
                         .select("div.font-bold")
                         .textNodes().safeTakeFirst
-                        .apply { "existence: $this".printAM }
+                        .apply { "existence: $this".printAK }
 
 
                     val imageUrl = element
                         .select("a")
                         .select("img")
                         .attr("src")
-                        .apply { "imageUrl: $this".printAM }
+                        .apply { "imageUrl: $this".printAK }
 
 
                     val name = element
                         .select("div.info")
                         .select("a")
                         .textNodes().safeTakeFirst
-                        .apply { "name: $this".printAM }
+                        .apply { "name: $this".printAK }
 
 
                     val partLinkToProduct = element
                         .select("div.info")
                         .select("a")
                         .attr("href")
-                        .apply { "halfLinkToProduct: $this".printAM }
+                        .apply { "halfLinkToProduct: $this".printAK }
 
 
                     val brand = element
@@ -93,7 +93,7 @@ class AvtoKamaParser : ProductParser() {
                         .select("a")
                         .select("b")
                         .text().html2text
-                        .apply { "brand: $this".printAM }
+                        .apply { "brand: $this".printAK }
 
                     val price = element
                         .select("div.justify-between")
@@ -103,7 +103,7 @@ class AvtoKamaParser : ProductParser() {
                         .let {
                             if (it.isNotEmpty()) "$it ₽" else it
                         }
-                        .apply { "price: $this".printAM }
+                        .apply { "price: $this".printAK }
 
 
                     productList.add(
