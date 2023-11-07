@@ -25,31 +25,34 @@ class AutoMotorsParser : ProductParser() {
     val Any.printAU
         get() = Timber.tag("developerAU").d(toString())
 
+    lateinit var autoMotorsCookies: MutableMap<String, String>
+
     @Suppress("OVERRIDE_BY_INLINE")
     override inline val workWithServer: (String) -> Flow<Resource<List<ProductCart>>>
         get() = { articleToSearch ->
             flow {
 
-                val authLink = "https://auto-motors.ru/AM_autorize_AUT/"
+                if (!::autoMotorsCookies.isInitialized) {
+                    val authLink = "https://auto-motors.ru/AM_autorize_AUT/"
+                    val authCookies: Connection.Response =
+                        Jsoup.connect(authLink)
+                            .data(
+                                "USER_LOGIN", "info@dvizh-dvizh.ru",
+                                "USER_PASSWORD", "info@dvizh-dvizh.ru",
+                                "USER_REMEMBER", "Y",
+                                "AUTH_ACTION", "Войти"
+                            )
+                            .method(Connection.Method.POST)
+                            .execute()
 
-                val authCookies: Connection.Response =
-                    Jsoup.connect(authLink)
-                        .data(
-                            "USER_LOGIN", "info@dvizh-dvizh.ru",
-                            "USER_PASSWORD", "info@dvizh-dvizh.ru",
-                            "USER_REMEMBER", "Y",
-                            "AUTH_ACTION", "Войти"
-                        )
-                        .method(Connection.Method.POST)
-                        .execute()
-
-                val cookies = authCookies.cookies()
+                    autoMotorsCookies = authCookies.cookies()
+                }
 
                 val document: Document =
                     Jsoup.connect("$linkToSite${partOfLinkToCatalog(articleToSearch)}") // 740.1003010-20 пример
                         .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36")
                         .timeout(10 * 1000)
-                        .cookies(cookies)
+                        .cookies(autoMotorsCookies)
                         .post()
 
                 val productElements = document.select("div.product-card-list")
@@ -111,23 +114,22 @@ class AutoMotorsParser : ProductParser() {
 
 
 
-                     productList.add(
-                         ProductCart(
-                             fullLinkToProduct = linkToSite + halfLinkToProduct,
-                             fullImageUrl = linkToSite + imgSrc,
-                             price = price,
-                             name = name,
-                             alternativeName = alternativeName,
-                             article = article,
-                             additionalArticles = dopArticle,
-                             brand = brand,
-                             quantity = quantity,
-                             existence = ""
-                         )
-                     )
+                    productList.add(
+                        ProductCart(
+                            fullLinkToProduct = linkToSite + halfLinkToProduct,
+                            fullImageUrl = linkToSite + imgSrc,
+                            price = price,
+                            name = name,
+                            alternativeName = alternativeName,
+                            article = article,
+                            additionalArticles = dopArticle,
+                            brand = brand,
+                            quantity = quantity,
+                            existence = ""
+                        )
+                    )
                 }
                 emit(Resource.Success(data = productList))
             }
         }
-
 }

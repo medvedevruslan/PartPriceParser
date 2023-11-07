@@ -60,10 +60,10 @@ class ParserViewModel : ViewModel() {
 
         viewModelScope.launch(Dispatchers.IO) {
 
-            val linkToSite: String = "https://нико.рф"
+            val linkToSite: String = "https://avtoalfa.com"
 
             val partOfLinkToCatalog: (String) -> String = { article ->
-                "/search/?nc_ctpl=2052&find=$article"
+                "/catalog/?find=$article"
             }
 
             val fullLink = linkToSite + partOfLinkToCatalog(articleToSearch)
@@ -76,26 +76,26 @@ class ParserViewModel : ViewModel() {
                     .timeout(10 * 1000)
                     .get()
 
-
             val productElements = document
-                .select("div.catalog-items-list")
-                .select("div.catalog-item")
-                .select("div.blklist_main")
+                .select("div.products")
+                .select("article.relative")
                 .apply { "productElements: $this".printNK }
 
             productElements.forEach { element ->
 
-                val imageUrl = element
-                    .select("div.blklist_photo")
-                    .select("div.image-default")
-                    .select("img")
-                    .attr("data-src")
+                val dopArticle:String
+                var name: String
+                var article: String
+                var partLinkToProduct: String
+                var imageUrl:String
+
+                element
+                    .select("div.relative")
+                    .select("div.flex")
+                    .select("img.product__image")
+                    .attr("src")
                     .apply { "imageUrl: $this".printNK }
 
-                val dopArticle = ""
-                var name = ""
-                var article = ""
-                var partLinkToProduct = ""
 
                 element
                     .select("div.blklist_info")
@@ -111,8 +111,8 @@ class ParserViewModel : ViewModel() {
                 "name: $name".printNK
                 "article: $article".printNK
 
-                var price = ""
-                var existence = ""
+                var price: String
+                var existence: String
 
                 element.select("div.blklist_price")
                     .apply {

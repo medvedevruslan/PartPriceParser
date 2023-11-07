@@ -24,39 +24,42 @@ class MarkParser : ProductParser() {
     val Any.printMR
         get() = Timber.tag("developerMR").d(toString())
 
+    lateinit var markCookies: MutableMap<String, String>
+
     @Suppress("OVERRIDE_BY_INLINE")
     override inline val workWithServer: (String) -> Flow<Resource<List<ProductCart>>>
         get() = { articleToSearch ->
             flow {
+                if (!::markCookies.isInitialized) {
+
+                    val markLogin = "a9173959992@gmail.com"
+                    val markPassword = "уке987гр"
+                    val authLink = "https://klassauto.ru/cabinet/"
+
+                    val authCookies: Connection.Response = Jsoup.connect(authLink)
+                        .data(
+                            "AuthPhase", "1",
+                            "REQUESTED_FROM", "/",
+                            "REQUESTED_BY", "GET",
+                            "catalogue", "1",
+                            "sub", "7",
+                            "cc", "74",
+                            "AUTH_USER", markLogin,
+                            "AUTH_PW", markPassword,
+                            "submit", "Авторизоваться"
+                        )
+                        .method(Connection.Method.POST)
+                        .execute()
+
+                    markCookies = authCookies.cookies()
+                }
 
                 val fullLinkToSearch = linkToSite + partOfLinkToCatalog(articleToSearch)
-
-                val markLogin = "a9173959992@gmail.com"
-                val markPassword = "уке987гр"
-                val authLink = "https://klassauto.ru/cabinet/"
-
-                val authCookies: Connection.Response = Jsoup.connect(authLink)
-                    .data(
-                        "AuthPhase", "1",
-                        "REQUESTED_FROM", "/",
-                        "REQUESTED_BY", "GET",
-                        "catalogue", "1",
-                        "sub", "7",
-                        "cc", "74",
-                        "AUTH_USER", markLogin,
-                        "AUTH_PW", markPassword,
-                        "submit", "Авторизоваться"
-                    )
-                    .method(Connection.Method.POST)
-                    .execute()
-
-                val cookies = authCookies.cookies()
-
 
                 val document: Document = Jsoup.connect(fullLinkToSearch)
                     .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36")
                     .timeout(20 * 1000)
-                    .cookies(cookies)
+                    .cookies(markCookies)
                     .post()
 
                 val productElements = document
