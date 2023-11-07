@@ -112,7 +112,6 @@ class AvtoKamaParser : ProductParser() {
                             fullImageUrl = linkToSite + imageUrl,
                             price = price,
                             name = name,
-                            alternativeName = "",
                             article = article,
                             additionalArticles = "",
                             brand = brand,

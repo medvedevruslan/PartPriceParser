@@ -46,6 +46,7 @@ class ParserViewModel : ViewModel() {
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
+            getProductsUseCase.execute("740.1003010-20")
             // temporaryParseProducts("740.1003010-20")
             // temporaryParseProducts("740-1003010")
             // temporaryParseProducts("агрегат")
@@ -83,11 +84,11 @@ class ParserViewModel : ViewModel() {
 
             productElements.forEach { element ->
 
-                val dopArticle:String
+                val dopArticle: String
                 var name: String
                 var article: String
                 var partLinkToProduct: String
-                var imageUrl:String
+                var imageUrl: String
 
                 element
                     .select("div.relative")

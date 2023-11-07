@@ -95,7 +95,7 @@ class SkladTfkParser : ProductParser() {
 
                     val innerProductElements = innerDocument.select("div.tbody")
 
-                    var price: String? = "0"
+                    var price: String? = ""
                     var existence: String? = ""
 
                     innerProductElements.forEach { innerElement ->
@@ -114,7 +114,6 @@ class SkladTfkParser : ProductParser() {
                             fullImageUrl = linkToSite + imageUrl,
                             price = price,
                             name = readyName,
-                            alternativeName = "",
                             article = "Артикул: $article",
                             additionalArticles = additionalArticles,
                             brand = brand,

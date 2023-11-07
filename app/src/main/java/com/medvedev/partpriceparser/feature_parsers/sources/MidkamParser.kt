@@ -20,7 +20,7 @@ class MidkamParser : ProductParser() {
         "/search/?nc_ctpl=2052&find=$article"
     }
     val Any.printMK
-        get() = Timber.tag("developerAM").d(toString())
+        get() = Timber.tag("developerMK").d(toString())
     @Suppress("OVERRIDE_BY_INLINE")
     override inline val workWithServer: (String) -> Flow<Resource<List<ProductCart>>>
         get() = { articleToSearch ->
@@ -106,7 +106,6 @@ class MidkamParser : ProductParser() {
                             fullImageUrl = linkToSite + imageUrl,
                             price = price,
                             name = name,
-                            alternativeName = "",
                             article = article,
                             additionalArticles = "",
                             brand = "",

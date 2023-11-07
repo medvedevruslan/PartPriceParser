@@ -114,7 +114,6 @@ class RiatParser : ProductParser() {
                             fullImageUrl = linkToSite + imageUrl,
                             price = price,
                             name = name,
-                            alternativeName = "",
                             article = "Артикул: $article",
                             additionalArticles = "",
                             brand = brand,

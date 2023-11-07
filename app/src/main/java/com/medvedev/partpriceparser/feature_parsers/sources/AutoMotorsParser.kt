@@ -70,9 +70,6 @@ class AutoMotorsParser : ProductParser() {
 
                     val infoProductElements = element.getElementsByAttribute("alt")
 
-                    val alternativeName: String = infoProductElements.attr("alt")
-                        .apply { "alternativeName: $this".printAU }
-
                     val imgSrc = infoProductElements.attr("src")
                         .apply { "imgSrc: $this".printAU }
 
@@ -120,7 +117,6 @@ class AutoMotorsParser : ProductParser() {
                             fullImageUrl = linkToSite + imgSrc,
                             price = price,
                             name = name,
-                            alternativeName = alternativeName,
                             article = article,
                             additionalArticles = dopArticle,
                             brand = brand,

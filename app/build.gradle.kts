@@ -13,8 +13,8 @@ android {
         applicationId = "com.medvedev.partpriceparser"
         minSdk = 24
         targetSdk = 33
-        versionCode = 18
-        versionName = "0.1.17"
+        versionCode = 19
+        versionName = "0.1.18"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -71,7 +71,6 @@ dependencies {
 
     // HTML parser
     implementation ("org.jsoup:jsoup:1.16.1")
-    // implementation("com.mohamedrejeb.ksoup:ksoup-html:0.1.4")
 
     // image downloader
     implementation("io.coil-kt:coil:2.4.0")
@@ -86,5 +85,5 @@ dependencies {
     implementation ("androidx.hilt:hilt-navigation-compose:1.0.0")
 
     // Sentry
-    implementation(dependencyNotation = "io.sentry:sentry-android:5.7.3")
+    implementation(dependencyNotation = "io.sentry:sentry-android:6.6.0")
 }

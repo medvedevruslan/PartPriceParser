@@ -115,7 +115,6 @@ class KamaCenterParser : ProductParser() {
                             fullImageUrl = linkToSite + imageUrl,
                             price = price,
                             name = name,
-                            alternativeName = "",
                             article = "Артикул: $textArticle",
                             additionalArticles = "",
                             brand = "",

@@ -5,7 +5,6 @@ data class ProductCart(
     val fullImageUrl: String,
     val price: String?,
     val name: String,
-    val alternativeName: String?,
     val article: String,
     val additionalArticles: String?,
     val brand: String?,
