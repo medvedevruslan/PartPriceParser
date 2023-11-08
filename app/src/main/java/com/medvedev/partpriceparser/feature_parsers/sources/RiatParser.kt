@@ -6,6 +6,7 @@ import com.medvedev.partpriceparser.feature_parsers.ProductParser
 import com.medvedev.partpriceparser.presentation.models.ProductCart
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import org.jsoup.Connection
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import timber.log.Timber
@@ -27,21 +28,31 @@ class RiatParser : ProductParser() {
         get() = { articleToSearch ->
             flow {
 
+                val fullLink = linkToSite + partOfLinkToCatalog(articleToSearch)
+                "fullLink: $fullLink".printRT
+
+                // cookies are required to load the current price
+                val cookieResponse: Connection.Response =
+                    Jsoup.connect("$linkToSite${partOfLinkToCatalog(articleToSearch)}")
+                        .data("username", "myUsername", "password", "myPassword")
+                        .method(Connection.Method.GET)
+                        .timeout(40 * 1000)
+                        .execute()
+
+                val cookies = cookieResponse.cookies()
+
                 val document: Document =
-                    Jsoup.connect("$linkToSite${partOfLinkToCatalog(articleToSearch)}") // 740.1003010-20 пример
+                    Jsoup.connect(fullLink) // 740.1003010-20 пример
                         .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36")
-                        .timeout(20 * 1000)
+                        .timeout(30 * 1000)
+                        .cookies(cookies)
                         .post()
 
                 val productElements = document
                     .select("table.table-catalog")
                     .select("tr.cart_table_item")
 
-                productElements.isNullOrEmpty().printRT
-
                 productElements.forEach { element ->
-
-                    "productElements: $element".printRT
 
                     val partLinkToProduct = element.select("a").attr("href")
                         .apply { "partLinkToProduct: $this".printRT }
@@ -65,35 +76,30 @@ class RiatParser : ProductParser() {
                         .text().html2text.trim()
                         .apply { "article: $this".printRT }
 
-                    var price = element
+                    val price = element
                         .select("td.product-price")
                         .select("span.amount")
+                        .select("b")
                         .text().html2text
+                        .replace(" ", "")
+                        .replace(" ", "")
+                        .toFloatOrNull()
                         .apply { "price: $this".printRT }
 
                     val existence: String = element
+                        .select("td.product-price")
                         .select("span.amount")
-                        .select("small").text().html2text
+                        .select("small")
+                        .text().html2text
                         .apply { "existence: $this".printRT }
-
-                    if (existence.isNotBlank()) {
-                        if (price.contains(existence)) {
-                            price = price.removeSuffix(existence).trim()
-                            "price is cleaned: $price".printRT
-                        }
-                    }
-
-                    price = if (price != "договорная") "$price ₽" else price
-
 
                     val innerDocument = Jsoup
                         .connect("$linkToSite$partLinkToProduct")
-                        .timeout(10 * 1000)
+                        .timeout(20 * 1000)
                         .get()
 
 
                     val productInfo = innerDocument.select("p.taller")
-                        .apply { "productInfo: $this".printRT }
 
                     var brand = ""
 
@@ -114,7 +120,7 @@ class RiatParser : ProductParser() {
                             fullImageUrl = linkToSite + imageUrl,
                             price = price,
                             name = name,
-                            article = "Артикул: $article",
+                            article = article,
                             additionalArticles = "",
                             brand = brand,
                             quantity = null,

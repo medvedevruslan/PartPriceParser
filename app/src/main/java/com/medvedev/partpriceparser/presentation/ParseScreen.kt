@@ -63,6 +63,7 @@ import com.medvedev.partpriceparser.core.util.Resource
 import com.medvedev.partpriceparser.core.util.UIEvents
 import com.medvedev.partpriceparser.presentation.models.ParserData
 import com.medvedev.partpriceparser.presentation.models.ProductCart
+import com.medvedev.partpriceparser.presentation.models.toPriceWithSpace
 import kotlinx.coroutines.flow.collectLatest
 
 
@@ -186,18 +187,20 @@ fun ItemColumn(
                 color = MaterialTheme.colorScheme.secondary,
                 thickness = 1.dp
             )
-            when (parserData.productList) {
+            when (parserData.productParserData) {
                 is Resource.Loading -> {
                     ProgressBar(modifier = Modifier.fillMaxSize())
                 }
 
                 is Resource.Error -> {
-                    Text(text = parserData.productList.message.toString())
+                    Text(text = parserData.productParserData.message.toString())
                 }
 
                 is Resource.Success -> {
-                    parserData.productList.data?.let { listData ->
-                        listData.forEach { product ->
+                    parserData.productParserData.data?.let { listData ->
+                        val iterator = listData.iterator()
+                        while (iterator.hasNext()) {
+                            val product = iterator.next()
                             ProductCardItem(
                                 productCart = product,
                                 actionGoToBrowser = actionGoToBrowser
@@ -300,7 +303,7 @@ fun ProductCardItem(
                         thickness = 0.3.dp
                     )
                     Text(
-                        text = productCart.article,
+                        text = "Артикул: " + productCart.article,
                         style = MaterialTheme.typography.labelSmall + MaterialTheme.typography.bodyMedium
                     )
                     Text(
@@ -315,7 +318,7 @@ fun ProductCardItem(
                         .weight(3f)
                 ) {
                     Text(
-                        text = productCart.price ?: "",
+                        text = if (productCart.price != null) productCart.price.toPriceWithSpace + " ₽" else "",
                         style = MaterialTheme.typography.labelMedium,
                         modifier = Modifier.padding(top = 5.dp)
                     )
@@ -394,7 +397,10 @@ fun SearchBarArticle(
                 .size(45.dp)
                 .padding(start = 3.dp),
             shape = RoundedCornerShape(8.dp),
-            onClick = { viewModel.parseProducts(viewModel.textSearch.value) },
+            onClick = {
+                viewModel.parseProducts(viewModel.textSearch.value)
+                keyboardController?.hide()
+            },
             colors = IconButtonDefaults.iconButtonColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer

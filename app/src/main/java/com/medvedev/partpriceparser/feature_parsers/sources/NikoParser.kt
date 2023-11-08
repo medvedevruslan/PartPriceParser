@@ -5,6 +5,7 @@ import com.medvedev.partpriceparser.core.util.html2text
 import com.medvedev.partpriceparser.core.util.safeTakeFirst
 import com.medvedev.partpriceparser.feature_parsers.ProductParser
 import com.medvedev.partpriceparser.presentation.models.ProductCart
+import com.medvedev.partpriceparser.presentation.models.getCleanPrice
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.jsoup.Jsoup
@@ -29,10 +30,13 @@ class NikoParser : ProductParser() {
         get() = { articleToSearch ->
             flow {
 
+                val fullLink = linkToSite + partOfLinkToCatalog(articleToSearch)
+                "fullLink: $fullLink".printNK
+
                 val document: Document =
-                    Jsoup.connect("$linkToSite${partOfLinkToCatalog(articleToSearch)}") // 740.1003010-20 пример
+                    Jsoup.connect(fullLink) // 740.1003010-20 пример
                         .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36")
-                        .timeout(10 * 1000)
+                        .timeout(30 * 1000)
                         .get()
 
 
@@ -40,7 +44,6 @@ class NikoParser : ProductParser() {
                     .select("div.catalog-items-list")
                     .select("div.catalog-item")
                     .select("div.blklist_main")
-                    .apply { "productElements: $this".printNK }
 
                 productElements.forEach { element ->
 
@@ -59,26 +62,41 @@ class NikoParser : ProductParser() {
                         .select("div.blklist_info")
                         .select("div.blk_listfirst")
                         .apply {
-                            partLinkToProduct =
-                                select("div.blk_name").select("a").attr("href").html2text
-                            name = select("div.blk_name").select("span").text().html2text
-                            article =
-                                select("div.blk_art").select("span.art_value").text().html2text
+                            partLinkToProduct = select("div.blk_name")
+                                .select("a")
+                                .attr("href").html2text
+
+                            name = select("div.blk_name")
+                                .select("span")
+                                .text().html2text
+
+                            article = select("div.blk_art")
+                                .select("span.art_value")
+                                .text().html2text
+                                .removeSuffix("..")
+                                .removeSuffix(".")
                         }
 
                     "partLinkToProduct: $partLinkToProduct".printNK
                     "name: $name".printNK
                     "article: $article".printNK
 
-                    var price: String
+                    var price: Float?
                     var existence: String
 
                     element.select("div.blklist_price")
                         .apply {
-                            price = select("div.blk_priceblock ").select("div.normal_price")
+                            price = select("div.blk_priceblock")
+                                .select("div.normal_price")
                                 .select("span.cen").text()
-                            existence =
-                                select("div.blk_stock").select("span").textNodes().safeTakeFirst
+                                .getCleanPrice
+                                .let {
+                                    if (it == 0f) null else it
+                                }
+
+                            existence = select("div.blk_stock")
+                                .select("span")
+                                .textNodes().safeTakeFirst
                         }
 
                     "price: $price".printNK
@@ -91,7 +109,7 @@ class NikoParser : ProductParser() {
                             fullImageUrl = linkToSite + imageUrl,
                             price = price,
                             name = name,
-                            article = "Артикул: $article",
+                            article = article,
                             additionalArticles = "",
                             brand = "",
                             quantity = null,

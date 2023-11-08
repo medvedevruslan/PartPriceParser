@@ -2,6 +2,7 @@ package com.medvedev.partpriceparser.feature_parsers.sources
 
 import com.medvedev.partpriceparser.core.util.Resource
 import com.medvedev.partpriceparser.core.util.html2text
+import com.medvedev.partpriceparser.core.util.safeTakeFirst
 import com.medvedev.partpriceparser.feature_parsers.ProductParser
 import com.medvedev.partpriceparser.presentation.models.ProductCart
 import kotlinx.coroutines.flow.Flow
@@ -31,6 +32,10 @@ class SkladTfkParser : ProductParser() {
         get() = { articleToSearch ->
             flow {
 
+                val fullLink = linkToSite + partOfLinkToCatalog(articleToSearch)
+
+                "fullLink: $fullLink".printTFK
+
                 val nameSeparator = "(см."
 
                 val actualDocument = Jsoup
@@ -39,74 +44,83 @@ class SkladTfkParser : ProductParser() {
                     .get()
 
                 val productElements = actualDocument.select("td.table-body-image")
+                // .apply { "productElements: $this".printTFK }
 
                 productElements.forEach { element ->
-                    val partLinkToProduct =
-                        element.select("a").attr("href").apply { "linkToProduct: $this".printTFK }
-                    val name: String =
-                        element.select("img").attr("alt").apply { "name: $this".printTFK }
 
+                    val partLinkToProduct: String = element
+                        .select("a")
+                        .attr("href")
+                        .apply { "linkToProduct: $this".printTFK }
 
-                    var additionalArticles = ""
+                    val name: String = element
+                        .select("img")
+                        .attr("alt")
+                        .apply { "name: $this".printTFK }
+
+                    var additionalArticles: String? = ""
 
                     val readyName = if (name.contains("(см.")) {
-
                         val nameList = ArrayList<String>()
                         nameList.addAll(name.split(nameSeparator))
                         additionalArticles = "Доп.артикул: ${nameList[1].trim().removeSuffix(")")}"
 
-                        nameList.first()
+                        nameList.first().trim()
+                            .apply { "changedName: $this".printTFK }
                     } else {
                         name
                     }
 
+                    val imageUrl = element
+                        .select("img")
+                        .attr("src")
+                        .apply { "imageUrl: $this".printTFK }
 
-                    val imageUrl =
-                        element.select("img").attr("src").apply { "imageUrl: $this".printTFK }
+                    val innerDocument: Document = Jsoup
+                        .connect("$linkToSite$partLinkToProduct")
+                        .timeout(10 * 1000).get()
 
-                    val innerDocument: Document =
-                        Jsoup.connect("$linkToSite$partLinkToProduct").timeout(10 * 1000).get()
+                    var article: String
+                    var brand: String
 
-                    val productInfo = innerDocument.select("span.tovarcard-top-prop")
+                    innerDocument
+                        .select("span.tovarcard-top-prop")
+                        .also { articleAndBrand ->
+                            article = articleAndBrand[0]
+                                .child(1)
+                                .text().html2text
+                                .apply { "article: $this".printTFK }
 
-                    val article =
-                        productInfo[0].child(1).text().html2text.apply { "article: $this".printTFK }
-                    val brand =
-                        productInfo[1].child(1).text().html2text.apply { "brand: $this".printTFK }
+                            brand = articleAndBrand[1]
+                                .child(1)
+                                .text().html2text
+                                .apply { "brand: $this".printTFK }
+                        }
 
+                    var price: Float?
+                    var existence: String?
 
-                    // val spanArticle = productInfo.select("span.tovarcard-top-prop").apply { "spanArticle: $this".printTFK }
-                    // val article = productInfo.text().html2text.apply { "article: $this".printTFK }
-                    /*productInfo[0].getElementsMatchingOwnText("Артикул:").apply { "getE1: $this".printTFK }
-                    productInfo[0].getElementsByAttributeStarting("Артикул:").apply { "getE2: $this".printTFK }
-                    productInfo[0].getElementsContainingOwnText("Артикул:").apply { "getE3: $this".printTFK }
-                    productInfo[0].getElementsByAttributeValueContaining("span","Артикул:").apply { "getE4: $this".printTFK }
-                    productInfo[0].getElementsByAttribute("Артикул:").apply { "getE5: $this".printTFK }*/
+                    innerDocument
+                        .select("div.tbody")
+                        .select("div.tr")
+                        .first()
+                        .also { firstElement ->
+                            price = firstElement
+                                ?.select("div.td_cena")
+                                ?.textNodes()
+                                ?.safeTakeFirst
+                                ?.removeSuffix("руб.")
+                                ?.replace(" ", "")
+                                ?.toFloatOrNull()
+                                .apply { "price: $this".printTFK }
 
-                    /*productInfo[0].allElements.forEach {
-                        "productInfoForEach: $it".printTFK
-                    }*/
-
-                    /* val article1 = productInfo.attr("div.tovarcard-top-props span span").apply { "article1: $this".printTFK }
-                     val article3 = productInfo.attr("div.tovarcard-top-props span span").apply { "article3: $this".printTFK }
-                     // val article2 = productInfo.attr("Артикул:").apply { "article2: $this".printTFK }
-                     val brand = productInfo.attr("Производитель::").apply { "brand: $this".printTFK }*/
-
-
-                    val innerProductElements = innerDocument.select("div.tbody")
-
-                    var price: String? = ""
-                    var existence: String? = ""
-
-                    innerProductElements.forEach { innerElement ->
-
-                        price = innerElement.select("div.td_cena").first()?.text()?.html2text
-                            .apply { "price: $this".printTFK }
-
-                        existence =
-                            innerElement.select("div.td_quantity").first()?.text()?.html2text
+                            existence = firstElement
+                                ?.select("div.td_quantity")
+                                ?.select("span.for-order")
+                                ?.textNodes()
+                                ?.safeTakeFirst
                                 .apply { "existenceText: $this".printTFK }
-                    }
+                        }
 
                     productList.add(
                         ProductCart(
@@ -114,11 +128,11 @@ class SkladTfkParser : ProductParser() {
                             fullImageUrl = linkToSite + imageUrl,
                             price = price,
                             name = readyName,
-                            article = "Артикул: $article",
+                            article = article,
                             additionalArticles = additionalArticles,
                             brand = brand,
                             quantity = null,
-                            existence = existence,
+                            existence = existence
                         )
                     )
                 }

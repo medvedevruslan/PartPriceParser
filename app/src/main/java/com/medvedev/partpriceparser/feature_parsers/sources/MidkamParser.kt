@@ -4,6 +4,7 @@ import com.medvedev.partpriceparser.core.util.Resource
 import com.medvedev.partpriceparser.core.util.safeTakeFirst
 import com.medvedev.partpriceparser.feature_parsers.ProductParser
 import com.medvedev.partpriceparser.presentation.models.ProductCart
+import com.medvedev.partpriceparser.presentation.models.getCleanPrice
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.jsoup.Jsoup
@@ -21,6 +22,7 @@ class MidkamParser : ProductParser() {
     }
     val Any.printMK
         get() = Timber.tag("developerMK").d(toString())
+
     @Suppress("OVERRIDE_BY_INLINE")
     override inline val workWithServer: (String) -> Flow<Resource<List<ProductCart>>>
         get() = { articleToSearch ->
@@ -40,7 +42,6 @@ class MidkamParser : ProductParser() {
                 val productElements = document
                     .select("div.blk_items_spisok")
                     .select("div.product-item")
-                    .apply { "productElements: $this".printMK }
 
                 productElements.forEach { element ->
 
@@ -73,9 +74,7 @@ class MidkamParser : ProductParser() {
                         .select("div.blk_buyinfo")
                         .select("span.cen")
                         .textNodes().safeTakeFirst
-                        .let {
-                            if (it.isNotEmpty()) "$it ₽" else it
-                        }
+                        .getCleanPrice
                         .apply { "price: $this".printMK }
 
                     val existence = element
@@ -93,10 +92,9 @@ class MidkamParser : ProductParser() {
                             .get()
 
                     val article = innerDocument
-                        .select("div.c_article").let {
-                            (it.select("span.c_art_1").textNodes().safeTakeFirst) + " " +
-                                    (it.select("span.art_num").textNodes().safeTakeFirst)
-                        }
+                        .select("div.c_article")
+                        .select("span.art_num")
+                        .textNodes().safeTakeFirst
                         .apply { "article: $this".printMK }
 
 

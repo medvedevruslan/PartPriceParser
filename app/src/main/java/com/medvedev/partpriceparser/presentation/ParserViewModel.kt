@@ -46,7 +46,9 @@ class ParserViewModel : ViewModel() {
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
-            getProductsUseCase.execute("740.1003010-20")
+           /* getProductsUseCase.execute("740.1003010-20").collect {
+
+            }*/
             // temporaryParseProducts("740.1003010-20")
             // temporaryParseProducts("740-1003010")
             // temporaryParseProducts("агрегат")
@@ -61,7 +63,7 @@ class ParserViewModel : ViewModel() {
 
         viewModelScope.launch(Dispatchers.IO) {
 
-            val linkToSite: String = "https://avtoalfa.com"
+            val linkToSite = "https://avtoalfa.com"
 
             val partOfLinkToCatalog: (String) -> String = { article ->
                 "/catalog/?find=$article"
@@ -149,9 +151,6 @@ class ParserViewModel : ViewModel() {
                     .select("div.blk_buyinfo")
                     .select("span.cen")
                     .textNodes().safeTakeFirst
-                    .let {
-                        if (it.isNotEmpty()) "$it ₽" else it
-                    }
                     .apply { "price: $this".printNK }
 
                 val quantity = ""
@@ -206,7 +205,7 @@ class ParserViewModel : ViewModel() {
     }
 
 
-    private val _textSearch = mutableStateOf("740.1003010-20")
+    private val _textSearch = mutableStateOf("6520-2405024")// 740.1003010-20
     val textSearch = _textSearch
 
     fun changeTextSearch(text: String) {

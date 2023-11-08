@@ -5,6 +5,7 @@ import com.medvedev.partpriceparser.core.util.html2text
 import com.medvedev.partpriceparser.core.util.safeTakeFirst
 import com.medvedev.partpriceparser.feature_parsers.ProductParser
 import com.medvedev.partpriceparser.presentation.models.ProductCart
+import com.medvedev.partpriceparser.presentation.models.getCleanPrice
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.jsoup.Jsoup
@@ -50,11 +51,8 @@ class AvtoKamaParser : ProductParser() {
                         .select("div.info")
                         .select("div.codes")
                         .select("div.small-text")
-                        .let {
-                            val articleName = it.select("b").first()?.text()?.html2text
-                            val articleText = it.textNodes().safeTakeFirst
-                            "$articleText $articleName"
-                        }
+                        .select("b")
+                        .first()?.text()?.html2text
                         .apply { "article: $this".printAK }
 
 
@@ -100,9 +98,7 @@ class AvtoKamaParser : ProductParser() {
                         .select("div.price-line")
                         .select("div.price")
                         .textNodes().safeTakeFirst
-                        .let {
-                            if (it.isNotEmpty()) "$it ₽" else it
-                        }
+                        .getCleanPrice
                         .apply { "price: $this".printAK }
 
 
@@ -112,7 +108,7 @@ class AvtoKamaParser : ProductParser() {
                             fullImageUrl = linkToSite + imageUrl,
                             price = price,
                             name = name,
-                            article = article,
+                            article = article ?: "articleError",
                             additionalArticles = "",
                             brand = brand,
                             quantity = null,

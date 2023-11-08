@@ -6,5 +6,5 @@ data class ParserData(
     val linkToSearchCatalog: String = "",
     val linkToSite: String = "",
     val siteName: String = "",
-    val productList: Resource<List<ProductCart>> = Resource.Success(data = listOf())
+    val productParserData: Resource<List<ProductCart>> = Resource.Success(data = listOf())
 )

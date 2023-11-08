@@ -5,6 +5,7 @@ import com.medvedev.partpriceparser.core.util.html2text
 import com.medvedev.partpriceparser.core.util.safeTakeFirst
 import com.medvedev.partpriceparser.feature_parsers.ProductParser
 import com.medvedev.partpriceparser.presentation.models.ProductCart
+import com.medvedev.partpriceparser.presentation.models.getCleanPrice
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.jsoup.Connection
@@ -32,6 +33,10 @@ class AutoMotorsParser : ProductParser() {
         get() = { articleToSearch ->
             flow {
 
+                val fullLink = linkToSite + partOfLinkToCatalog(articleToSearch)
+
+                "fullLink: $fullLink".printAU
+
                 if (!::autoMotorsCookies.isInitialized) {
                     val authLink = "https://auto-motors.ru/AM_autorize_AUT/"
                     val authCookies: Connection.Response =
@@ -48,8 +53,8 @@ class AutoMotorsParser : ProductParser() {
                     autoMotorsCookies = authCookies.cookies()
                 }
 
-                val document: Document =
-                    Jsoup.connect("$linkToSite${partOfLinkToCatalog(articleToSearch)}") // 740.1003010-20 пример
+                val document: Document = Jsoup
+                        .connect("$linkToSite${partOfLinkToCatalog(articleToSearch)}") // 740.1003010-20 пример
                         .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36")
                         .timeout(10 * 1000)
                         .cookies(autoMotorsCookies)
@@ -63,17 +68,22 @@ class AutoMotorsParser : ProductParser() {
                         .select("div.art-list")
                         .select("p.m_none")
                         .textNodes().safeTakeFirst
+                        .removePrefix("Артикул: ")
                         .apply { "article: $this".printAU }
 
-                    val dopArticle = element.select("p.hidden").textNodes().safeTakeFirst
+                    val dopArticle = element
+                        .select("p.hidden")
+                        .textNodes().safeTakeFirst
                         .apply { "dopArticle: $this".printAU }
 
                     val infoProductElements = element.getElementsByAttribute("alt")
 
-                    val imgSrc = infoProductElements.attr("src")
+                    val imgSrc = infoProductElements
+                        .attr("src")
                         .apply { "imgSrc: $this".printAU }
 
-                    val name = infoProductElements.attr("title")
+                    val name = infoProductElements
+                        .attr("title")
                         .apply { "name: $this".printAU }
 
                     val halfLinkToProduct = element
@@ -81,11 +91,18 @@ class AutoMotorsParser : ProductParser() {
                         .attr("data-url").html2text
                         .apply { "halfLink: $this".printAU }
 
-                    val brand = element.select("p.brand_name").text().html2text
+                    val brand = element
+                        .select("p.brand_name")
+                        .text().html2text
                         .apply { "brand: $this".printAU }
 
-                    val price: String? = element.select("div.price").first()?.html()?.html2text
-                        .apply { "price: $this".printAU }
+                    val price: Float? = element
+                        .select("div.price")
+                        .select("div")
+                        .first()?.text()
+                        ?.removeSuffix("₽")
+                        ?.getCleanPrice
+                        .apply { "price: ${this.toString()}".printAU }
 
                     val quantity = element
                         .select("div.m_right20")
@@ -95,15 +112,15 @@ class AutoMotorsParser : ProductParser() {
                         .let { quantity ->
                             when (quantity) {
                                 "ПОД" -> {
-                                    "под заказ."
+                                    "под заказ"
                                 }
 
                                 "50" -> {
-                                    "болеe 50 шт."
+                                    "болеe 50 шт"
                                 }
 
                                 else -> {
-                                    "$quantity шт."
+                                    "$quantity шт"
                                 }
                             }
                         }

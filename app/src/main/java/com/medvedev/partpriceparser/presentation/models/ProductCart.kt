@@ -3,7 +3,7 @@ package com.medvedev.partpriceparser.presentation.models
 data class ProductCart(
     val fullLinkToProduct: String,
     val fullImageUrl: String,
-    val price: String?,
+    val price: Float?,
     val name: String,
     val article: String,
     val additionalArticles: String?,
@@ -11,3 +11,22 @@ data class ProductCart(
     val quantity: String?,
     val existence: String?
 )
+
+val String.getCleanPrice: Float?
+    get() = run {
+        if (this.isEmpty()) null
+        else {
+            this.replace(",",".")
+                .replace(" ", "")
+                .toFloatOrNull()
+        }
+    }
+
+
+
+val Float.toPriceWithSpace: String
+    get() = toString()
+        .replace(
+            regex = Regex(pattern = """(?!^)(?=(\d{3})+(?=\.|$))"""),
+            replacement = " "
+        )

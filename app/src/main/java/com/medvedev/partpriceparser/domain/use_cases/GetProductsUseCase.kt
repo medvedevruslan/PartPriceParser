@@ -56,7 +56,7 @@ class GetProductsUseCase {
                                     source.partOfLinkToCatalog(article),
                             linkToSite = source.linkToSite,
                             siteName = source.siteName,
-                            productList = result
+                            productParserData = result
                         )
                         send(parserData)
                     }

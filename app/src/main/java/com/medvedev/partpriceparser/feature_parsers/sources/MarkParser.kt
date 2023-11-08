@@ -4,6 +4,7 @@ import com.medvedev.partpriceparser.core.util.Resource
 import com.medvedev.partpriceparser.core.util.safeTakeFirst
 import com.medvedev.partpriceparser.feature_parsers.ProductParser
 import com.medvedev.partpriceparser.presentation.models.ProductCart
+import com.medvedev.partpriceparser.presentation.models.getCleanPrice
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.jsoup.Connection
@@ -68,34 +69,48 @@ class MarkParser : ProductParser() {
 
                 productElements.forEach { element ->
 
-                    val imageUrl = element.select("figure.image").select("img").attr("src")
+                    val imageUrl = element
+                        .select("figure.image")
+                        .select("img")
+                        .attr("src")
                         .apply { "imageUrl: $this".printMR }
 
-                    val price = element.select("span.price").textNodes().safeTakeFirst
+                    val price = element
+                        .select("span.price")
+                        .textNodes().safeTakeFirst
+                        .removeSuffix("₽")
+                        .getCleanPrice
                         .apply { "price: $this".printMR }
 
-                    val brand =
-                        element.select("a.param-vendor-value").textNodes().safeTakeFirst
-                            .apply { "brand: $this".printMR }
+                    val brand = element
+                        .select("a.param-vendor-value")
+                        .textNodes().safeTakeFirst
+                        .apply { "brand: $this".printMR }
 
-                    val article =
-                        element.select("span.param-article-value").textNodes().safeTakeFirst
-                            .apply { "article: $this".printMR }
+                    val article = element
+                        .select("span.param-article-value")
+                        .textNodes().safeTakeFirst
+                        .apply { "article: $this".printMR }
 
-                    val name =
-                        element.select("a.catalog-item__tile-item-title").textNodes().safeTakeFirst
-                            .apply { "name: $this".printMR }
+                    val name = element
+                        .select("a.catalog-item__tile-item-title")
+                        .textNodes().safeTakeFirst
+                        .apply { "name: $this".printMR }
 
-                    val halfLinkToProduct =
-                        element.select("a.catalog-item__tile-item-title").attr("href")
-                            .apply { "linkToProduct: $this".printMR }
+                    val halfLinkToProduct = element
+                        .select("a.catalog-item__tile-item-title")
+                        .attr("href")
+                        .apply { "linkToProduct: $this".printMR }
 
-                    val quantity =
-                        element.select("span.stock-value").textNodes().safeTakeFirst
-                            .apply { "quantity: $this".printMR }
+                    val quantity = element
+                        .select("span.stock-value")
+                        .textNodes().safeTakeFirst
+                        .apply { "quantity: $this".printMR }
 
 
-                    val existence = element.select("span.stock-title").textNodes().safeTakeFirst
+                    val existence = element
+                        .select("span.stock-title")
+                        .textNodes().safeTakeFirst
                         .apply { "existence: $this".printMR }
 
 
@@ -105,7 +120,7 @@ class MarkParser : ProductParser() {
                             fullImageUrl = linkToSite + imageUrl,
                             price = price,
                             name = name,
-                            article = "Артикул: $article",
+                            article = article,
                             additionalArticles = "",
                             brand = brand,
                             quantity = quantity,

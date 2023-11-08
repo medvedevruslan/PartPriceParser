@@ -64,9 +64,7 @@ class KamaCenterParser : ProductParser() {
                     val price = element
                         .select("span.products-priceinfo__price")
                         .textNodes().safeTakeFirst
-                        .let {
-                            if (it.isNotEmpty()) "$it ₽" else ""
-                        }
+                        .toFloatOrNull()
                         .apply { "price: $this".printKC }
 
 
@@ -82,7 +80,8 @@ class KamaCenterParser : ProductParser() {
                     }
 
                     element.select("a.products__getmore")
-                        .textNodes().safeTakeFirst.apply { "existenceOriginal: $this".printKC }
+                        .textNodes().safeTakeFirst
+                        .apply { "existenceOriginal: $this".printKC }
 
 
                     val existence = element
@@ -115,7 +114,7 @@ class KamaCenterParser : ProductParser() {
                             fullImageUrl = linkToSite + imageUrl,
                             price = price,
                             name = name,
-                            article = "Артикул: $textArticle",
+                            article = textArticle,
                             additionalArticles = "",
                             brand = "",
                             quantity = quantity,
