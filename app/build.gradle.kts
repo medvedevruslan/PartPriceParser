@@ -1,3 +1,4 @@
+val sentryToken = providers.gradleProperty("SENTRY_AUTH_TOKEN").get()
 
 plugins {
     id("com.android.application")
@@ -13,8 +14,8 @@ android {
         applicationId = "com.medvedev.partpriceparser"
         minSdk = 24
         targetSdk = 33
-        versionCode = 20
-        versionName = "0.1.19"
+        versionCode = 21
+        versionName = "0.1.20"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -24,13 +25,23 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
     }
+
+    signingConfigs {
+        create("release") {
+            keyAlias = "android"
+            keyPassword = "android"
+            storeFile = file("$rootDir/key/platform1.jks")
+            storePassword = "android"
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -49,6 +60,13 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+}
+
+sentry {
+    authToken.set(sentryToken)
+    experimentalGuardsquareSupport.set(true)
+    projectName.set("smart_truck")
+    org.set("medvedev91")
 }
 
 dependencies {
@@ -70,20 +88,21 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
     // HTML parser
-    implementation ("org.jsoup:jsoup:1.16.1")
+    implementation("org.jsoup:jsoup:1.16.1")
 
     // image downloader
     implementation("io.coil-kt:coil:2.4.0")
     implementation("io.coil-kt:coil-compose:2.4.0")
 
     // Timber for logging
-    implementation ("com.jakewharton.timber:timber:5.0.1")
+    implementation("com.jakewharton.timber:timber:5.0.1")
 
 
     // Hilt for DI
-    implementation ("com.google.dagger:hilt-android:2.46.1")
-    implementation ("androidx.hilt:hilt-navigation-compose:1.0.0")
+    implementation("com.google.dagger:hilt-android:2.46.1")
+    implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
 
     // Sentry
-    implementation(dependencyNotation = "io.sentry:sentry-android:6.6.0")
+    implementation("io.sentry:sentry-android:6.6.0")
+    implementation("io.sentry:sentry:6.33.1")
 }
