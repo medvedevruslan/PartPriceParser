@@ -88,7 +88,10 @@ fun ParseScreen(viewModel: ParserViewModel = hiltViewModel()) {
         }
     }
 
-    CustomScaffold(snackbarHostState) {
+    CustomScaffold(
+        snackbarHostState = snackbarHostState,
+        loadingFlag = viewModel.loadingInProgressFlag.value
+    ) {
         ParseScreenContent(
             keyboardController = keyboardController,
             modifier = Modifier.padding(it),
@@ -416,30 +419,46 @@ fun SearchBarArticle(
 @Composable
 fun CustomScaffold(
     snackbarHostState: SnackbarHostState,
+    loadingFlag: Boolean,
     content: @Composable (paddingValues: PaddingValues) -> Unit
 ) {
 
     // todo добавить общий прогрессБар для отслеживания всех загрузок
 
-    Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }, topBar = {
-        TopAppBar(
-            modifier = Modifier.height(50.dp), title = {
-                Surface(tonalElevation = 5.dp) {
-                    Text(
-                        text = "Парсер артикула:",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 12.dp),
-                        fontSize = 18.sp,
-                        style = MaterialTheme.typography.headlineSmall,
-                        textAlign = TextAlign.Start,
-                    )
-                }
-            }, colors = TopAppBarDefaults.mediumTopAppBarColors(
-                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(5.dp)
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        topBar = {
+            TopAppBar(
+                modifier = Modifier.height(50.dp),
+                title = {
+                    Box(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Text(
+                            text = "Парсер артикула",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.CenterStart),
+                            fontSize = 18.sp,
+                            style = MaterialTheme.typography.headlineSmall,
+                            textAlign = TextAlign.Start,
+                        )
+                        if (loadingFlag) {
+                            CircularProgressIndicator(
+                                modifier = Modifier
+                                    .align(Alignment.CenterEnd)
+                                    .padding(end = 15.dp)
+                                    .size(30.dp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                strokeWidth = 4.dp
+                            )
+                        }
+                    }
+                }, colors = TopAppBarDefaults.mediumTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(5.dp)
+                )
             )
-        )
-    }) { paddingValues ->
+        }) { paddingValues ->
         content(paddingValues)
     }
 }

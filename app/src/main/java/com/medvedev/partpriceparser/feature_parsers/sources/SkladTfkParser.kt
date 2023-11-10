@@ -33,7 +33,6 @@ class SkladTfkParser : ProductParser() {
             flow {
 
                 val fullLink = linkToSite + partOfLinkToCatalog(articleToSearch)
-
                 "fullLink: $fullLink".printTFK
 
                 val nameSeparator = "(см."
@@ -116,10 +115,10 @@ class SkladTfkParser : ProductParser() {
 
                             existence = firstElement
                                 ?.select("div.td_quantity")
-                                ?.select("span.for-order")
+                                ?.select("span")
                                 ?.textNodes()
                                 ?.safeTakeFirst
-                                .apply { "existenceText: $this".printTFK }
+                                .apply { "existence: $this".printTFK }
                         }
 
                     productList.add(
