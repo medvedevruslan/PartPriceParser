@@ -1,10 +1,10 @@
-package com.medvedev.partpriceparser.feature_parsers.sources
+package com.medvedev.partpriceparser.feature_parsers.data.sources
 
 import com.medvedev.partpriceparser.core.util.Resource
 import com.medvedev.partpriceparser.core.util.html2text
 import com.medvedev.partpriceparser.core.util.safeTakeFirst
-import com.medvedev.partpriceparser.feature_parsers.ProductParser
-import com.medvedev.partpriceparser.presentation.models.ProductCart
+import com.medvedev.partpriceparser.feature_parsers.data.ProductParser
+import com.medvedev.partpriceparser.feature_parsers.presentation.models.ProductCart
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.jsoup.Jsoup

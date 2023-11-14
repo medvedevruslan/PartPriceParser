@@ -8,7 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.medvedev.partpriceparser.presentation.ParseScreen
+import com.medvedev.partpriceparser.feature_parsers.presentation.ParseScreen
 import com.medvedev.partpriceparser.ui.theme.PartPriceParserTheme
 
 class MainActivity : ComponentActivity() {

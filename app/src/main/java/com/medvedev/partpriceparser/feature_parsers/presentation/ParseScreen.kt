@@ -1,4 +1,4 @@
-package com.medvedev.partpriceparser.presentation
+package com.medvedev.partpriceparser.feature_parsers.presentation
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -31,6 +31,7 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedIconButton
@@ -49,6 +50,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
@@ -61,9 +63,11 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.medvedev.partpriceparser.core.util.Resource
 import com.medvedev.partpriceparser.core.util.UIEvents
-import com.medvedev.partpriceparser.presentation.models.ParserData
-import com.medvedev.partpriceparser.presentation.models.ProductCart
-import com.medvedev.partpriceparser.presentation.models.toPriceWithSpace
+import com.medvedev.partpriceparser.feature_parsers.presentation.models.ParserData
+import com.medvedev.partpriceparser.feature_parsers.presentation.models.ProductCart
+import com.medvedev.partpriceparser.feature_parsers.presentation.models.toPriceWithSpace
+import com.medvedev.partpriceparser.feature_parsers.presentation.screen_content.CustomFilterDialog
+import com.medvedev.partpriceparser.feature_parsers.presentation.screen_content.FilterItemButton
 import kotlinx.coroutines.flow.collectLatest
 
 
@@ -90,7 +94,8 @@ fun ParseScreen(viewModel: ParserViewModel = hiltViewModel()) {
 
     CustomScaffold(
         snackbarHostState = snackbarHostState,
-        loadingFlag = viewModel.loadingInProgressFlag.value
+        loadingFlag = viewModel.loadingInProgressFlag.value,
+        onChangeDialogState = { viewModel.changeDialogState() }
     ) {
         ParseScreenContent(
             keyboardController = keyboardController,
@@ -107,6 +112,21 @@ fun ParseScreenContent(
     modifier: Modifier = Modifier,
     viewModel: ParserViewModel
 ) {
+
+    if (viewModel.filterDialogState.value) {
+        CustomFilterDialog(
+            changeDialogState = { viewModel.changeDialogState() },
+            productFilter = viewModel.filterState.value,
+            brandListFilter = viewModel.brandListFilter,
+            onCheckedChangeBrandState = { state, brand ->
+                viewModel.changeListBrand(brandState = state, brand = brand)
+            },
+            onCheckedChangeShowMiss = {
+                viewModel.changeFilterShowMissingItems(it)
+            }
+        )
+    }
+
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.Center,
@@ -123,6 +143,7 @@ fun ParseScreenContent(
                 .padding(horizontal = 5.dp)
         ) {
             LazyColumn(
+
                 modifier = Modifier
                     .fillMaxHeight()
                     .padding(bottom = 10.dp)
@@ -131,7 +152,6 @@ fun ParseScreenContent(
                     Surface(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(color = MaterialTheme.colorScheme.background)
                             .padding(horizontal = 5.dp)
                             .padding(bottom = 3.dp)
                     ) {
@@ -352,7 +372,7 @@ fun ProgressBar(modifier: Modifier = Modifier) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SearchBarArticle(
     keyboardController: SoftwareKeyboardController?,
@@ -420,6 +440,7 @@ fun SearchBarArticle(
 fun CustomScaffold(
     snackbarHostState: SnackbarHostState,
     loadingFlag: Boolean,
+    onChangeDialogState: () -> Unit,
     content: @Composable (paddingValues: PaddingValues) -> Unit
 ) {
 
@@ -437,22 +458,27 @@ fun CustomScaffold(
                         Text(
                             text = "Парсер артикула",
                             modifier = Modifier
-                                .fillMaxWidth()
                                 .align(Alignment.CenterStart),
                             fontSize = 18.sp,
                             style = MaterialTheme.typography.headlineSmall,
                             textAlign = TextAlign.Start,
                         )
                         if (loadingFlag) {
-                            CircularProgressIndicator(
+                            LinearProgressIndicator(
                                 modifier = Modifier
-                                    .align(Alignment.CenterEnd)
-                                    .padding(end = 15.dp)
-                                    .size(30.dp),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                strokeWidth = 4.dp
+                                    .align(Alignment.BottomCenter)
+                                    .fillMaxWidth(),
+                                color = MaterialTheme.colorScheme.onTertiary,
+                                trackColor = MaterialTheme.colorScheme.tertiary,
+                                strokeCap = StrokeCap.Butt
                             )
                         }
+                        FilterItemButton(
+                            modifier = Modifier
+                                .align(Alignment.CenterEnd)
+                                .size(35.dp),
+                            onChangeDialogState = onChangeDialogState
+                        )
                     }
                 }, colors = TopAppBarDefaults.mediumTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(5.dp)

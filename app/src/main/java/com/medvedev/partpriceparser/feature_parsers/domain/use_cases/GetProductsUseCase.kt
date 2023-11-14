@@ -1,15 +1,15 @@
-package com.medvedev.partpriceparser.domain.use_cases
+package com.medvedev.partpriceparser.feature_parsers.domain.use_cases
 
-import com.medvedev.partpriceparser.feature_parsers.ProductParser
-import com.medvedev.partpriceparser.feature_parsers.sources.AutoMotorsParser
-import com.medvedev.partpriceparser.feature_parsers.sources.AvtoKamaParser
-import com.medvedev.partpriceparser.feature_parsers.sources.KamaCenterParser
-import com.medvedev.partpriceparser.feature_parsers.sources.MarkParser
-import com.medvedev.partpriceparser.feature_parsers.sources.MidkamParser
-import com.medvedev.partpriceparser.feature_parsers.sources.NikoParser
-import com.medvedev.partpriceparser.feature_parsers.sources.RiatParser
-import com.medvedev.partpriceparser.feature_parsers.sources.SkladTfkParser
-import com.medvedev.partpriceparser.presentation.models.ParserData
+import com.medvedev.partpriceparser.feature_parsers.data.ProductParser
+import com.medvedev.partpriceparser.feature_parsers.data.sources.AutoMotorsParser
+import com.medvedev.partpriceparser.feature_parsers.data.sources.AvtoKamaParser
+import com.medvedev.partpriceparser.feature_parsers.data.sources.KamaCenterParser
+import com.medvedev.partpriceparser.feature_parsers.data.sources.MarkParser
+import com.medvedev.partpriceparser.feature_parsers.data.sources.MidkamParser
+import com.medvedev.partpriceparser.feature_parsers.data.sources.NikoParser
+import com.medvedev.partpriceparser.feature_parsers.data.sources.RiatParser
+import com.medvedev.partpriceparser.feature_parsers.data.sources.SkladTfkParser
+import com.medvedev.partpriceparser.feature_parsers.presentation.models.ParserData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow

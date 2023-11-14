@@ -1,7 +1,7 @@
-package com.medvedev.partpriceparser.feature_parsers
+package com.medvedev.partpriceparser.feature_parsers.data
 
 import com.medvedev.partpriceparser.core.util.Resource
-import com.medvedev.partpriceparser.presentation.models.ProductCart
+import com.medvedev.partpriceparser.feature_parsers.presentation.models.ProductCart
 import io.sentry.Sentry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow

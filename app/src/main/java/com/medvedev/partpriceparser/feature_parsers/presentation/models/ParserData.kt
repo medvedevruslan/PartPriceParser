@@ -1,4 +1,4 @@
-package com.medvedev.partpriceparser.presentation.models
+package com.medvedev.partpriceparser.feature_parsers.presentation.models
 
 import com.medvedev.partpriceparser.core.util.Resource
 
