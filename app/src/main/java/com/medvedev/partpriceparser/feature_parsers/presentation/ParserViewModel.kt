@@ -65,23 +65,24 @@ class ParserViewModel : ViewModel() {
     )
     val filterState: State<ProductFilter> = _filterState
 
-    private var _brandListFilter = mutableStateListOf<BrandFilter>(
+    fun changeFilterShowMissingItems(changeToBoolean: Boolean) {
+        _filterState.value = _filterState.value.copy(showMissingItems = changeToBoolean)
+    }
+
+
+    private var _brandListFilter: SnapshotStateList<BrandFilter> = mutableStateListOf(
         BrandFilter(true, ProductBrand.Kamaz),
         BrandFilter(true, ProductBrand.Kmz),
         BrandFilter(true, ProductBrand.Repair),
         BrandFilter(true, ProductBrand.Unknown())
     )
-    val brandListFilter = _brandListFilter
+    val brandListFilter: List<BrandFilter> = _brandListFilter
 
-    fun changeFilterShowMissingItems(changeToBoolean: Boolean) {
-        _filterState.value = _filterState.value.copy(showMissingItems = changeToBoolean)
-    }
 
     fun changeListBrand(brandState: Boolean, brand: ProductBrand) {
         _brandListFilter.replaceAll {
             if (it.brandProduct == brand) {
-                it.brandState = brandState
-                it
+                it.copy(brandState = brandState)
             } else it
         }
     }
@@ -146,7 +147,7 @@ class ParserViewModel : ViewModel() {
     }
 
 
-    private val _textSearch = mutableStateOf("6520-2405024")// 740.1003010-20
+    private val _textSearch = mutableStateOf("6520-2405024")// 740.1003010-20 todo изменить на пусто
     val textSearch = _textSearch
 
     fun changeTextSearch(text: String) {

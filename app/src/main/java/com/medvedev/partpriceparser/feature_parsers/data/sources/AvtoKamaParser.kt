@@ -93,13 +93,20 @@ class AvtoKamaParser : ProductParser() {
                         .text().html2text
                         .apply { "brand: $this".printAK }
 
-                    val price = element
+
+                    var price: Float? = null
+
+                    element
                         .select("div.justify-between")
                         .select("div.price-line")
                         .select("div.price")
-                        .textNodes().safeTakeFirst
-                        .getCleanPrice
-                        .apply { "price: $this".printAK }
+                        .textNodes().forEach {
+                            val text = it.text()
+                            if (!text.isNullOrEmpty() && text != " ") {
+                                price = text.getCleanPrice
+                            }
+                        }
+                        .apply { "price: $price".printAK }
 
 
                     productList.add(
