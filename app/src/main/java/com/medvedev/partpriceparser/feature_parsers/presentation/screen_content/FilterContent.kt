@@ -2,6 +2,7 @@ package com.medvedev.partpriceparser.feature_parsers.presentation.screen_content
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -66,36 +67,38 @@ fun CustomFilterDialog(
     productFilter: ProductFilter,
     brandListFilter: List<BrandFilter>,
     onCheckedChangeShowMiss: (Boolean) -> Unit,
-    onCheckedChangeBrandState: (Boolean, ProductBrand) -> Unit
+    onCheckedChangeBrandState: (Boolean, ProductBrand) -> Unit,
+    sortList: List<ProductSort>,
+    onClickOnSortItem: (ProductSort) -> Unit
 ) {
     AlertDialog(
         modifier = Modifier
             .background(
-                color = MaterialTheme.colorScheme.surface,
-                shape = RoundedCornerShape(5.dp)
+                color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(5.dp)
             )
-            .wrapContentSize(),
-        onDismissRequest = changeDialogState
+            .wrapContentSize(), onDismissRequest = changeDialogState
     ) {
         FilterDialogContent(
-            filterList = productFilter.sortListByBrands,
+            sortList = sortList,
             showMissingItems = productFilter.showMissingItems,
             selectedSort = productFilter.selectedSort,
             onCheckedChangeShowMiss = onCheckedChangeShowMiss,
             brandList = brandListFilter,
-            onCheckedChangeBrandState = onCheckedChangeBrandState
+            onCheckedChangeBrandState = onCheckedChangeBrandState,
+            onClickOnSortItem = onClickOnSortItem
         )
     }
 }
 
 @Composable
 fun FilterDialogContent(
-    filterList: List<ProductSort>,
+    sortList: List<ProductSort>,
     showMissingItems: Boolean,
     selectedSort: ProductSort,
     onCheckedChangeShowMiss: (Boolean) -> Unit,
     brandList: List<BrandFilter>,
-    onCheckedChangeBrandState: (Boolean, ProductBrand) -> Unit
+    onCheckedChangeBrandState: (Boolean, ProductBrand) -> Unit,
+    onClickOnSortItem: (ProductSort) -> Unit
 ) {
     Column(modifier = Modifier.padding(10.dp)) {
         CheckboxFilter(
@@ -104,22 +107,22 @@ fun FilterDialogContent(
             onCheckedChange = onCheckedChangeShowMiss
         )
         BrandListCheckboxes(
-            brandList = brandList,
-            brandOnCheckedChange = onCheckedChangeBrandState
+            brandList = brandList, brandOnCheckedChange = onCheckedChangeBrandState
         )
         // sort list
         LazyColumn(
-            modifier = Modifier
-                .border(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    shape = RoundedCornerShape(5.dp)
-                )
+            modifier = Modifier.border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                shape = RoundedCornerShape(5.dp)
+            )
         ) {
-            items(filterList) { productFilter ->
+            items(sortList) { productSort ->
                 SortItem(
-                    filterText = productFilter.filterDescription,
-                    selected = (selectedSort == productFilter)
+                    productSort = productSort,
+                    filterText = productSort.filterDescription,
+                    selected = (selectedSort == productSort),
+                    onClickOnSortItem = onClickOnSortItem
                 )
             }
         }
@@ -128,8 +131,7 @@ fun FilterDialogContent(
 
 @Composable
 fun BrandListCheckboxes(
-    brandList: List<BrandFilter>,
-    brandOnCheckedChange: (Boolean, ProductBrand) -> Unit
+    brandList: List<BrandFilter>, brandOnCheckedChange: (Boolean, ProductBrand) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier
@@ -144,8 +146,7 @@ fun BrandListCheckboxes(
     ) {
         items(brandList) { brandFilter ->
             CheckboxBrandFilter(
-                brandFilter = brandFilter,
-                brandOnCheckedChange = brandOnCheckedChange
+                brandFilter = brandFilter, brandOnCheckedChange = brandOnCheckedChange
             )
         }
     }
@@ -154,26 +155,22 @@ fun BrandListCheckboxes(
 
 @Composable
 fun CheckboxBrandFilter(
-    brandFilter: BrandFilter,
-    brandOnCheckedChange: (Boolean, ProductBrand) -> Unit
+    brandFilter: BrandFilter, brandOnCheckedChange: (Boolean, ProductBrand) -> Unit
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        CustomCheckbox(
-            modifier = Modifier
-                .size(30.dp)
-                .padding(5.dp),
+        CustomCheckbox(modifier = Modifier
+            .size(30.dp)
+            .padding(5.dp),
             checked = brandFilter.brandState,
             onCheckedChange = {
                 brandOnCheckedChange(it, brandFilter.brandProduct)
             })
         Text(
-            modifier = Modifier,
-            text = brandFilter.brandProduct.name
+            modifier = Modifier, text = brandFilter.brandProduct.name
         )
     }
 }
@@ -210,9 +207,7 @@ fun CheckboxFilter(text: String, checked: Boolean, onCheckedChange: (Boolean) ->
 
 @Composable
 fun CustomCheckbox(
-    modifier: Modifier = Modifier,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
+    modifier: Modifier = Modifier, checked: Boolean, onCheckedChange: (Boolean) -> Unit
 ) {
     Checkbox(
         modifier = modifier.clip(shape = RoundedCornerShape(15.dp)),
@@ -249,19 +244,24 @@ fun PreviewCheckboxNotOutlined() {
 }
 
 @Composable
-fun SortItem(filterText: String, selected: Boolean) {
+fun SortItem(
+    productSort: ProductSort,
+    filterText: String,
+    selected: Boolean,
+    onClickOnSortItem: (ProductSort) -> Unit
+) {
     Column {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 5.dp)
-                .padding(5.dp),
+                .padding(5.dp)
+                .clickable { onClickOnSortItem(productSort) },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
         ) {
             Text(
-                text = filterText,
-                modifier = Modifier.padding(end = 5.dp)
+                text = filterText, modifier = Modifier.padding(end = 5.dp)
             )
             if (selected) {
                 Icon(
@@ -273,8 +273,7 @@ fun SortItem(filterText: String, selected: Boolean) {
             }
         }
         Divider(
-            thickness = 1.dp,
-            color = MaterialTheme.colorScheme.surfaceVariant
+            thickness = 1.dp, color = MaterialTheme.colorScheme.surfaceVariant
         )
     }
 }

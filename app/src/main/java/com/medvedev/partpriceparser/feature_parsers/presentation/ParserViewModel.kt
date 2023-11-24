@@ -10,10 +10,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.medvedev.partpriceparser.ProductFilterPreferences.SortOrderProducts
 import com.medvedev.partpriceparser.brands.ProductBrand
 import com.medvedev.partpriceparser.core.util.Resource
 import com.medvedev.partpriceparser.core.util.UIEvents
 import com.medvedev.partpriceparser.core.util.printD
+import com.medvedev.partpriceparser.feature_parsers.data.ProductFiltersPreferencesRepository
 import com.medvedev.partpriceparser.feature_parsers.domain.use_cases.GetProductsUseCase
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.ParserData
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.filter.BrandFilter
@@ -28,11 +30,19 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.internal.synchronized
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
-class ParserViewModel : ViewModel() {
+class ParserViewModel @Inject constructor(private val productFiltersPreferencesRepository: ProductFiltersPreferencesRepository) :
+    ViewModel() {
 
     private val getProductsUseCase = GetProductsUseCase()
+
+    val sortListByBrands: ArrayList<ProductSort> = arrayListOf(
+        ProductSort.ByStoreNameAlphabetically,
+        ProductSort.CheapFirst,
+        ProductSort.ExpensiveFirst
+    )
 
     private val _uiEvents = MutableSharedFlow<UIEvents>()
     val uiEvents: SharedFlow<UIEvents> = _uiEvents.asSharedFlow()
@@ -40,8 +50,6 @@ class ParserViewModel : ViewModel() {
     private val _foundedProductList: SnapshotStateList<ParserData> = mutableStateListOf()
     val foundedProductList = _foundedProductList
 
-    private val _loadingInProgressFlag: MutableState<Boolean> = mutableStateOf(false)
-    val loadingInProgressFlag = _loadingInProgressFlag
 
     private fun addUIEvent(event: UIEvents) {
         viewModelScope.launch {
@@ -49,25 +57,14 @@ class ParserViewModel : ViewModel() {
         }
     }
 
-    private val _filterDialogState = mutableStateOf(true) // todo должен быть false
-    val filterDialogState: State<Boolean> = _filterDialogState
 
-    fun changeDialogState() {
-        _filterDialogState.value = !_filterDialogState.value
-    }
-
-
-    private val _filterState = mutableStateOf(
+    private val _filterProductState = mutableStateOf(
         ProductFilter(
             showMissingItems = true,
-            selectedSort = ProductSort.ByShopAlphabet
+            selectedSort = ProductSort.ByStoreNameAlphabetically
         )
     )
-    val filterState: State<ProductFilter> = _filterState
-
-    fun changeFilterShowMissingItems(changeToBoolean: Boolean) {
-        _filterState.value = _filterState.value.copy(showMissingItems = changeToBoolean)
-    }
+    val filterProductState: State<ProductFilter> = _filterProductState
 
 
     private var _brandListFilter: SnapshotStateList<BrandFilter> = mutableStateListOf(
@@ -78,17 +75,87 @@ class ParserViewModel : ViewModel() {
     )
     val brandListFilter: List<BrandFilter> = _brandListFilter
 
+    init {
+        initFilterPreferences()
+    }
 
-    fun changeListBrand(brandState: Boolean, brand: ProductBrand) {
-        _brandListFilter.replaceAll {
-            if (it.brandProduct == brand) {
-                it.copy(brandState = brandState)
-            } else it
+    private fun initFilterPreferences() {
+        viewModelScope.launch(Dispatchers.IO) {
+            productFiltersPreferencesRepository.filterPreferencesFlow.collect { productFilterPreferences ->
+
+                _filterProductState.value = _filterProductState.value.copy(
+                    showMissingItems = productFilterPreferences.showMissingProduct,
+                    selectedSort = when (productFilterPreferences.sortOrder) {
+                        SortOrderProducts.BY_FIRST_CHEAP -> ProductSort.CheapFirst
+                        SortOrderProducts.BY_FIRST_EXPENSIVE -> ProductSort.ExpensiveFirst
+                        else -> ProductSort.ByStoreNameAlphabetically
+                    }
+                )
+
+                _brandListFilter.replaceAll {
+                    when (it.brandProduct) {
+                        ProductBrand.Kamaz -> it.copy(brandState = productFilterPreferences.showKamazBrand)
+                        ProductBrand.Kmz -> it.copy(brandState = productFilterPreferences.showKmzBrand)
+                        ProductBrand.Repair -> it.copy(brandState = productFilterPreferences.showRepairBrand)
+                        is ProductBrand.Unknown -> it.copy(brandState = productFilterPreferences.showUnknownBrand)
+                    }
+                }
+            }
         }
     }
 
-    fun changeSortState(brandSort: ProductSort) {
-        _filterState.value = _filterState.value.copy(selectedSort = brandSort)
+
+    fun updateFilterShowMissingProduct(enable: Boolean) {
+        viewModelScope.launch(Dispatchers.IO) {
+            productFiltersPreferencesRepository.updateShowMissingProduct(enable)
+        }
+    }
+
+    fun updateFilterShowKamazBrand(enable: Boolean) {
+        viewModelScope.launch(Dispatchers.IO) {
+            productFiltersPreferencesRepository.updateShowKamazBrand(enable)
+        }
+    }
+
+    fun updateFilterShowKmzBrand(enable: Boolean) {
+        viewModelScope.launch(Dispatchers.IO) {
+            productFiltersPreferencesRepository.updateShowKmzBrand(enable)
+        }
+    }
+
+    fun updateFilterShowRepairBrand(enable: Boolean) {
+        viewModelScope.launch(Dispatchers.IO) {
+            productFiltersPreferencesRepository.updateRepairBrand(enable)
+        }
+    }
+
+    fun updateFilterShowUnknownBrand(enable: Boolean) {
+        viewModelScope.launch(Dispatchers.IO) {
+            productFiltersPreferencesRepository.updateShowUnknownBrand(enable)
+        }
+    }
+    fun updateSortFilter(productSort: ProductSort) {
+        viewModelScope.launch(Dispatchers.IO) {
+            when (productSort.protoName) {
+
+                SortOrderProducts.BY_NAME.name ->
+                    productFiltersPreferencesRepository.updateSortOrder(SortOrderProducts.BY_NAME)
+
+                SortOrderProducts.BY_FIRST_CHEAP.name ->
+                    productFiltersPreferencesRepository.updateSortOrder(SortOrderProducts.BY_FIRST_CHEAP)
+
+                SortOrderProducts.BY_FIRST_EXPENSIVE.name ->
+                    productFiltersPreferencesRepository.updateSortOrder(SortOrderProducts.BY_FIRST_EXPENSIVE)
+                
+            }
+        }
+    }
+
+    private val _filterDialogState = mutableStateOf(true) // todo должен быть false на момент релиза
+    val filterDialogState: State<Boolean> = _filterDialogState
+
+    fun changeDialogState() {
+        _filterDialogState.value = !_filterDialogState.value
     }
 
 
@@ -121,6 +188,10 @@ class ParserViewModel : ViewModel() {
             }
         }
     }
+
+
+    private val _loadingInProgressFlag: MutableState<Boolean> = mutableStateOf(false)
+    val loadingInProgressFlag = _loadingInProgressFlag
 
     private fun changeStateOfCommonLoading() {
         var loadingWork = false

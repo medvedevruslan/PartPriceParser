@@ -3,8 +3,16 @@ val sentryToken = providers.gradleProperty("SENTRY_AUTH_TOKEN").get()
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("com.google.protobuf") version "0.9.4"
     id("io.sentry.android.gradle") version "3.14.0"
+    id("com.google.dagger.hilt.android") version "2.48.1" apply false
+    id("dagger.hilt.android.plugin")
+    kotlin("kapt")
 }
+
+// todo добавить систему контроля версий в отдельный файл
+
+val protobufVersion = "3.19.4"
 
 android {
     namespace = "com.medvedev.partpriceparser"
@@ -14,8 +22,8 @@ android {
         applicationId = "com.medvedev.partpriceparser"
         minSdk = 24
         targetSdk = 33
-        versionCode = 24
-        versionName = "0.1.23"
+        versionCode = 25
+        versionName = "0.1.24"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -43,11 +51,11 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -97,12 +105,35 @@ dependencies {
     // Timber for logging
     implementation("com.jakewharton.timber:timber:5.0.1")
 
-
     // Hilt for DI
-    implementation("com.google.dagger:hilt-android:2.46.1")
+    implementation("com.google.dagger:hilt-android:2.48.1")
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
+    kapt("com.google.dagger:hilt-compiler:2.48.1")
 
     // Sentry
     implementation("io.sentry:sentry-android:6.6.0")
     implementation("io.sentry:sentry:6.33.1")
+
+    // DataStore Proto
+    implementation("androidx.datastore:datastore:1.0.0")
+    implementation("com.google.protobuf:protobuf-javalite:$protobufVersion")
+}
+
+kapt {
+    correctErrorTypes = true
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:$protobufVersion"
+    }
+    generateProtoTasks {
+        all().forEach { task ->
+            task.plugins {
+                create("java") {
+                    option("lite")
+                }
+            }
+        }
+    }
 }

@@ -10,7 +10,9 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.medvedev.partpriceparser.feature_parsers.presentation.ParseScreen
 import com.medvedev.partpriceparser.ui.theme.PartPriceParserTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {

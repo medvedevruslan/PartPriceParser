@@ -61,6 +61,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.medvedev.partpriceparser.brands.ProductBrand
 import com.medvedev.partpriceparser.core.util.Resource
 import com.medvedev.partpriceparser.core.util.UIEvents
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.ParserData
@@ -116,13 +117,22 @@ fun ParseScreenContent(
     if (viewModel.filterDialogState.value) {
         CustomFilterDialog(
             changeDialogState = { viewModel.changeDialogState() },
-            productFilter = viewModel.filterState.value,
+            productFilter = viewModel.filterProductState.value,
             brandListFilter = viewModel.brandListFilter,
             onCheckedChangeBrandState = { state, brand ->
-                viewModel.changeListBrand(brandState = state, brand = brand)
+                when (brand) {
+                    ProductBrand.Kamaz -> viewModel.updateFilterShowKamazBrand(state)
+                    ProductBrand.Kmz -> viewModel.updateFilterShowKmzBrand(state)
+                    ProductBrand.Repair -> viewModel.updateFilterShowRepairBrand(state)
+                    is ProductBrand.Unknown -> viewModel.updateFilterShowUnknownBrand(state)
+                }
             },
             onCheckedChangeShowMiss = {
-                viewModel.changeFilterShowMissingItems(it)
+                viewModel.updateFilterShowMissingProduct(it)
+            },
+            sortList = viewModel.sortListByBrands,
+            onClickOnSortItem = { productSort ->
+                viewModel.updateSortFilter(productSort)
             }
         )
     }
