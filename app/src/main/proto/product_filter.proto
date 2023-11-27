@@ -7,10 +7,9 @@ message ProductFilterPreferences {
 
   bool show_missing_product = 1;
 
-  bool show_kmz_brand = 2;
-  bool show_kamaz_brand = 3;
-  bool show_repair_brand = 4;
-  bool show_unknown_brand = 5;
+  bool show_kamaz_brand = 2;
+  bool show_repair_brand = 3;
+  bool show_unknown_brand = 4;
 
   SortOrderProducts sort_order = 6;
 

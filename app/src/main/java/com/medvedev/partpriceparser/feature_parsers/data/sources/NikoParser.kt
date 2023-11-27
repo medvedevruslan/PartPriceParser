@@ -1,5 +1,6 @@
 package com.medvedev.partpriceparser.feature_parsers.data.sources
 
+import com.medvedev.partpriceparser.brands.ProductBrand
 import com.medvedev.partpriceparser.core.util.Resource
 import com.medvedev.partpriceparser.core.util.html2text
 import com.medvedev.partpriceparser.core.util.safeTakeFirst
@@ -114,6 +115,7 @@ class NikoParser : ProductParser() {
                             brand = "",
                             quantity = null,
                             existence = existence,
+                            mfr = ProductBrand.Unknown()
                         )
                     )
                 }

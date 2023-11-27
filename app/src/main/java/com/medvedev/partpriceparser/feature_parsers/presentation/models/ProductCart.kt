@@ -1,5 +1,7 @@
 package com.medvedev.partpriceparser.feature_parsers.presentation.models
 
+import com.medvedev.partpriceparser.brands.ProductBrand
+
 data class ProductCart(
     val fullLinkToProduct: String,
     val fullImageUrl: String,
@@ -8,6 +10,7 @@ data class ProductCart(
     val article: String,
     val additionalArticles: String?,
     val brand: String?,
+    val mfr:ProductBrand,
     val quantity: String?,
     val existence: String?
 )

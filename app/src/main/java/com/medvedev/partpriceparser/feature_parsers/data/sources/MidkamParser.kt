@@ -1,5 +1,6 @@
 package com.medvedev.partpriceparser.feature_parsers.data.sources
 
+import com.medvedev.partpriceparser.brands.ProductBrand
 import com.medvedev.partpriceparser.core.util.Resource
 import com.medvedev.partpriceparser.core.util.safeTakeFirst
 import com.medvedev.partpriceparser.feature_parsers.data.ProductParser
@@ -109,6 +110,7 @@ class MidkamParser : ProductParser() {
                             brand = "",
                             quantity = "",
                             existence = existence,
+                            mfr = ProductBrand.Unknown()
                         )
                     )
                 }

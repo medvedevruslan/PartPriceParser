@@ -1,5 +1,6 @@
 package com.medvedev.partpriceparser.feature_parsers.data.sources
 
+import com.medvedev.partpriceparser.brands.getBrand
 import com.medvedev.partpriceparser.core.util.Resource
 import com.medvedev.partpriceparser.core.util.html2text
 import com.medvedev.partpriceparser.core.util.safeTakeFirst
@@ -14,7 +15,7 @@ import timber.log.Timber
 
 class SkladTfkParser : ProductParser() {
 
-    // todo магазин имеет несколько складов с разынм наличием и разными ценами, взят самый основной склад,
+    // todo магазин имеет несколько складов с разным наличием и разными ценами, взят самый основной склад,
     //  где больше всех наличие и самая актуально-низкая цена
 
     val Any.printTFK
@@ -131,7 +132,8 @@ class SkladTfkParser : ProductParser() {
                             additionalArticles = additionalArticles,
                             brand = brand,
                             quantity = null,
-                            existence = existence
+                            existence = existence,
+                            mfr = brand.getBrand
                         )
                     )
                 }

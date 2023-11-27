@@ -1,5 +1,6 @@
 package com.medvedev.partpriceparser.feature_parsers.data.sources
 
+import com.medvedev.partpriceparser.brands.getBrand
 import com.medvedev.partpriceparser.core.util.Resource
 import com.medvedev.partpriceparser.core.util.html2text
 import com.medvedev.partpriceparser.core.util.safeTakeFirst
@@ -127,7 +128,6 @@ class AutoMotorsParser : ProductParser() {
                         .apply { "quantity: $this".printAU }
 
 
-
                     productList.add(
                         ProductCart(
                             fullLinkToProduct = linkToSite + halfLinkToProduct,
@@ -138,6 +138,7 @@ class AutoMotorsParser : ProductParser() {
                             additionalArticles = dopArticle,
                             brand = brand,
                             quantity = quantity,
+                            mfr = brand.getBrand,
                             existence = ""
                         )
                     )

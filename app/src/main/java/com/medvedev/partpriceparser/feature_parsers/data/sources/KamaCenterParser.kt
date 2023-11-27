@@ -1,5 +1,6 @@
 package com.medvedev.partpriceparser.feature_parsers.data.sources
 
+import com.medvedev.partpriceparser.brands.ProductBrand
 import com.medvedev.partpriceparser.core.util.Resource
 import com.medvedev.partpriceparser.core.util.html2text
 import com.medvedev.partpriceparser.core.util.safeTakeFirst
@@ -119,6 +120,7 @@ class KamaCenterParser : ProductParser() {
                             brand = "",
                             quantity = quantity,
                             existence = existence,
+                            mfr = ProductBrand.Unknown()
                         )
                     )
                 }

@@ -1,5 +1,6 @@
 package com.medvedev.partpriceparser.feature_parsers.data.sources
 
+import com.medvedev.partpriceparser.brands.getBrand
 import com.medvedev.partpriceparser.core.util.Resource
 import com.medvedev.partpriceparser.core.util.html2text
 import com.medvedev.partpriceparser.core.util.safeTakeFirst
@@ -120,6 +121,7 @@ class AvtoKamaParser : ProductParser() {
                             brand = brand,
                             quantity = null,
                             existence = existence,
+                            mfr = brand.getBrand
                         )
                     )
                 }

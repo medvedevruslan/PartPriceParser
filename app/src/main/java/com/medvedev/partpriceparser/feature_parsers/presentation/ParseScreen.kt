@@ -122,7 +122,6 @@ fun ParseScreenContent(
             onCheckedChangeBrandState = { state, brand ->
                 when (brand) {
                     ProductBrand.Kamaz -> viewModel.updateFilterShowKamazBrand(state)
-                    ProductBrand.Kmz -> viewModel.updateFilterShowKmzBrand(state)
                     ProductBrand.Repair -> viewModel.updateFilterShowRepairBrand(state)
                     is ProductBrand.Unknown -> viewModel.updateFilterShowUnknownBrand(state)
                 }

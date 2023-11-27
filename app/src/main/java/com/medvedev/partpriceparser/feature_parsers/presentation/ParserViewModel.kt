@@ -69,7 +69,6 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
 
     private var _brandListFilter: SnapshotStateList<BrandFilter> = mutableStateListOf(
         BrandFilter(true, ProductBrand.Kamaz),
-        BrandFilter(true, ProductBrand.Kmz),
         BrandFilter(true, ProductBrand.Repair),
         BrandFilter(true, ProductBrand.Unknown())
     )
@@ -95,7 +94,6 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
                 _brandListFilter.replaceAll {
                     when (it.brandProduct) {
                         ProductBrand.Kamaz -> it.copy(brandState = productFilterPreferences.showKamazBrand)
-                        ProductBrand.Kmz -> it.copy(brandState = productFilterPreferences.showKmzBrand)
                         ProductBrand.Repair -> it.copy(brandState = productFilterPreferences.showRepairBrand)
                         is ProductBrand.Unknown -> it.copy(brandState = productFilterPreferences.showUnknownBrand)
                     }
@@ -103,6 +101,14 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
             }
         }
     }
+
+   /* private fun applyingFilters(){ todo
+        if (_filterProductState.value.showMissingItems){
+            foundedProductList.filter {
+                it.
+            }
+        }
+    }*/
 
 
     fun updateFilterShowMissingProduct(enable: Boolean) {
@@ -114,12 +120,6 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
     fun updateFilterShowKamazBrand(enable: Boolean) {
         viewModelScope.launch(Dispatchers.IO) {
             productFiltersPreferencesRepository.updateShowKamazBrand(enable)
-        }
-    }
-
-    fun updateFilterShowKmzBrand(enable: Boolean) {
-        viewModelScope.launch(Dispatchers.IO) {
-            productFiltersPreferencesRepository.updateShowKmzBrand(enable)
         }
     }
 

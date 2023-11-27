@@ -26,12 +26,6 @@ class ProductFiltersPreferencesRepository(private val filterPreferencesStore: Da
         }
     }
 
-    suspend fun updateShowKmzBrand(enable: Boolean) {
-        filterPreferencesStore.updateData { preferences ->
-            preferences.toBuilder().setShowKmzBrand(enable).build()
-        }
-    }
-
     suspend fun updateRepairBrand(enable: Boolean) {
         filterPreferencesStore.updateData { preferences ->
             preferences.toBuilder().setShowRepairBrand(enable).build()

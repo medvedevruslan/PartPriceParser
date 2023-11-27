@@ -1,5 +1,6 @@
 package com.medvedev.partpriceparser.feature_parsers.data.sources
 
+import com.medvedev.partpriceparser.brands.getBrand
 import com.medvedev.partpriceparser.core.util.Resource
 import com.medvedev.partpriceparser.core.util.safeTakeFirst
 import com.medvedev.partpriceparser.feature_parsers.data.ProductParser
@@ -124,7 +125,8 @@ class MarkParser : ProductParser() {
                             additionalArticles = "",
                             brand = brand,
                             quantity = quantity,
-                            existence = existence
+                            existence = existence,
+                            mfr = brand.getBrand
                         )
                     )
                 }
