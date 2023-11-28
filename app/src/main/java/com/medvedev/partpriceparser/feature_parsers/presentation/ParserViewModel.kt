@@ -218,7 +218,7 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
     }
 
 
-    private val _textSearch = mutableStateOf("6520-2405024")// 740.1003010-20 todo изменить на пусто
+    private val _textSearch = mutableStateOf("740.100")// 740.1003010-20 todo изменить на пусто
     val textSearch = _textSearch
 
     fun changeTextSearch(text: String) {

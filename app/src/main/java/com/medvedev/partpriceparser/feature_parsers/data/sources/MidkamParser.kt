@@ -13,6 +13,10 @@ import org.jsoup.nodes.Document
 import timber.log.Timber
 
 class MidkamParser : ProductParser() {
+
+    val kamazMrfName = "ПАО КамАЗ"
+    val repairText = "ремонт с гарантией"
+
     override val linkToSite: String
         get() = "https://midkam.ru"
     override val siteName: String
@@ -98,6 +102,12 @@ class MidkamParser : ProductParser() {
                         .textNodes().safeTakeFirst
                         .apply { "article: $this".printMK }
 
+                    val mrf = if (name.contains(kamazMrfName)) {
+                        ProductBrand.Kamaz
+                    } else if (name.contains(repairText)) {
+                        ProductBrand.Repair
+                    } else ProductBrand.Unknown()
+
 
                     productList.add(
                         ProductCart(
@@ -110,7 +120,7 @@ class MidkamParser : ProductParser() {
                             brand = "",
                             quantity = "",
                             existence = existence,
-                            mfr = ProductBrand.Unknown()
+                            mfr = mrf
                         )
                     )
                 }

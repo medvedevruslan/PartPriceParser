@@ -12,12 +12,18 @@ sealed interface ProductBrand {
 
     object Repair : ProductBrand {
         override val name: String = "Ремонтный"
-        override val possibleNames: ArrayList<String> = arrayListOf("ремонт", "восcтановленный")
+        override val possibleNames: ArrayList<String> = arrayListOf(
+            "ремонтный",
+            "ремонтированный",
+            "восcтановленный",
+            "ремонт под новый с гарантией",
+            "ремонт с гарантией"
+        )
     }
 
     class Unknown(description: String = "Неопределен") : ProductBrand {
         override val name: String = description
-        override val possibleNames: ArrayList<String> = arrayListOf("Прочие",)
+        override val possibleNames: ArrayList<String> = arrayListOf("Прочие")
     }
 }
 
@@ -28,7 +34,6 @@ sealed interface ProductBrand {
 // MADARA \ АО "Строймаш" \ ОАО "Балаковорезинотехника" \ "SORL Ruili Group China" \ ГК Ростар \ ООО "ЕНА-холдинг" \
 // TECNARI \ ПАО "НЕФАЗ" \   "ПК АЙК" \ "ZF", Германия \ ОАО "Шадринский автоагрегатный завод" \ ВЧ РУС \
 // ООО "Рославльские тормозные системы" РААЗ \ ООО НПО "УРАЛ" \
-
 
 
 val String.getBrand: ProductBrand

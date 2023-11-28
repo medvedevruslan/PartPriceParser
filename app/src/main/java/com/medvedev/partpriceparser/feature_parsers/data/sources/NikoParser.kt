@@ -24,7 +24,7 @@ class NikoParser : ProductParser() {
     }
 
     val Any.printNK
-        get() = Timber.tag("developeNk").d(toString())
+        get() = Timber.tag("developerNk").d(toString())
 
     @Suppress("OVERRIDE_BY_INLINE")
     override inline val workWithServer: (String) -> Flow<Resource<List<ProductCart>>>

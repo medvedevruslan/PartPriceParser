@@ -1,6 +1,6 @@
 package com.medvedev.partpriceparser.feature_parsers.data.sources
 
-import com.medvedev.partpriceparser.brands.ProductBrand
+import com.medvedev.partpriceparser.brands.getBrand
 import com.medvedev.partpriceparser.core.util.Resource
 import com.medvedev.partpriceparser.core.util.html2text
 import com.medvedev.partpriceparser.core.util.safeTakeFirst
@@ -68,28 +68,31 @@ class KamaCenterParser : ProductParser() {
                         .toFloatOrNull()
                         .apply { "price: $this".printKC }
 
+                    var article = ""
+                    var brand = ""
 
-                    val articleHtml = element
+
+                    element
                         .select("table.products-table")
+                        .select("tr")
                         .select("td")
-
-                    var textArticle = ""
-
-                    if (articleHtml[0].text().html2text == "Артикул") {
-                        textArticle = articleHtml[1].text().html2text
-                        "textArticle: $textArticle".printKC
-                    }
-
-                    element.select("a.products__getmore")
-                        .textNodes().safeTakeFirst
-                        .apply { "existenceOriginal: $this".printKC }
-
+                        .apply {
+                            for (i in 0..this.size - 2) {
+                                if (this[i].text().html2text.contains("Артикул")) {
+                                    article = this[i + 1].text().html2text
+                                    "article: $article".printKC
+                                } else if (this[i].text().html2text.contains("Производитель")) {
+                                    brand = this[i + 1].text().html2text
+                                    "brand: $brand".printKC
+                                }
+                            }
+                        }
 
                     val existence = element
                         .select("a.products__getmore")
                         .textNodes().safeTakeFirst
                         .let {
-                            if (it == "Уведомить о наличии") "нет в наличии" else it
+                            if (it == "Уведомить о наличии") "нет в наличии" else "В наличии"
                         }
                         .apply { "existence: $this".printKC }
 
@@ -108,19 +111,18 @@ class KamaCenterParser : ProductParser() {
                         .textNodes().safeTakeFirst
                         .apply { "quantity: $this".printKC }
 
-
                     productList.add(
                         ProductCart(
                             fullLinkToProduct = linkToSite + partLinkToProduct,
                             fullImageUrl = linkToSite + imageUrl,
                             price = price,
                             name = name,
-                            article = textArticle,
+                            article = article,
                             additionalArticles = "",
-                            brand = "",
+                            brand = brand,
                             quantity = quantity,
                             existence = existence,
-                            mfr = ProductBrand.Unknown()
+                            mfr = brand.getBrand
                         )
                     )
                 }
