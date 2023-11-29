@@ -27,7 +27,7 @@ class NikoParser : ProductParser() {
         get() = Timber.tag("developerNk").d(toString())
 
     @Suppress("OVERRIDE_BY_INLINE")
-    override inline val workWithServer: (String) -> Flow<Resource<List<ProductCart>>>
+    override inline val workWithServer: (String) -> Flow<Resource<Set<ProductCart>>>
         get() = { articleToSearch ->
             flow {
 
@@ -104,7 +104,7 @@ class NikoParser : ProductParser() {
                     "existence: $existence".printNK
 
 
-                    productList.add(
+                    productSet.add(
                         ProductCart(
                             fullLinkToProduct = linkToSite + partLinkToProduct,
                             fullImageUrl = linkToSite + imageUrl,
@@ -112,14 +112,13 @@ class NikoParser : ProductParser() {
                             name = name,
                             article = article,
                             additionalArticles = "",
-                            brand = "",
+                            brand = ProductBrand.Unknown(),
                             quantity = null,
-                            existence = existence,
-                            mfr = ProductBrand.Unknown()
+                            existence = existence
                         )
                     )
                 }
-                emit(Resource.Success(data = productList))
+                emit(Resource.Success(data = productSet))
             }
         }
 }

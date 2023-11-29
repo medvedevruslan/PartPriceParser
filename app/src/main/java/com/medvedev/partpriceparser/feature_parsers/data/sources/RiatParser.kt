@@ -25,7 +25,7 @@ class RiatParser : ProductParser() {
         get() = Timber.tag("developerRT").d(toString())
 
     @Suppress("OVERRIDE_BY_INLINE")
-    override inline val workWithServer: (String) -> Flow<Resource<List<ProductCart>>>
+    override inline val workWithServer: (String) -> Flow<Resource<Set<ProductCart>>>
         get() = { articleToSearch ->
             flow {
 
@@ -115,7 +115,7 @@ class RiatParser : ProductParser() {
                         }
                     }
 
-                    productList.add(
+                    productSet.add(
                         ProductCart(
                             fullLinkToProduct = linkToSite + partLinkToProduct,
                             fullImageUrl = linkToSite + imageUrl,
@@ -123,14 +123,13 @@ class RiatParser : ProductParser() {
                             name = name,
                             article = article,
                             additionalArticles = "",
-                            brand = brand,
+                            brand = brand.getBrand,
                             quantity = null,
-                            existence = existence,
-                            mfr = brand.getBrand
+                            existence = existence
                         )
                     )
                 }
-                emit(Resource.Success(data = productList))
+                emit(Resource.Success(data = productSet))
             }
         }
 }

@@ -29,7 +29,7 @@ class SkladTfkParser : ProductParser() {
         }
 
     @Suppress("OVERRIDE_BY_INLINE")
-    override inline val workWithServer: (String) -> Flow<Resource<List<ProductCart>>>
+    override inline val workWithServer: (String) -> Flow<Resource<Set<ProductCart>>>
         get() = { articleToSearch ->
             flow {
 
@@ -122,7 +122,7 @@ class SkladTfkParser : ProductParser() {
                                 .apply { "existence: $this".printTFK }
                         }
 
-                    productList.add(
+                    productSet.add(
                         ProductCart(
                             fullLinkToProduct = linkToSite + partLinkToProduct,
                             fullImageUrl = linkToSite + imageUrl,
@@ -130,14 +130,13 @@ class SkladTfkParser : ProductParser() {
                             name = readyName,
                             article = article,
                             additionalArticles = additionalArticles,
-                            brand = brand,
+                            brand = brand.getBrand,
                             quantity = null,
-                            existence = existence,
-                            mfr = brand.getBrand
+                            existence = existence
                         )
                     )
                 }
-                emit(Resource.Success(data = productList))
+                emit(Resource.Success(data = productSet))
             }
         }
 }

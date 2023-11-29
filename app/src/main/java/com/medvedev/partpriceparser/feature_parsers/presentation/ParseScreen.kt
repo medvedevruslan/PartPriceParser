@@ -61,6 +61,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.medvedev.partpriceparser.R
 import com.medvedev.partpriceparser.brands.ProductBrand
 import com.medvedev.partpriceparser.core.util.Resource
 import com.medvedev.partpriceparser.core.util.UIEvents
@@ -68,7 +69,7 @@ import com.medvedev.partpriceparser.feature_parsers.presentation.models.ParserDa
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.ProductCart
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.toPriceWithSpace
 import com.medvedev.partpriceparser.feature_parsers.presentation.screen_content.CustomFilterDialog
-import com.medvedev.partpriceparser.feature_parsers.presentation.screen_content.FilterItemButton
+import com.medvedev.partpriceparser.feature_parsers.presentation.screen_content.TopBarItemButton
 import kotlinx.coroutines.flow.collectLatest
 
 
@@ -96,6 +97,7 @@ fun ParseScreen(viewModel: ParserViewModel = hiltViewModel()) {
     CustomScaffold(
         snackbarHostState = snackbarHostState,
         loadingFlag = viewModel.loadingInProgressFlag.value,
+        onCancelParsing = { viewModel.cancelParsing() },
         onChangeDialogState = { viewModel.changeDialogState() }
     ) {
         ParseScreenContent(
@@ -143,7 +145,8 @@ fun ParseScreenContent(
     ) {
         SearchBarArticle(
             keyboardController = keyboardController,
-            viewModel = viewModel
+            viewModel = viewModel,
+            parseIsWorking = viewModel.loadingInProgressFlag.value
         )
 
         Surface(
@@ -326,7 +329,7 @@ fun ProductCardItem(
                         style = MaterialTheme.typography.labelMedium
                     )
                     Text(
-                        text = productCart.brand ?: "",
+                        text = "Производитель: \n" + productCart.brand.name,
                         style = MaterialTheme.typography.labelMedium
                     )
                     Divider(
@@ -384,9 +387,11 @@ fun ProgressBar(modifier: Modifier = Modifier) {
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SearchBarArticle(
+    parseIsWorking: Boolean,
     keyboardController: SoftwareKeyboardController?,
     viewModel: ParserViewModel
 ) {
+    // todo не передавать viewModel, а передавать только необходимые параметры
     Row(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
@@ -396,7 +401,8 @@ fun SearchBarArticle(
             .padding(horizontal = 10.dp)
             .height(50.dp)
     ) {
-        OutlinedTextField(textStyle = MaterialTheme.typography.bodyMedium,
+        OutlinedTextField(
+            textStyle = MaterialTheme.typography.bodyMedium,
             maxLines = 1,
             trailingIcon = {
                 Icon(imageVector = Icons.Default.Clear,
@@ -412,7 +418,9 @@ fun SearchBarArticle(
             },
             keyboardActions = KeyboardActions {
                 keyboardController?.hide()
-                viewModel.parseProducts(viewModel.textSearch.value)
+                if (!parseIsWorking) {
+                    viewModel.parseProducts(viewModel.textSearch.value)
+                } // todo добавить ли вопрос "приостановить парсер?"
             },
             keyboardOptions = KeyboardOptions(
                 autoCorrect = true, keyboardType = KeyboardType.Text, imeAction = ImeAction.Search
@@ -429,6 +437,7 @@ fun SearchBarArticle(
                 .size(45.dp)
                 .padding(start = 3.dp),
             shape = RoundedCornerShape(8.dp),
+            enabled = !parseIsWorking,
             onClick = {
                 viewModel.parseProducts(viewModel.textSearch.value)
                 keyboardController?.hide()
@@ -449,12 +458,10 @@ fun SearchBarArticle(
 fun CustomScaffold(
     snackbarHostState: SnackbarHostState,
     loadingFlag: Boolean,
+    onCancelParsing: () -> Unit,
     onChangeDialogState: () -> Unit,
     content: @Composable (paddingValues: PaddingValues) -> Unit
 ) {
-
-    // todo добавить общий прогрессБар для отслеживания всех загрузок
-
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
@@ -481,13 +488,24 @@ fun CustomScaffold(
                                 trackColor = MaterialTheme.colorScheme.tertiary,
                                 strokeCap = StrokeCap.Butt
                             )
+                            TopBarItemButton(
+                                modifier = Modifier
+                                    .align(Alignment.CenterEnd)
+                                    .size(35.dp),
+                                onChangeDialogState = onCancelParsing,
+                                contentDescription = "остановить парсинг",
+                                iconResource = R.drawable.baseline_cancel_24
+                            )
+                        } else {
+                            TopBarItemButton(
+                                modifier = Modifier
+                                    .align(Alignment.CenterEnd)
+                                    .size(35.dp),
+                                contentDescription = "изменение фильтров",
+                                onChangeDialogState = onChangeDialogState,
+                                iconResource = R.drawable.baseline_tune_24
+                            )
                         }
-                        FilterItemButton(
-                            modifier = Modifier
-                                .align(Alignment.CenterEnd)
-                                .size(35.dp),
-                            onChangeDialogState = onChangeDialogState
-                        )
                     }
                 }, colors = TopAppBarDefaults.mediumTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(5.dp)

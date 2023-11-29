@@ -26,7 +26,7 @@ class KamaCenterParser : ProductParser() {
         get() = Timber.tag("developerKC").d(toString())
 
     @Suppress("OVERRIDE_BY_INLINE")
-    override inline val workWithServer: (String) -> Flow<Resource<List<ProductCart>>>
+    override inline val workWithServer: (String) -> Flow<Resource<Set<ProductCart>>>
         get() = { articleToSearch ->
             flow {
                 val fullLink = linkToSite + partOfLinkToCatalog(articleToSearch)
@@ -111,7 +111,7 @@ class KamaCenterParser : ProductParser() {
                         .textNodes().safeTakeFirst
                         .apply { "quantity: $this".printKC }
 
-                    productList.add(
+                    productSet.add(
                         ProductCart(
                             fullLinkToProduct = linkToSite + partLinkToProduct,
                             fullImageUrl = linkToSite + imageUrl,
@@ -119,14 +119,13 @@ class KamaCenterParser : ProductParser() {
                             name = name,
                             article = article,
                             additionalArticles = "",
-                            brand = brand,
+                            brand = brand.getBrand,
                             quantity = quantity,
-                            existence = existence,
-                            mfr = brand.getBrand
+                            existence = existence
                         )
                     )
                 }
-                emit(Resource.Success(data = productList))
+                emit(Resource.Success(data = productSet))
             }
         }
 }

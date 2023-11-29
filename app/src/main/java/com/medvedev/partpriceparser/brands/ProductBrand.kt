@@ -21,8 +21,7 @@ sealed interface ProductBrand {
         )
     }
 
-    class Unknown(description: String = "Неопределен") : ProductBrand {
-        override val name: String = description
+    class Unknown(override val name: String = "Неопределен") : ProductBrand {
         override val possibleNames: ArrayList<String> = arrayListOf("Прочие")
     }
 }
@@ -40,6 +39,6 @@ val String.getBrand: ProductBrand
     get() = when {
         ProductBrand.Kamaz.possibleNames.contains(this) -> ProductBrand.Kamaz
         ProductBrand.Repair.possibleNames.contains(this) -> ProductBrand.Repair
-        else -> ProductBrand.Unknown(description = this)
+        else -> ProductBrand.Unknown(name = this)
     }
 

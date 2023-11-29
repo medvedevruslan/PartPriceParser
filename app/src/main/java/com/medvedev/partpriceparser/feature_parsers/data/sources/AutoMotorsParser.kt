@@ -30,7 +30,7 @@ class AutoMotorsParser : ProductParser() {
     lateinit var autoMotorsCookies: MutableMap<String, String>
 
     @Suppress("OVERRIDE_BY_INLINE")
-    override inline val workWithServer: (String) -> Flow<Resource<List<ProductCart>>>
+    override inline val workWithServer: (String) -> Flow<Resource<Set<ProductCart>>>
         get() = { articleToSearch ->
             flow {
 
@@ -128,7 +128,7 @@ class AutoMotorsParser : ProductParser() {
                         .apply { "quantity: $this".printAU }
 
 
-                    productList.add(
+                    productSet.add(
                         ProductCart(
                             fullLinkToProduct = linkToSite + halfLinkToProduct,
                             fullImageUrl = linkToSite + imgSrc,
@@ -136,14 +136,13 @@ class AutoMotorsParser : ProductParser() {
                             name = name,
                             article = article,
                             additionalArticles = dopArticle,
-                            brand = brand,
+                            brand = brand.getBrand,
                             quantity = quantity,
-                            mfr = brand.getBrand,
                             existence = ""
                         )
                     )
                 }
-                emit(Resource.Success(data = productList))
+                emit(Resource.Success(data = productSet))
             }
         }
 }

@@ -29,7 +29,7 @@ class MarkParser : ProductParser() {
     lateinit var markCookies: MutableMap<String, String>
 
     @Suppress("OVERRIDE_BY_INLINE")
-    override inline val workWithServer: (String) -> Flow<Resource<List<ProductCart>>>
+    override inline val workWithServer: (String) -> Flow<Resource<Set<ProductCart>>>
         get() = { articleToSearch ->
             flow {
                 if (!::markCookies.isInitialized) {
@@ -115,7 +115,7 @@ class MarkParser : ProductParser() {
                         .apply { "existence: $this".printMR }
 
 
-                    productList.add(
+                    productSet.add(
                         ProductCart(
                             fullLinkToProduct = linkToSite + halfLinkToProduct,
                             fullImageUrl = linkToSite + imageUrl,
@@ -123,14 +123,13 @@ class MarkParser : ProductParser() {
                             name = name,
                             article = article,
                             additionalArticles = "",
-                            brand = brand,
+                            brand = brand.getBrand,
                             quantity = quantity,
-                            existence = existence,
-                            mfr = brand.getBrand
+                            existence = existence
                         )
                     )
                 }
-                emit(Resource.Success(data = productList))
+                emit(Resource.Success(data = productSet))
             }
         }
 }

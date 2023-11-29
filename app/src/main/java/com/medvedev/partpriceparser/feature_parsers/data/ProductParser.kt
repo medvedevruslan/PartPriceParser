@@ -12,11 +12,12 @@ abstract class ProductParser {
     abstract val siteName: String
     abstract val partOfLinkToCatalog: (String) -> String
 
-    protected val productList: MutableList<ProductCart> = mutableListOf()
+    @Volatile
+    protected var productSet: MutableSet<ProductCart> = mutableSetOf()
 
-    suspend fun getProduct(articleToSearch: String): Flow<Resource<List<ProductCart>>> = flow {
+    suspend fun getProduct(articleToSearch: String): Flow<Resource<Set<ProductCart>>> = flow {
         try {
-            if (productList.size > 0) productList.clear()
+            if (productSet.size > 0) productSet.clear()
             emit(Resource.Loading())
             workWithServer(articleToSearch).collect {
                 emit(it)
@@ -27,5 +28,5 @@ abstract class ProductParser {
             emit(Resource.Error(e.toString()))
         }
     }
-    protected abstract val workWithServer: (String) -> Flow<Resource<List<ProductCart>>>
+    protected abstract val workWithServer: (String) -> Flow<Resource<Set<ProductCart>>>
 }

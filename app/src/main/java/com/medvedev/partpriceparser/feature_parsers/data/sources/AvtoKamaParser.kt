@@ -27,7 +27,7 @@ class AvtoKamaParser : ProductParser() {
         get() = Timber.tag("developerAK").d(toString())
 
     @Suppress("OVERRIDE_BY_INLINE")
-    override inline val workWithServer: (String) -> Flow<Resource<List<ProductCart>>>
+    override inline val workWithServer: (String) -> Flow<Resource<Set<ProductCart>>>
         get() = { articleToSearch ->
             flow {
 
@@ -110,7 +110,7 @@ class AvtoKamaParser : ProductParser() {
                         .apply { "price: $price".printAK }
 
 
-                    productList.add(
+                    productSet.add(
                         ProductCart(
                             fullLinkToProduct = linkToSite + partLinkToProduct,
                             fullImageUrl = linkToSite + imageUrl,
@@ -118,14 +118,13 @@ class AvtoKamaParser : ProductParser() {
                             name = name,
                             article = article ?: "articleError",
                             additionalArticles = "",
-                            brand = brand,
+                            brand = brand.getBrand,
                             quantity = null,
-                            existence = existence,
-                            mfr = brand.getBrand
+                            existence = existence
                         )
                     )
                 }
-                emit(Resource.Success(data = productList))
+                emit(Resource.Success(data = productSet))
             }
         }
 }

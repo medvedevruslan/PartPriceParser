@@ -1,5 +1,6 @@
 package com.medvedev.partpriceparser.feature_parsers.presentation.screen_content
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -43,7 +44,12 @@ import com.medvedev.partpriceparser.ui.theme.PartPriceParserTheme
 
 
 @Composable
-fun FilterItemButton(modifier: Modifier = Modifier, onChangeDialogState: () -> Unit) {
+fun TopBarItemButton(
+    modifier: Modifier = Modifier,
+    onChangeDialogState: () -> Unit,
+    contentDescription: String?,
+    @DrawableRes iconResource: Int
+) {
     Row(
         modifier = modifier
             .padding(end = 10.dp)
@@ -52,8 +58,8 @@ fun FilterItemButton(modifier: Modifier = Modifier, onChangeDialogState: () -> U
     ) {
         IconButton(onClick = onChangeDialogState) {
             Icon(
-                painter = painterResource(id = R.drawable.baseline_tune_24),
-                contentDescription = "изменение фильтров"
+                painter = painterResource(id = iconResource),
+                contentDescription = contentDescription
             )
         }
     }

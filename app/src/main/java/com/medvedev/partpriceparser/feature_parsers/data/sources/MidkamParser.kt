@@ -29,7 +29,7 @@ class MidkamParser : ProductParser() {
         get() = Timber.tag("developerMK").d(toString())
 
     @Suppress("OVERRIDE_BY_INLINE")
-    override inline val workWithServer: (String) -> Flow<Resource<List<ProductCart>>>
+    override inline val workWithServer: (String) -> Flow<Resource<Set<ProductCart>>>
         get() = { articleToSearch ->
             flow {
 
@@ -102,14 +102,14 @@ class MidkamParser : ProductParser() {
                         .textNodes().safeTakeFirst
                         .apply { "article: $this".printMK }
 
-                    val mrf = if (name.contains(kamazMrfName)) {
+                    val brand = if (name.contains(kamazMrfName)) {
                         ProductBrand.Kamaz
                     } else if (name.contains(repairText)) {
                         ProductBrand.Repair
                     } else ProductBrand.Unknown()
 
 
-                    productList.add(
+                    productSet.add(
                         ProductCart(
                             fullLinkToProduct = linkToSite + partLinkToProduct,
                             fullImageUrl = linkToSite + imageUrl,
@@ -117,14 +117,13 @@ class MidkamParser : ProductParser() {
                             name = name,
                             article = article,
                             additionalArticles = "",
-                            brand = "",
+                            brand = brand,
                             quantity = "",
-                            existence = existence,
-                            mfr = mrf
+                            existence = existence
                         )
                     )
                 }
-                emit(Resource.Success(data = productList))
+                emit(Resource.Success(data = productSet))
             }
         }
 }

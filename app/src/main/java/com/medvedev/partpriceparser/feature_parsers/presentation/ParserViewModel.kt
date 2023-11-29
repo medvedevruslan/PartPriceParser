@@ -15,6 +15,7 @@ import com.medvedev.partpriceparser.brands.ProductBrand
 import com.medvedev.partpriceparser.core.util.Resource
 import com.medvedev.partpriceparser.core.util.UIEvents
 import com.medvedev.partpriceparser.core.util.printD
+import com.medvedev.partpriceparser.core.util.printE
 import com.medvedev.partpriceparser.feature_parsers.data.ProductFiltersPreferencesRepository
 import com.medvedev.partpriceparser.feature_parsers.domain.use_cases.GetProductsUseCase
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.ParserData
@@ -23,12 +24,12 @@ import com.medvedev.partpriceparser.feature_parsers.presentation.models.filter.P
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.filter.ProductSort
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.buffer
-import kotlinx.coroutines.internal.synchronized
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -47,8 +48,9 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
     private val _uiEvents = MutableSharedFlow<UIEvents>()
     val uiEvents: SharedFlow<UIEvents> = _uiEvents.asSharedFlow()
 
-    private val _foundedProductList: SnapshotStateList<ParserData> = mutableStateListOf()
-    val foundedProductList = _foundedProductList
+    @Volatile
+    private var _foundedProductList: SnapshotStateList<ParserData> = mutableStateListOf() // todo решить проблему с дублирующимися данными
+    var foundedProductList: SnapshotStateList<ParserData> = _foundedProductList
 
 
     private fun addUIEvent(event: UIEvents) {
@@ -102,13 +104,13 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
         }
     }
 
-   /* private fun applyingFilters(){ todo
-        if (_filterProductState.value.showMissingItems){
-            foundedProductList.filter {
-                it.
-            }
-        }
-    }*/
+    /* private fun applyingFilters(){ todo
+         if (_filterProductState.value.showMissingItems){
+             foundedProductList.filter {
+                 it.
+             }
+         }
+     }*/
 
 
     fun updateFilterShowMissingProduct(enable: Boolean) {
@@ -134,6 +136,7 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
             productFiltersPreferencesRepository.updateShowUnknownBrand(enable)
         }
     }
+
     fun updateSortFilter(productSort: ProductSort) {
         viewModelScope.launch(Dispatchers.IO) {
             when (productSort.protoName) {
@@ -146,47 +149,79 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
 
                 SortOrderProducts.BY_FIRST_EXPENSIVE.name ->
                     productFiltersPreferencesRepository.updateSortOrder(SortOrderProducts.BY_FIRST_EXPENSIVE)
-                
+
             }
         }
     }
 
-    private val _filterDialogState = mutableStateOf(true) // todo должен быть false на момент релиза
+    private val _filterDialogState = mutableStateOf(false) // todo должен быть false на момент релиза
     val filterDialogState: State<Boolean> = _filterDialogState
 
     fun changeDialogState() {
         _filterDialogState.value = !_filterDialogState.value
     }
 
+    private lateinit var job: Job
 
-    @OptIn(InternalCoroutinesApi::class)
-    fun parseProducts(articleToSearch: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            _foundedProductList.clear()
-            if (articleToSearch.isEmpty()) {
-                addUIEvent(UIEvents.SnackbarEvent(message = "Введите артикул"))
+    private var parseJob: (String) -> Unit = { articleToSearch ->
+        if (articleToSearch.isEmpty()) {
+            addUIEvent(UIEvents.SnackbarEvent(message = "Введите артикул"))
+        } else {
+
+            if (!::job.isInitialized) {
+                "parseJob is not init. before".printD
             } else {
-                getProductsUseCase.execute(articleToSearch)
-                    .buffer(10)
-                    .collect { data ->
-                        synchronized(Object()) {
-                            val iterator: MutableIterator<ParserData> =
-                                _foundedProductList.iterator()
-
-                            while (iterator.hasNext()) {
-                                val value = iterator.next()
-                                if (value.siteName == data.siteName) {
-                                    iterator.remove()
-                                }
-                            }
-                            _foundedProductList.add(data)
-                            _foundedProductList.sortBy { it.siteName }
-
-                            changeStateOfCommonLoading()
-                        }
-                    }
+                "parseJob status. before: $job".printD
             }
+
+            if (!::job.isInitialized || job.isCancelled || job.isCompleted) {
+                job = viewModelScope.launch(context = Dispatchers.IO) {
+                    try {
+                        _foundedProductList.clear()
+                        getProductsUseCase.execute(articleToSearch)
+                            .buffer(30)
+                            .collect { data ->
+                                val iterator: MutableIterator<ParserData> =
+                                    _foundedProductList.iterator()
+
+                                while (iterator.hasNext()) {
+                                    val value = iterator.next()
+                                    if (value.siteName == data.siteName) {
+                                        iterator.remove()
+                                    }
+                                }
+                                _foundedProductList.add(data)
+                                _foundedProductList.sortBy { it.siteName }
+                                changeStateOfCommonLoading()
+                            }
+                    } catch (e: Exception) {
+                        e.printE
+                    }
+                }
+            } else {
+                viewModelScope.launch(Dispatchers.IO) {
+                    cancelParsing()
+                }
+            }
+            "parseJob status. after: $job".printD
         }
+    }
+
+    fun cancelParsing() {
+        viewModelScope.launch {
+            job.cancelChildren()
+            _foundedProductList.replaceAll { parserData ->
+                when (parserData.productParserData) {
+                    is Resource.Loading -> parserData.copy(productParserData = Resource.Error("Parser is stopped"))
+                    else -> parserData
+                }
+            }
+            _loadingInProgressFlag.value = false
+        }
+    }
+
+    fun parseProducts(articleToSearch: String) {
+        parseJob(articleToSearch)
     }
 
 
@@ -218,8 +253,9 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
     }
 
 
-    private val _textSearch = mutableStateOf("740.100")// 740.1003010-20 todo изменить на пусто
-    val textSearch = _textSearch
+    private val _textSearch: MutableState<String> =
+        mutableStateOf("6520-2405024")// 740.1003010-20 todo изменить на пусто
+    val textSearch: State<String> = _textSearch
 
     fun changeTextSearch(text: String) {
         _textSearch.value = text
