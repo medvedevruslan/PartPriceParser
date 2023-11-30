@@ -54,10 +54,14 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -65,6 +69,7 @@ import com.medvedev.partpriceparser.R
 import com.medvedev.partpriceparser.brands.ProductBrand
 import com.medvedev.partpriceparser.core.util.Resource
 import com.medvedev.partpriceparser.core.util.UIEvents
+import com.medvedev.partpriceparser.core.util.printD
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.ParserData
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.ProductCart
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.toPriceWithSpace
@@ -76,6 +81,10 @@ import kotlinx.coroutines.flow.collectLatest
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ParseScreen(viewModel: ParserViewModel = hiltViewModel()) {
+
+    if (viewModel.loadingInProgressFlag.value) {
+        "allExistence: ${viewModel.listWithExistences}".printD
+    }
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -123,8 +132,8 @@ fun ParseScreenContent(
             brandListFilter = viewModel.brandListFilter,
             onCheckedChangeBrandState = { state, brand ->
                 when (brand) {
-                    ProductBrand.Kamaz -> viewModel.updateFilterShowKamazBrand(state)
-                    ProductBrand.Repair -> viewModel.updateFilterShowRepairBrand(state)
+                    is ProductBrand.Kamaz -> viewModel.updateFilterShowKamazBrand(state)
+                    is ProductBrand.Repair -> viewModel.updateFilterShowRepairBrand(state)
                     is ProductBrand.Unknown -> viewModel.updateFilterShowUnknownBrand(state)
                 }
             },
@@ -240,15 +249,6 @@ fun ItemColumn(
                                 actionGoToBrowser = actionGoToBrowser
                             )
                         }
-                    /*
-                        val iterator = listData.iterator()
-                        while (iterator.hasNext()) {
-                            val product = iterator.next()
-                            ProductCardItem(
-                                productCart = product,
-                                actionGoToBrowser = actionGoToBrowser
-                            )
-                        }*/
                     }
                 }
             }
@@ -336,18 +336,18 @@ fun ProductCardItem(
                         text = productCart.name,
                         style = MaterialTheme.typography.labelMedium
                     )
-                    Text(
-                        text = "Производитель: \n" + productCart.brand.name,
-                        style = MaterialTheme.typography.labelMedium
+                    TwoStyleText(
+                        titleText = "Производитель: ",
+                        descriptionText = productCart.brand.name
                     )
                     Divider(
                         modifier = Modifier.padding(horizontal = 7.dp),
                         color = MaterialTheme.colorScheme.tertiary,
                         thickness = 0.3.dp
                     )
-                    Text(
-                        text = "Артикул: " + productCart.article,
-                        style = MaterialTheme.typography.labelSmall + MaterialTheme.typography.bodyMedium
+                    TwoStyleText(
+                        titleText = "Артикул: ",
+                        descriptionText = productCart.article
                     )
                     Text(
                         text = productCart.additionalArticles ?: "",
@@ -377,6 +377,28 @@ fun ProductCardItem(
             }
         }
     }
+}
+
+@Composable
+fun TwoStyleText(
+    modifier: Modifier = Modifier,
+    titleText: String,
+    descriptionText: String
+) {
+    Text(
+        modifier = modifier,
+        text = buildAnnotatedString {
+            withStyle(
+                style = SpanStyle(
+                    fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                    fontWeight = FontWeight.Normal
+                )
+            ) {
+                append(titleText)
+            }
+            append(descriptionText)
+        }, style = MaterialTheme.typography.labelMedium
+    )
 }
 
 @Composable
@@ -481,8 +503,7 @@ fun CustomScaffold(
                     ) {
                         Text(
                             text = "Парсер артикула",
-                            modifier = Modifier
-                                .align(Alignment.CenterStart),
+                            modifier = Modifier.align(Alignment.CenterStart),
                             fontSize = 18.sp,
                             style = MaterialTheme.typography.headlineSmall,
                             textAlign = TextAlign.Start,

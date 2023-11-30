@@ -128,6 +128,7 @@ class AutoMotorsParser : ProductParser() {
                         }
                         .apply { "quantity: $this".printAU }
 
+                    val existence = "" // todo на сайте есть инфа о наличии, доделать парсер
 
                     productSet.add(
                         ProductCart(
@@ -139,7 +140,7 @@ class AutoMotorsParser : ProductParser() {
                             additionalArticles = dopArticle,
                             brand = brand.getBrand,
                             quantity = quantity,
-                            existence = ""
+                            existence = existence
                         )
                     )
                 }

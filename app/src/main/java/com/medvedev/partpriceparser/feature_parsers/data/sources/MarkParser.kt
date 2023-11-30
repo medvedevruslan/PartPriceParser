@@ -35,6 +35,9 @@ class MarkParser : ProductParser() {
             flow {
                 if (!::markCookies.isInitialized) {
 
+                    val fullLink = linkToSite + partOfLinkToCatalog(articleToSearch)
+                    "fullLink: $fullLink".printMR
+
                     val markLogin = "a9173959992@gmail.com" // todo спрятать данные по авторизации в gradle.properties или в другой файл, который нельзя прочитать при декомпилировании
                     val markPassword = "уке987гр"
                     val authLink = "https://klassauto.ru/cabinet/"

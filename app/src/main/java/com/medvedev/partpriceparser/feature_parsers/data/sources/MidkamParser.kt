@@ -106,9 +106,9 @@ class MidkamParser : ProductParser() {
                         .apply { "article: $this".printMK }
 
                     val brand = if (name.contains(kamazMrfName)) {
-                        ProductBrand.Kamaz
+                        ProductBrand.Kamaz()
                     } else if (name.contains(repairText)) {
-                        ProductBrand.Repair
+                        ProductBrand.Repair()
                     } else ProductBrand.Unknown()
 
 

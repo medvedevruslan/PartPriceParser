@@ -4,14 +4,20 @@ sealed interface ProductBrand {
     val name: String
     val possibleNames: ArrayList<String>
 
-    object Kamaz : ProductBrand {
-        override val name: String = "ПАО \"КАМАЗ\""
+    class Kamaz(override val name: String = "ПАО \"КАМАЗ\"") : ProductBrand {
 
-        override val possibleNames: ArrayList<String> = arrayListOf("пао", "камаз", "ПАО \"КАМАЗ\"")
+        override val possibleNames: ArrayList<String> = arrayListOf(
+            "пао",
+            "камаз",
+            "пао \"камаз\"",
+            "ПАО КАМАЗ",
+            "пао камаз",
+            "паокамаз",
+            "ПАОКАМАЗ"
+        )
     }
 
-    object Repair : ProductBrand {
-        override val name: String = "Ремонтный"
+    class Repair(override val name: String = "Ремонтный") : ProductBrand {
         override val possibleNames: ArrayList<String> = arrayListOf(
             "ремонтный",
             "ремонтированный",
@@ -36,9 +42,13 @@ sealed interface ProductBrand {
 
 
 val String.getBrand: ProductBrand
-    get() = when {
-        ProductBrand.Kamaz.possibleNames.contains(this) -> ProductBrand.Kamaz
-        ProductBrand.Repair.possibleNames.contains(this) -> ProductBrand.Repair
-        else -> ProductBrand.Unknown(name = this)
+    get() = this.trim().lowercase().let { lowerString ->
+        when {
+            ProductBrand.Kamaz().possibleNames.contains(lowerString) ||
+                    lowerString.contains("камаз") -> ProductBrand.Kamaz(name = this)
+
+            ProductBrand.Repair().possibleNames.contains(lowerString) -> ProductBrand.Repair(name = this)
+            else -> ProductBrand.Unknown(name = this)
+        }
     }
 

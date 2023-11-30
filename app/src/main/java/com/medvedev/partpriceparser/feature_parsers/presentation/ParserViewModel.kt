@@ -68,8 +68,8 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
 
 
     private var _brandListFilter: SnapshotStateList<BrandFilter> = mutableStateListOf(
-        BrandFilter(true, ProductBrand.Kamaz),
-        BrandFilter(true, ProductBrand.Repair),
+        BrandFilter(true, ProductBrand.Kamaz()),
+        BrandFilter(true, ProductBrand.Repair()),
         BrandFilter(true, ProductBrand.Unknown())
     )
     val brandListFilter: List<BrandFilter> = _brandListFilter
@@ -93,8 +93,8 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
 
                 _brandListFilter.replaceAll {
                     when (it.brandProduct) {
-                        ProductBrand.Kamaz -> it.copy(brandState = productFilterPreferences.showKamazBrand)
-                        ProductBrand.Repair -> it.copy(brandState = productFilterPreferences.showRepairBrand)
+                        is ProductBrand.Kamaz -> it.copy(brandState = productFilterPreferences.showKamazBrand)
+                        is ProductBrand.Repair -> it.copy(brandState = productFilterPreferences.showRepairBrand)
                         is ProductBrand.Unknown -> it.copy(brandState = productFilterPreferences.showUnknownBrand)
                     }
                 }
@@ -161,6 +161,9 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
 
     private lateinit var job: Job
 
+    // todo нужен только для выведения логов
+    val listWithExistences: MutableSet<String> = mutableSetOf()
+
     private var parseJob: (String) -> Unit = { articleToSearch ->
         if (articleToSearch.isEmpty()) {
             addUIEvent(UIEvents.SnackbarEvent(message = "Введите артикул"))
@@ -190,13 +193,21 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
                                 }
                                 _foundedProductList.add(data)
                                 _foundedProductList.sortBy { it.siteName }
+
+                                data.productParserData.data?.forEach {
+                                    // todo нужно только для выведения логов
+                                    it.existence?.also { existenceText ->
+                                        listWithExistences.add(existenceText.trim().lowercase())
+                                    }
+                                }
+
                                 changeStateOfCommonLoading()
                             }
                     } catch (e: Exception) {
                         e.printE
                     }
                 }
-            } else {
+            } else { // todo просто защита от дурака, лишнняя, можно удалить
                 viewModelScope.launch(Dispatchers.IO) {
                     cancelParsing()
                 }
@@ -235,6 +246,12 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
             }
         }
         if (_loadingInProgressFlag.value != loadingWork) {
+
+            if (!loadingWork) {
+                // todo нужен только для выведения логов
+                "allExistence: $listWithExistences".printD
+            }
+
             _loadingInProgressFlag.value = loadingWork
             "globalLoading: ${_loadingInProgressFlag.value}".printD
         }
@@ -252,7 +269,7 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
 
 
     private val _textSearch: MutableState<String> =
-        mutableStateOf("6520-2405024")// 740.1003010-20 todo изменить на пусто
+        mutableStateOf("740.100")// 740.1003010-20 todo изменить на пусто 6520-2405024
     val textSearch: State<String> = _textSearch
 
     fun changeTextSearch(text: String) {
