@@ -12,12 +12,9 @@ abstract class ProductParser {
     abstract val siteName: String
     abstract val partOfLinkToCatalog: (String) -> String
 
-    @Volatile
-    protected var productSet: MutableSet<ProductCart> = mutableSetOf()
 
     suspend fun getProduct(articleToSearch: String): Flow<Resource<Set<ProductCart>>> = flow {
         try {
-            if (productSet.size > 0) productSet.clear()
             emit(Resource.Loading())
             workWithServer(articleToSearch).collect {
                 emit(it)

@@ -98,7 +98,7 @@ fun ParseScreen(viewModel: ParserViewModel = hiltViewModel()) {
         snackbarHostState = snackbarHostState,
         loadingFlag = viewModel.loadingInProgressFlag.value,
         onCancelParsing = { viewModel.cancelParsing() },
-        onChangeDialogState = { viewModel.changeDialogState() }
+        onChangeFilterDialogState = { viewModel.changeDialogState() }
     ) {
         ParseScreenContent(
             keyboardController = keyboardController,
@@ -233,6 +233,14 @@ fun ItemColumn(
 
                 is Resource.Success -> {
                     parserData.productParserData.data?.let { listData ->
+
+                        listData.forEach {
+                            ProductCardItem(
+                                productCart = it,
+                                actionGoToBrowser = actionGoToBrowser
+                            )
+                        }
+                    /*
                         val iterator = listData.iterator()
                         while (iterator.hasNext()) {
                             val product = iterator.next()
@@ -240,7 +248,7 @@ fun ItemColumn(
                                 productCart = product,
                                 actionGoToBrowser = actionGoToBrowser
                             )
-                        }
+                        }*/
                     }
                 }
             }
@@ -459,7 +467,7 @@ fun CustomScaffold(
     snackbarHostState: SnackbarHostState,
     loadingFlag: Boolean,
     onCancelParsing: () -> Unit,
-    onChangeDialogState: () -> Unit,
+    onChangeFilterDialogState: () -> Unit,
     content: @Composable (paddingValues: PaddingValues) -> Unit
 ) {
     Scaffold(
@@ -502,7 +510,7 @@ fun CustomScaffold(
                                     .align(Alignment.CenterEnd)
                                     .size(35.dp),
                                 contentDescription = "изменение фильтров",
-                                onChangeDialogState = onChangeDialogState,
+                                onChangeDialogState = onChangeFilterDialogState,
                                 iconResource = R.drawable.baseline_tune_24
                             )
                         }

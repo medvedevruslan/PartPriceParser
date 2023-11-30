@@ -33,6 +33,7 @@ class AutoMotorsParser : ProductParser() {
     override inline val workWithServer: (String) -> Flow<Resource<Set<ProductCart>>>
         get() = { articleToSearch ->
             flow {
+                val productSet: MutableSet<ProductCart> = mutableSetOf()
 
                 val fullLink = linkToSite + partOfLinkToCatalog(articleToSearch)
 

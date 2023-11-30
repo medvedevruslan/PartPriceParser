@@ -31,6 +31,7 @@ class MarkParser : ProductParser() {
     @Suppress("OVERRIDE_BY_INLINE")
     override inline val workWithServer: (String) -> Flow<Resource<Set<ProductCart>>>
         get() = { articleToSearch ->
+            val productSet: MutableSet<ProductCart> = mutableSetOf()
             flow {
                 if (!::markCookies.isInitialized) {
 

@@ -31,6 +31,9 @@ class MidkamParser : ProductParser() {
     @Suppress("OVERRIDE_BY_INLINE")
     override inline val workWithServer: (String) -> Flow<Resource<Set<ProductCart>>>
         get() = { articleToSearch ->
+
+            val productSet: MutableSet<ProductCart> = mutableSetOf()
+
             flow {
 
                 val fullLink = linkToSite + partOfLinkToCatalog(articleToSearch)
@@ -46,7 +49,7 @@ class MidkamParser : ProductParser() {
 
                 val productElements = document
                     .select("div.blk_items_spisok")
-                    .select("div.product-item")
+                        .select("div.product-item")
 
                 productElements.forEach { element ->
 

@@ -25,7 +25,6 @@ import com.medvedev.partpriceparser.feature_parsers.presentation.models.filter.P
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -48,7 +47,6 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
     private val _uiEvents = MutableSharedFlow<UIEvents>()
     val uiEvents: SharedFlow<UIEvents> = _uiEvents.asSharedFlow()
 
-    @Volatile
     private var _foundedProductList: SnapshotStateList<ParserData> = mutableStateListOf() // todo решить проблему с дублирующимися данными
     var foundedProductList: SnapshotStateList<ParserData> = _foundedProductList
 
@@ -209,7 +207,7 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
 
     fun cancelParsing() {
         viewModelScope.launch {
-            job.cancelChildren()
+            job.cancel()
             _foundedProductList.replaceAll { parserData ->
                 when (parserData.productParserData) {
                     is Resource.Loading -> parserData.copy(productParserData = Resource.Error("Parser is stopped"))
