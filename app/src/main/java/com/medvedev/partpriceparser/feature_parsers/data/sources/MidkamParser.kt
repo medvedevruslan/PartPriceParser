@@ -5,6 +5,7 @@ import com.medvedev.partpriceparser.core.util.Resource
 import com.medvedev.partpriceparser.core.util.safeTakeFirst
 import com.medvedev.partpriceparser.feature_parsers.data.ProductParser
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.ProductCart
+import com.medvedev.partpriceparser.feature_parsers.presentation.models.filter.getExistence
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.getCleanPrice
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -122,7 +123,7 @@ class MidkamParser : ProductParser() {
                             additionalArticles = "",
                             brand = brand,
                             quantity = "",
-                            existence = existence
+                            existence = existence.getExistence
                         )
                     )
                 }

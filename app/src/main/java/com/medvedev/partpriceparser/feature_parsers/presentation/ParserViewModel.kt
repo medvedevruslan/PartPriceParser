@@ -169,11 +169,11 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
             addUIEvent(UIEvents.SnackbarEvent(message = "Введите артикул"))
         } else {
 
-            if (!::job.isInitialized) {
+            /*if (!::job.isInitialized) {
                 "parseJob is not init. before".printD
             } else {
                 "parseJob status. before: $job".printD
-            }
+            }*/
 
             if (!::job.isInitialized || job.isCancelled || job.isCompleted) {
                 job = viewModelScope.launch(context = Dispatchers.IO) {
@@ -196,8 +196,8 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
 
                                 data.productParserData.data?.forEach {
                                     // todo нужно только для выведения логов
-                                    it.existence?.also { existenceText ->
-                                        listWithExistences.add(existenceText.trim().lowercase())
+                                    it.existence.also { existence ->
+                                        listWithExistences.add(existence.description)
                                     }
                                 }
 
@@ -212,7 +212,7 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
                     cancelParsing()
                 }
             }
-            "parseJob status. after: $job".printD
+            // "parseJob status. after: $job".printD
         }
     }
 
@@ -253,7 +253,7 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
             }
 
             _loadingInProgressFlag.value = loadingWork
-            "globalLoading: ${_loadingInProgressFlag.value}".printD
+            // "globalLoading: ${_loadingInProgressFlag.value}".printD
         }
     }
 
@@ -269,7 +269,7 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
 
 
     private val _textSearch: MutableState<String> =
-        mutableStateOf("740.100")// 740.1003010-20 todo изменить на пусто 6520-2405024
+        mutableStateOf("6520-2405024")// 740.1003010-20 или 6520-2405024 todo изменить на пусто
     val textSearch: State<String> = _textSearch
 
     fun changeTextSearch(text: String) {

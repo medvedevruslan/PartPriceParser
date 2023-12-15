@@ -164,12 +164,26 @@ fun ParseScreenContent(
                 .padding(horizontal = 5.dp)
         ) {
             LazyColumn(
-
                 modifier = Modifier
                     .fillMaxHeight()
                     .padding(bottom = 10.dp)
             ) {
-                items(items = viewModel.foundedProductList) { parserData ->
+
+                val sortedList = viewModel.foundedProductList
+
+                // todo ошибка. фильтра не работают
+                /*sortedList.forEach { parserData ->
+                    parserData.productParserData.data?.filter { productElement ->
+                        if (!viewModel.filterProductState.value.showMissingItems) {
+                            "change showMissing in compose".printD
+                            productElement.existence == ProductExistence.TrueExistence()
+                        } else true
+                    }
+                }*/
+
+
+
+                items(items = sortedList) { parserData ->
                     Surface(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -366,7 +380,7 @@ fun ProductCardItem(
                         modifier = Modifier.padding(top = 5.dp)
                     )
                     Text(
-                        text = productCart.existence ?: "",
+                        text = productCart.existence.description,
                         style = MaterialTheme.typography.bodySmall
                     )
                     Text(

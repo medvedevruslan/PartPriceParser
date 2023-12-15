@@ -6,6 +6,7 @@ import com.medvedev.partpriceparser.core.util.html2text
 import com.medvedev.partpriceparser.core.util.safeTakeFirst
 import com.medvedev.partpriceparser.feature_parsers.data.ProductParser
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.ProductCart
+import com.medvedev.partpriceparser.feature_parsers.presentation.models.filter.ProductExistence
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.getCleanPrice
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -56,11 +57,11 @@ class AutoMotorsParser : ProductParser() {
                 }
 
                 val document: Document = Jsoup
-                        .connect("$linkToSite${partOfLinkToCatalog(articleToSearch)}") // 740.1003010-20 пример
-                        .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36")
-                        .timeout(10 * 1000)
-                        .cookies(autoMotorsCookies)
-                        .post()
+                    .connect("$linkToSite${partOfLinkToCatalog(articleToSearch)}") // 740.1003010-20 пример
+                    .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36")
+                    .timeout(10 * 1000)
+                    .cookies(autoMotorsCookies)
+                    .post()
 
                 val productElements = document.select("div.product-card-list")
 
@@ -106,29 +107,31 @@ class AutoMotorsParser : ProductParser() {
                         ?.getCleanPrice
                         .apply { "price: ${this.toString()}".printAU }
 
-                    val quantity = element
+
+                    var count: Pair<ProductExistence, String>
+
+                    element
                         .select("div.m_right20")
                         .select("p.m_none")
                         .select("b")
                         .text().html2text
-                        .let { quantity ->
-                            when (quantity) {
+                        .also { quantityDescription ->
+                            count = when (quantityDescription) {
                                 "ПОД" -> {
-                                    "под заказ"
+                                    ProductExistence.FalseExistence("под заказ") to ""
                                 }
 
                                 "50" -> {
-                                    "болеe 50 шт"
+                                    ProductExistence.TrueExistence("болеe 50 шт") to ">50"
                                 }
 
                                 else -> {
-                                    "$quantity шт"
+                                    ProductExistence.TrueExistence() to quantityDescription
                                 }
                             }
                         }
                         .apply { "quantity: $this".printAU }
 
-                    val existence = "" // todo на сайте есть инфа о наличии, доделать парсер
 
                     productSet.add(
                         ProductCart(
@@ -139,8 +142,8 @@ class AutoMotorsParser : ProductParser() {
                             article = article,
                             additionalArticles = dopArticle,
                             brand = brand.getBrand,
-                            quantity = quantity,
-                            existence = existence
+                            quantity = count.second,
+                            existence = count.first
                         )
                     )
                 }
