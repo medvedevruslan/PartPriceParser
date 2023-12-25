@@ -11,10 +11,10 @@ import kotlinx.coroutines.flow.flow
 import org.jsoup.Connection
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import org.jsoup.nodes.TextNode
 import timber.log.Timber
 
 class RiatParser : ProductParser() {
-
 
     override val linkToSite: String = "https://tdriat.ru"
     override val siteName: String = "РИАТ"
@@ -71,13 +71,44 @@ class RiatParser : ProductParser() {
                         .text().html2text
                         .apply { "name: $this".printRT }
 
-                    val article = element
+                    val unnecessary = element
+                        .select("div.spoiler_links3")
+
+                    var article = ""
+                    var brand = ""
+
+
+                    element
                         .select("td.product-name")
-                        .after("a")
+                        .select("div")
+                        .let {
+                            val elements = it
+                            if (unnecessary.size > 0) {
+                                unnecessary.forEach { elementToRemove ->
+                                    elements.remove(elementToRemove)
+                                }
+                            }
+                            elements
+                        }
                         .textNodes()
-                        .first()
-                        .text().html2text.trim()
-                        .apply { "article: $this".printRT }
+                        .let {
+                            val elements = it
+                            val iterator: MutableIterator<TextNode> = elements.iterator()
+                            while (iterator.hasNext()) {
+                                val value = iterator.next()
+                                if (value.isBlank || value.text() == ", ") {
+                                    iterator.remove()
+                                }
+                            }
+                            elements
+                        }.also { foundElements ->
+                            if (foundElements.size > 0) {
+                                article = foundElements[0].text().apply { "article: $this".printRT }
+                            }
+                            if (foundElements.size > 1) {
+                                brand = foundElements[1].text().apply { "brand: $this".printRT }
+                            }
+                        }
 
                     val price = element
                         .select("td.product-price")
@@ -96,7 +127,7 @@ class RiatParser : ProductParser() {
                         .text().html2text
                         .apply { "existence: $this".printRT }
 
-                    val innerDocument = Jsoup
+                    /*val innerDocument = Jsoup
                         .connect("$linkToSite$partLinkToProduct")
                         .timeout(20 * 1000)
                         .get()
@@ -115,7 +146,7 @@ class RiatParser : ProductParser() {
                                     .apply { "data contains brand: $this".printRT }
                             }
                         }
-                    }
+                    }*/
 
                     productSet.add(
                         ProductCart(

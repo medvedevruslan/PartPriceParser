@@ -41,7 +41,7 @@ class AutoMotorsParser : ProductParser() {
                 "fullLink: $fullLink".printAU
 
                 if (!::autoMotorsCookies.isInitialized) {
-                    val authLink = "https://auto-motors.ru/AM_autorize_AUT/"
+                    val authLink = "https://auto-motors.ru/auth/"
                     val authCookies: Connection.Response =
                         Jsoup.connect(authLink)
                             .data(

@@ -157,21 +157,20 @@ fun ParseScreenContent(
             viewModel = viewModel,
             parseIsWorking = viewModel.loadingInProgressFlag.value
         )
-
         Surface(
             modifier = Modifier
                 .padding(top = 5.dp)
                 .padding(horizontal = 5.dp)
         ) {
+
+            val sortedList = viewModel.foundedProductList
+
             LazyColumn(
                 modifier = Modifier
                     .fillMaxHeight()
                     .padding(bottom = 10.dp)
             ) {
 
-                val sortedList = viewModel.foundedProductList
-
-                // todo ошибка. фильтра не работают
                 /*sortedList.forEach { parserData ->
                     parserData.productParserData.data?.filter { productElement ->
                         if (!viewModel.filterProductState.value.showMissingItems) {
