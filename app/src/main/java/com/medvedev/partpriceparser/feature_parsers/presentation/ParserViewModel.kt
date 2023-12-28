@@ -102,15 +102,6 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
         }
     }
 
-    /* private fun applyingFilters(){ todo
-         if (_filterProductState.value.showMissingItems){
-             foundedProductList.filter {
-                 it.
-             }
-         }
-     }*/
-
-
     fun updateFilterShowMissingProduct(enable: Boolean) {
         viewModelScope.launch(Dispatchers.IO) {
             productFiltersPreferencesRepository.updateShowMissingProduct(enable)
@@ -235,7 +226,7 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
 
 
     private val _loadingInProgressFlag: MutableState<Boolean> = mutableStateOf(false)
-    val loadingInProgressFlag = _loadingInProgressFlag
+    val loadingInProgressFlag: State<Boolean> = _loadingInProgressFlag
 
     private fun changeStateOfCommonLoading() {
         var loadingWork = false
@@ -270,6 +261,7 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
 
     private val _textSearch: MutableState<String> =
         mutableStateOf("6520-2405024")// todo изменить на пусто
+
     // CDP-450-02.07.01-DL
     // 6520-2405024
     // 740.1003010-20

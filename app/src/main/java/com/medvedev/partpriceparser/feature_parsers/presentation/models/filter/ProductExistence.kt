@@ -32,7 +32,7 @@ val String.getExistence
                 ProductExistence.FalseExistence(description = this)
 
             ProductExistence.TrueExistence().possibleDescription.contains(lowerExistence) ->
-                ProductExistence.FalseExistence(description = this)
+                ProductExistence.TrueExistence(description = this)
 
             else -> ProductExistence.UnknownExistence(description = this)
         }

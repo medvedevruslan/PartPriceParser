@@ -46,6 +46,8 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -72,6 +74,7 @@ import com.medvedev.partpriceparser.core.util.UIEvents
 import com.medvedev.partpriceparser.core.util.printD
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.ParserData
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.ProductCart
+import com.medvedev.partpriceparser.feature_parsers.presentation.models.filter.ProductExistence
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.toPriceWithSpace
 import com.medvedev.partpriceparser.feature_parsers.presentation.screen_content.CustomFilterDialog
 import com.medvedev.partpriceparser.feature_parsers.presentation.screen_content.TopBarItemButton
@@ -163,26 +166,48 @@ fun ParseScreenContent(
                 .padding(horizontal = 5.dp)
         ) {
 
-            val sortedList = viewModel.foundedProductList
+            val filteredList: State<List<ParserData>> = remember(
+                viewModel.foundedProductList,
+                viewModel.filterProductState,
+                viewModel.loadingInProgressFlag
+            ) {
+                derivedStateOf {
+
+                    val sortedList = viewModel.foundedProductList
+                    val newList: MutableList<ParserData> = mutableListOf()
+
+                    if (!viewModel.loadingInProgressFlag.value && !viewModel.filterProductState.value.showMissingItems) {
+                        "updating sorted list".printD
+                        sortedList.forEach { parserData ->
+
+                            val newPartOfList = when (parserData.productParserData) {
+                                is Resource.Success -> {
+                                    val partOfList = parserData.productParserData.data?.filter { productElement ->
+                                            // "change showMissing in compose: ${productElement.existence.javaClass.simpleName}".printD
+                                            productElement.existence is ProductExistence.TrueExistence
+                                        }
+                                    parserData.copy(productParserData = Resource.Success(data = partOfList?.toSet()))
+
+                                }
+
+                                is Resource.Loading, is Resource.Error -> {
+                                    parserData
+                                }
+                            }
+
+                            newList.add(newPartOfList)
+                        }
+                        newList
+                    } else sortedList
+                }
+            }
 
             LazyColumn(
                 modifier = Modifier
                     .fillMaxHeight()
                     .padding(bottom = 10.dp)
             ) {
-
-                /*sortedList.forEach { parserData ->
-                    parserData.productParserData.data?.filter { productElement ->
-                        if (!viewModel.filterProductState.value.showMissingItems) {
-                            "change showMissing in compose".printD
-                            productElement.existence == ProductExistence.TrueExistence()
-                        } else true
-                    }
-                }*/
-
-
-
-                items(items = sortedList) { parserData ->
+                items(items = filteredList.value) { parserData ->
                     Surface(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -466,7 +491,9 @@ fun SearchBarArticle(
                 } // todo добавить ли вопрос "приостановить парсер?"
             },
             keyboardOptions = KeyboardOptions(
-                autoCorrect = true, keyboardType = KeyboardType.Text, imeAction = ImeAction.Search
+                autoCorrect = true,
+                keyboardType = KeyboardType.Text,
+                imeAction = ImeAction.Search
             ),
             modifier = Modifier
                 .weight(0.8f)
