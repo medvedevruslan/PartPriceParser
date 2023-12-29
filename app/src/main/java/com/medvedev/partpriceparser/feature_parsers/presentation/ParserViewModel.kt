@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -47,7 +48,8 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
     private val _uiEvents = MutableSharedFlow<UIEvents>()
     val uiEvents: SharedFlow<UIEvents> = _uiEvents.asSharedFlow()
 
-    private var _foundedProductList: SnapshotStateList<ParserData> = mutableStateListOf() // todo решить проблему с дублирующимися данными
+    private var _foundedProductList: SnapshotStateList<ParserData> =
+        mutableStateListOf() // todo решить проблему с дублирующимися данными
     var foundedProductList: SnapshotStateList<ParserData> = _foundedProductList
 
 
@@ -81,21 +83,22 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
     private fun initFilterPreferences() {
         viewModelScope.launch(Dispatchers.IO) {
             productFiltersPreferencesRepository.filterPreferencesFlow.collect { productFilterPreferences ->
+                withContext(Dispatchers.Main) {
+                    _filterProductState.value = _filterProductState.value.copy(
+                        showMissingItems = productFilterPreferences.showMissingProduct,
+                        selectedSort = when (productFilterPreferences.sortOrder) {
+                            SortOrderProducts.BY_FIRST_CHEAP -> ProductSort.CheapFirst
+                            SortOrderProducts.BY_FIRST_EXPENSIVE -> ProductSort.ExpensiveFirst
+                            else -> ProductSort.ByStoreNameAlphabetically
+                        }
+                    )
 
-                _filterProductState.value = _filterProductState.value.copy(
-                    showMissingItems = productFilterPreferences.showMissingProduct,
-                    selectedSort = when (productFilterPreferences.sortOrder) {
-                        SortOrderProducts.BY_FIRST_CHEAP -> ProductSort.CheapFirst
-                        SortOrderProducts.BY_FIRST_EXPENSIVE -> ProductSort.ExpensiveFirst
-                        else -> ProductSort.ByStoreNameAlphabetically
-                    }
-                )
-
-                _brandListFilter.replaceAll {
-                    when (it.brandProduct) {
-                        is ProductBrand.Kamaz -> it.copy(brandState = productFilterPreferences.showKamazBrand)
-                        is ProductBrand.Repair -> it.copy(brandState = productFilterPreferences.showRepairBrand)
-                        is ProductBrand.Unknown -> it.copy(brandState = productFilterPreferences.showUnknownBrand)
+                    _brandListFilter.replaceAll {
+                        when (it.brandProduct) {
+                            is ProductBrand.Kamaz -> it.copy(brandState = productFilterPreferences.showKamazBrand)
+                            is ProductBrand.Repair -> it.copy(brandState = productFilterPreferences.showRepairBrand)
+                            is ProductBrand.Unknown -> it.copy(brandState = productFilterPreferences.showUnknownBrand)
+                        }
                     }
                 }
             }
@@ -143,7 +146,7 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
         }
     }
 
-    private val _filterDialogState = mutableStateOf(false) // todo должен быть false на момент релиза
+    private val _filterDialogState = mutableStateOf(false)
     val filterDialogState: State<Boolean> = _filterDialogState
 
     fun changeDialogState() {
@@ -160,16 +163,12 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
             addUIEvent(UIEvents.SnackbarEvent(message = "Введите артикул"))
         } else {
 
-            /*if (!::job.isInitialized) {
-                "parseJob is not init. before".printD
-            } else {
-                "parseJob status. before: $job".printD
-            }*/
-
             if (!::job.isInitialized || job.isCancelled || job.isCompleted) {
                 job = viewModelScope.launch(context = Dispatchers.IO) {
                     try {
-                        _foundedProductList.clear()
+                        withContext(Dispatchers.Main) {
+                            _foundedProductList.clear()
+                        }
                         getProductsUseCase.execute(articleToSearch)
                             .buffer(30)
                             .collect { data ->
@@ -182,8 +181,10 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
                                         iterator.remove()
                                     }
                                 }
-                                _foundedProductList.add(data)
-                                _foundedProductList.sortBy { it.siteName }
+                                withContext(Dispatchers.Main) {
+                                    _foundedProductList.add(data)
+                                    _foundedProductList.sortBy { it.siteName }
+                                }
 
                                 data.productParserData.data?.forEach {
                                     // todo нужно только для выведения логов
@@ -199,17 +200,15 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
                     }
                 }
             } else { // todo просто защита от дурака, лишнняя, можно удалить
-                viewModelScope.launch(Dispatchers.IO) {
-                    cancelParsing()
-                }
+                cancelParsing()
             }
             // "parseJob status. after: $job".printD
         }
     }
 
     fun cancelParsing() {
-        viewModelScope.launch {
-            job.cancel()
+        job.cancel()
+        viewModelScope.launch(Dispatchers.Main) {
             _foundedProductList.replaceAll { parserData ->
                 when (parserData.productParserData) {
                     is Resource.Loading -> parserData.copy(productParserData = Resource.Error("Parser is stopped"))
