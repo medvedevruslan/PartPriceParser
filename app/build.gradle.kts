@@ -1,29 +1,26 @@
 val sentryToken = providers.gradleProperty("SENTRY_AUTH_TOKEN").get()
 
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    id("com.google.protobuf") version "0.9.4"
-    id("io.sentry.android.gradle") version "3.14.0"
-    id("com.google.dagger.hilt.android") version "2.48.1" apply false
-    id("dagger.hilt.android.plugin")
-    kotlin("kapt")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.jetbrains.kotlin.kapt)
+    alias(libs.plugins.google.protobuf)
+    alias(libs.plugins.sentry.android.gradle)
+    alias(libs.plugins.google.dagger.hilt.android)
 }
-
-// todo добавить систему контроля версий в отдельный файл
 
 val protobufVersion = "3.19.4"
 
 android {
     namespace = "com.medvedev.partpriceparser"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.medvedev.partpriceparser"
         minSdk = 24
-        targetSdk = 33
-        versionCode = 33
-        versionName = "0.1.33"
+        targetSdk = 34
+        versionCode = 34
+        versionName = "0.1.34"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -61,7 +58,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.3"
+        kotlinCompilerExtensionVersion = "1.5.8"
     }
     packaging {
         resources {
@@ -79,44 +76,42 @@ sentry {
 
 dependencies {
 
-    implementation("androidx.core:core-ktx:1.9.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
-    implementation("androidx.activity:activity-compose:1.7.2")
-    implementation(platform("androidx.compose:compose-bom:2023.03.00"))
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3:1.1.2")
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.03.00"))
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+
+    implementation(platform(libs.compose.bom))
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.graphics)
+    implementation(libs.androidx.compose.ui.tooling)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.compose.ui.test.manifest)
+    implementation(libs.androidx.compose.ui.test.junit4)
+
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.compose.material3)
+
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 
     // HTML parser
-    implementation("org.jsoup:jsoup:1.16.1")
-
-    // image downloader
-    implementation("io.coil-kt:coil:2.4.0")
-    implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation(libs.jsoup)
 
     // Timber for logging
-    implementation("com.jakewharton.timber:timber:5.0.1")
+    implementation(libs.timber)
 
     // Hilt for DI
-    implementation("com.google.dagger:hilt-android:2.48.1")
-    implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
-    kapt("com.google.dagger:hilt-compiler:2.48.1")
+    implementation(libs.hilt.android)
+    implementation(libs.androidx.hilt.navigation.compose)
+    kapt(libs.hilt.compiler)
 
     // Sentry
-    implementation("io.sentry:sentry-android:6.6.0")
-    implementation("io.sentry:sentry:6.33.1")
+    implementation(libs.sentry.android)
+    implementation(libs.sentry)
 
     // DataStore Proto
-    implementation("androidx.datastore:datastore:1.0.0")
-    implementation("com.google.protobuf:protobuf-javalite:$protobufVersion")
+    implementation(libs.androidx.datastore)
+    implementation(libs.protobuf.javalite)
 }
 
 kapt {

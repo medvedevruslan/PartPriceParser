@@ -1,0 +1,89 @@
+[versions]
+agp = "8.3.1"
+coil = "2.4.0"
+composeBom = "2024.03.00"
+datastore = "1.0.0"
+espressoCore = "3.5.0"
+hiltNavigationCompose = "1.2.0"
+jsoup = "1.16.1"
+junit = "4.13.2"
+junitVersion = "1.1.5"
+kotlin = "1.9.22"
+androidCoreKtx = "1.12.0"
+androidLifecycleRuntimeKtx = "2.7.0"
+androidActivityCompose = "1.8.2"
+googleProtobuf = "0.9.4"
+material3 = "1.2.1"
+protobufVersion = "3.19.4"
+sentry = "6.33.1"
+sentryAndroid = "6.6.0"
+sentryAndroidGradle = "3.14.0"
+daggerHiltAndroidPlugin = "2.51"
+timber = "5.0.1"
+
+[libraries]
+
+#android
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidCoreKtx"}
+androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "androidLifecycleRuntimeKtx"}
+
+#dagger-hilt
+dagger-hilt-android-gradle-plugin = { module = "com.google.dagger:hilt-android-gradle-plugin", version.ref = "daggerHiltAndroidPlugin" }
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "daggerHiltAndroidPlugin" }
+hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "daggerHiltAndroidPlugin" }
+androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+
+#compose
+androidx-compose-material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
+androidx-activity-compose = {module = "androidx.activity:activity-compose",version.ref = "androidActivityCompose"}
+compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
+androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
+androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+
+#compose-test
+androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+
+#test
+androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCore" }
+junit = { module = "junit:junit", version.ref = "junit" }
+androidx-junit = { module = "androidx.test.ext:junit", version.ref = "junitVersion" }
+
+#html parser
+jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
+
+#image libs
+coil = { module = "io.coil-kt:coil", version.ref = "coil" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
+
+#logger
+timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
+
+#crashlytics
+sentry-android = { module = "io.sentry:sentry-android", version.ref = "sentryAndroid" }
+sentry = { module = "io.sentry:sentry", version.ref = "sentry" }
+
+#datastore
+protobuf-javalite = { module = "com.google.protobuf:protobuf-javalite", version.ref = "protobufVersion" }
+androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp"}
+jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin"}
+jetbrains-kotlin-kapt = {id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin"}
+
+google-protobuf = {id = "com.google.protobuf", version.ref = "googleProtobuf"}
+sentry-android-gradle = { id = "io.sentry.android.gradle",version.ref = "sentryAndroidGradle"}
+
+google-dagger-hilt-android = {id = "com.google.dagger.hilt.android", version.ref = "daggerHiltAndroidPlugin"}
+
+
+[bundles]
+compose = [
+]
+
+test = [
+]
+
