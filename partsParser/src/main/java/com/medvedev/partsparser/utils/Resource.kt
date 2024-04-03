@@ -1,4 +1,4 @@
-package com.medvedev.partpriceparser.core.util
+package com.medvedev.partsparser.utils
 
 sealed class Resource<T>(val data: T? = null, val message: String? = null) {
     class Loading<T>(data: T? = null) : Resource<T>(data = data)

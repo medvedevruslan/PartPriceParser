@@ -1,4 +1,4 @@
-package com.medvedev.partpriceparser.brands
+package com.medvedev.partsparser.models
 
 sealed interface ProductBrand {
     val name: String

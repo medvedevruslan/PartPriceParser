@@ -36,11 +36,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.medvedev.partpriceparser.R
-import com.medvedev.partpriceparser.brands.ProductBrand
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.filter.BrandFilter
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.filter.ProductFilter
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.filter.ProductSort
 import com.medvedev.partpriceparser.ui.theme.PartPriceParserTheme
+import com.medvedev.partsparser.models.ProductBrand
 
 
 @Composable

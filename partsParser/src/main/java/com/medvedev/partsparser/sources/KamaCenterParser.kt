@@ -1,12 +1,11 @@
-package com.medvedev.partpriceparser.feature_parsers.data.sources
+package com.medvedev.partsparser.sources
 
-import com.medvedev.partpriceparser.brands.getBrand
-import com.medvedev.partpriceparser.core.util.Resource
-import com.medvedev.partpriceparser.core.util.html2text
-import com.medvedev.partpriceparser.core.util.safeTakeFirst
-import com.medvedev.partpriceparser.feature_parsers.data.ProductParser
-import com.medvedev.partpriceparser.feature_parsers.presentation.models.ProductCart
-import com.medvedev.partpriceparser.feature_parsers.presentation.models.filter.getExistence
+import com.medvedev.partsparser.models.ReceivedProductData
+import com.medvedev.partsparser.models.getBrand
+import com.medvedev.partsparser.models.getExistence
+import com.medvedev.partsparser.utils.Resource
+import com.medvedev.partsparser.utils.html2text
+import com.medvedev.partsparser.utils.safeTakeFirst
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.jsoup.Jsoup
@@ -27,9 +26,9 @@ class KamaCenterParser : ProductParser() {
         get() = Timber.tag("developerKC").d(toString())
 
     @Suppress("OVERRIDE_BY_INLINE")
-    override inline val workWithServer: (String) -> Flow<Resource<Set<ProductCart>>>
+    override inline val workWithServer: (String) -> Flow<Resource<Set<ReceivedProductData>>>
         get() = { articleToSearch ->
-            val productSet: MutableSet<ProductCart> = mutableSetOf()
+            val productSet: MutableSet<ReceivedProductData> = mutableSetOf()
             flow {
                 val fullLink = linkToSite + partOfLinkToCatalog(articleToSearch)
 
@@ -114,7 +113,7 @@ class KamaCenterParser : ProductParser() {
                         .apply { "quantity: $this".printKC }
 
                     productSet.add(
-                        ProductCart(
+                        ReceivedProductData(
                             fullLinkToProduct = linkToSite + partLinkToProduct,
                             fullImageUrl = linkToSite + imageUrl,
                             price = price,

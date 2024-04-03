@@ -27,8 +27,8 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
@@ -50,7 +50,6 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
@@ -68,20 +67,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.medvedev.partpriceparser.R
-import com.medvedev.partpriceparser.brands.ProductBrand
-import com.medvedev.partpriceparser.core.util.Resource
 import com.medvedev.partpriceparser.core.util.UIEvents
 import com.medvedev.partpriceparser.core.util.printD
-import com.medvedev.partpriceparser.feature_parsers.presentation.models.ParserData
+import com.medvedev.partpriceparser.feature_parsers.presentation.models.PartParserData
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.ProductCart
-import com.medvedev.partpriceparser.feature_parsers.presentation.models.filter.ProductExistence
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.toPriceWithSpace
 import com.medvedev.partpriceparser.feature_parsers.presentation.screen_content.CustomFilterDialog
 import com.medvedev.partpriceparser.feature_parsers.presentation.screen_content.TopBarItemButton
+import com.medvedev.partsparser.models.PartExistence
+import com.medvedev.partsparser.models.ProductBrand
 import kotlinx.coroutines.flow.collectLatest
 
-
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ParseScreen(viewModel: ParserViewModel = hiltViewModel()) {
 
@@ -104,6 +100,10 @@ fun ParseScreen(viewModel: ParserViewModel = hiltViewModel()) {
                 }
             }
         }
+
+        viewModel.listToView.collect {
+
+        }
     }
 
     CustomScaffold(
@@ -120,7 +120,6 @@ fun ParseScreen(viewModel: ParserViewModel = hiltViewModel()) {
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ParseScreenContent(
     keyboardController: SoftwareKeyboardController?,
@@ -166,7 +165,7 @@ fun ParseScreenContent(
                 .padding(horizontal = 5.dp)
         ) {
 
-            val filteredList: State<List<ParserData>> = remember(
+            val filteredList: State<List<PartParserData>> = remember(
                 viewModel.foundedProductList,
                 viewModel.filterProductState,
                 viewModel.loadingInProgressFlag
@@ -174,23 +173,23 @@ fun ParseScreenContent(
                 derivedStateOf {
 
                     val sortedList = viewModel.foundedProductList
-                    val newList: MutableList<ParserData> = mutableListOf()
+                    val newList: MutableList<PartParserData> = mutableListOf()
 
                     if (!viewModel.loadingInProgressFlag.value && !viewModel.filterProductState.value.showMissingItems) {
                         "updating sorted list".printD
                         sortedList.forEach { parserData ->
 
                             val newPartOfList = when (parserData.productParserData) {
-                                is Resource.Success -> {
+                                is com.medvedev.partsparser.utils.Resource.Success -> {
                                     val partOfList = parserData.productParserData.data?.filter { productElement ->
                                             // "change showMissing in compose: ${productElement.existence.javaClass.simpleName}".printD
-                                            productElement.existence is ProductExistence.TrueExistence
+                                            productElement.existence is PartExistence.TrueExistence
                                         }
-                                    parserData.copy(productParserData = Resource.Success(data = partOfList?.toSet()))
+                                    parserData.copy(productParserData = com.medvedev.partsparser.utils.Resource.Success(data = partOfList?.toSet()))
 
                                 }
 
-                                is Resource.Loading, is Resource.Error -> {
+                                is com.medvedev.partsparser.utils.Resource.Loading, is com.medvedev.partsparser.utils.Resource.Error -> {
                                     parserData
                                 }
                             }
@@ -235,7 +234,7 @@ fun ParseScreenContent(
 
 @Composable
 fun ItemColumn(
-    parserData: ParserData,
+    parserData: PartParserData,
     actionGoToBrowser: (String) -> Unit
 ) {
     Surface(
@@ -264,21 +263,21 @@ fun ItemColumn(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            Divider(
+            HorizontalDivider(
                 modifier = Modifier.padding(horizontal = 7.dp),
-                color = MaterialTheme.colorScheme.secondary,
-                thickness = 1.dp
+                thickness = 1.dp,
+                color = MaterialTheme.colorScheme.secondary
             )
             when (parserData.productParserData) {
-                is Resource.Loading -> {
+                is com.medvedev.partsparser.utils.Resource.Loading -> {
                     ProgressBar(modifier = Modifier.fillMaxSize())
                 }
 
-                is Resource.Error -> {
+                is com.medvedev.partsparser.utils.Resource.Error -> {
                     Text(text = parserData.productParserData.message.toString())
                 }
 
-                is Resource.Success -> {
+                is com.medvedev.partsparser.utils.Resource.Success -> {
                     parserData.productParserData.data?.let { listData ->
 
                         listData.forEach {
@@ -378,10 +377,10 @@ fun ProductCardItem(
                         titleText = "Производитель: ",
                         descriptionText = productCart.brand.name
                     )
-                    Divider(
+                    HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 7.dp),
-                        color = MaterialTheme.colorScheme.tertiary,
-                        thickness = 0.3.dp
+                        thickness = 0.3.dp,
+                        color = MaterialTheme.colorScheme.tertiary
                     )
                     TwoStyleText(
                         titleText = "Артикул: ",
@@ -452,7 +451,6 @@ fun ProgressBar(modifier: Modifier = Modifier) {
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SearchBarArticle(
     parseIsWorking: Boolean,

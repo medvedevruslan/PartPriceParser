@@ -1,7 +1,8 @@
-package com.medvedev.partpriceparser.feature_parsers.data
+package com.medvedev.partsparser.sources
 
-import com.medvedev.partpriceparser.core.util.Resource
-import com.medvedev.partpriceparser.feature_parsers.presentation.models.ProductCart
+
+import com.medvedev.partsparser.models.ReceivedProductData
+import com.medvedev.partsparser.utils.Resource
 import io.sentry.Sentry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -13,7 +14,7 @@ abstract class ProductParser {
     abstract val partOfLinkToCatalog: (String) -> String
 
 
-    suspend fun getProduct(articleToSearch: String): Flow<Resource<Set<ProductCart>>> = flow {
+    suspend fun getProduct(articleToSearch: String): Flow<Resource<Set<ReceivedProductData>>> = flow {
         try {
             emit(Resource.Loading())
             workWithServer(articleToSearch).collect {
@@ -25,5 +26,5 @@ abstract class ProductParser {
             emit(Resource.Error(e.toString()))
         }
     }
-    protected abstract val workWithServer: (String) -> Flow<Resource<Set<ProductCart>>>
+    protected abstract val workWithServer: (String) -> Flow<Resource<Set<ReceivedProductData>>>
 }

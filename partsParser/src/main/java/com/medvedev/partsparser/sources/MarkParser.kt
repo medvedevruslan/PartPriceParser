@@ -1,12 +1,11 @@
-package com.medvedev.partpriceparser.feature_parsers.data.sources
+package com.medvedev.partsparser.sources
 
-import com.medvedev.partpriceparser.brands.getBrand
-import com.medvedev.partpriceparser.core.util.Resource
-import com.medvedev.partpriceparser.core.util.safeTakeFirst
-import com.medvedev.partpriceparser.feature_parsers.data.ProductParser
-import com.medvedev.partpriceparser.feature_parsers.presentation.models.ProductCart
-import com.medvedev.partpriceparser.feature_parsers.presentation.models.filter.getExistence
-import com.medvedev.partpriceparser.feature_parsers.presentation.models.getCleanPrice
+import com.medvedev.partsparser.models.ReceivedProductData
+import com.medvedev.partsparser.models.getBrand
+import com.medvedev.partsparser.models.getCleanPrice
+import com.medvedev.partsparser.models.getExistence
+import com.medvedev.partsparser.utils.Resource
+import com.medvedev.partsparser.utils.safeTakeFirst
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.jsoup.Connection
@@ -30,9 +29,9 @@ class MarkParser : ProductParser() {
     lateinit var markCookies: MutableMap<String, String>
 
     @Suppress("OVERRIDE_BY_INLINE")
-    override inline val workWithServer: (String) -> Flow<Resource<Set<ProductCart>>>
+    override inline val workWithServer: (String) -> Flow<Resource<Set<ReceivedProductData>>>
         get() = { articleToSearch ->
-            val productSet: MutableSet<ProductCart> = mutableSetOf()
+            val productSet: MutableSet<ReceivedProductData> = mutableSetOf()
             flow {
                 if (!::markCookies.isInitialized) {
 
@@ -121,7 +120,7 @@ class MarkParser : ProductParser() {
 
 
                     productSet.add(
-                        ProductCart(
+                        ReceivedProductData(
                             fullLinkToProduct = linkToSite + halfLinkToProduct,
                             fullImageUrl = linkToSite + imageUrl,
                             price = price,

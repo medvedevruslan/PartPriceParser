@@ -1,12 +1,11 @@
-package com.medvedev.partpriceparser.feature_parsers.data.sources
+package com.medvedev.partsparser.sources
 
-import com.medvedev.partpriceparser.brands.ProductBrand
-import com.medvedev.partpriceparser.core.util.Resource
-import com.medvedev.partpriceparser.core.util.safeTakeFirst
-import com.medvedev.partpriceparser.feature_parsers.data.ProductParser
-import com.medvedev.partpriceparser.feature_parsers.presentation.models.ProductCart
-import com.medvedev.partpriceparser.feature_parsers.presentation.models.filter.getExistence
-import com.medvedev.partpriceparser.feature_parsers.presentation.models.getCleanPrice
+import com.medvedev.partsparser.models.ProductBrand
+import com.medvedev.partsparser.models.ReceivedProductData
+import com.medvedev.partsparser.models.getCleanPrice
+import com.medvedev.partsparser.models.getExistence
+import com.medvedev.partsparser.utils.Resource
+import com.medvedev.partsparser.utils.safeTakeFirst
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.jsoup.Jsoup
@@ -30,10 +29,10 @@ class MidkamParser : ProductParser() {
         get() = Timber.tag("developerMK").d(toString())
 
     @Suppress("OVERRIDE_BY_INLINE")
-    override inline val workWithServer: (String) -> Flow<Resource<Set<ProductCart>>>
+    override inline val workWithServer: (String) -> Flow<Resource<Set<ReceivedProductData>>>
         get() = { articleToSearch ->
 
-            val productSet: MutableSet<ProductCart> = mutableSetOf()
+            val productSet: MutableSet<ReceivedProductData> = mutableSetOf()
 
             flow {
 
@@ -114,7 +113,7 @@ class MidkamParser : ProductParser() {
 
 
                     productSet.add(
-                        ProductCart(
+                        ReceivedProductData(
                             fullLinkToProduct = linkToSite + partLinkToProduct,
                             fullImageUrl = linkToSite + imageUrl,
                             price = price,

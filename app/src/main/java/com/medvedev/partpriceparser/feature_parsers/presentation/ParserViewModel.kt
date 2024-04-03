@@ -12,16 +12,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.medvedev.partpriceparser.ProductFilterPreferences.SortOrderProducts
 import com.medvedev.partpriceparser.brands.ProductBrand
-import com.medvedev.partpriceparser.core.util.Resource
 import com.medvedev.partpriceparser.core.util.UIEvents
 import com.medvedev.partpriceparser.core.util.printD
 import com.medvedev.partpriceparser.core.util.printE
 import com.medvedev.partpriceparser.feature_parsers.data.ProductFiltersPreferencesRepository
 import com.medvedev.partpriceparser.feature_parsers.domain.use_cases.GetProductsUseCase
-import com.medvedev.partpriceparser.feature_parsers.presentation.models.ParserData
+import com.medvedev.partpriceparser.feature_parsers.presentation.models.PartParserData
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.filter.BrandFilter
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.filter.ProductFilter
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.filter.ProductSort
+import com.medvedev.partsparser.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -48,9 +48,9 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
     private val _uiEvents = MutableSharedFlow<UIEvents>()
     val uiEvents: SharedFlow<UIEvents> = _uiEvents.asSharedFlow()
 
-    private var _foundedProductList: SnapshotStateList<ParserData> =
+    private var _foundedProductList: SnapshotStateList<PartParserData> =
         mutableStateListOf() // todo решить проблему с дублирующимися данными
-    var foundedProductList: SnapshotStateList<ParserData> = _foundedProductList
+    var foundedProductList: SnapshotStateList<PartParserData> = _foundedProductList
 
 
     private fun addUIEvent(event: UIEvents) {
@@ -158,6 +158,16 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
     // todo нужен только для выведения логов
     val listWithExistences: MutableSet<String> = mutableSetOf()
 
+
+    private val _listToView = MutableSharedFlow<PartParserData>()
+    val listToView: SharedFlow<PartParserData> = _listToView.asSharedFlow()
+
+    private fun listToCompose(data: PartParserData) {
+        viewModelScope.launch {
+            _listToView.emit(data)
+        }
+    }
+
     private var parseJob: (String) -> Unit = { articleToSearch ->
         if (articleToSearch.isEmpty()) {
             addUIEvent(UIEvents.SnackbarEvent(message = "Введите артикул"))
@@ -172,7 +182,7 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
                         getProductsUseCase.execute(articleToSearch)
                             .buffer(30)
                             .collect { data ->
-                                val iterator: MutableIterator<ParserData> =
+                                val iterator: MutableIterator<PartParserData> =
                                     _foundedProductList.iterator()
 
                                 while (iterator.hasNext()) {
@@ -185,6 +195,8 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
                                     _foundedProductList.add(data)
                                     _foundedProductList.sortBy { it.siteName }
                                 }
+
+                                listToCompose(data)
 
                                 data.productParserData.data?.forEach {
                                     // todo нужно только для выведения логов

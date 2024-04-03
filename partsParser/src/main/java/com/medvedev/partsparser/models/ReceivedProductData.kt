@@ -1,8 +1,7 @@
-package com.medvedev.partpriceparser.feature_parsers.presentation.models
+package com.medvedev.partsparser.models
 
-import com.medvedev.partsparser.models.ProductBrand
 
-data class ProductCart(
+data class ReceivedProductData(
     val fullLinkToProduct: String,
     val fullImageUrl: String,
     val price: Float?,
@@ -11,7 +10,7 @@ data class ProductCart(
     val additionalArticles: String?,
     val brand: ProductBrand,
     val quantity: String?,
-    val existence: ProductExistence
+    val existence: PartExistence
 )
 
 val String.getCleanPrice: Float?

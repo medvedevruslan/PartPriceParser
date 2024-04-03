@@ -1,13 +1,12 @@
-package com.medvedev.partpriceparser.feature_parsers.data.sources
+package com.medvedev.partsparser.sources
 
-import com.medvedev.partpriceparser.brands.getBrand
-import com.medvedev.partpriceparser.core.util.Resource
-import com.medvedev.partpriceparser.core.util.html2text
-import com.medvedev.partpriceparser.core.util.safeTakeFirst
-import com.medvedev.partpriceparser.feature_parsers.data.ProductParser
-import com.medvedev.partpriceparser.feature_parsers.presentation.models.ProductCart
-import com.medvedev.partpriceparser.feature_parsers.presentation.models.filter.ProductExistence
-import com.medvedev.partpriceparser.feature_parsers.presentation.models.getCleanPrice
+import com.medvedev.partsparser.models.ReceivedProductData
+import com.medvedev.partsparser.models.PartExistence
+import com.medvedev.partsparser.models.getBrand
+import com.medvedev.partsparser.models.getCleanPrice
+import com.medvedev.partsparser.utils.Resource
+import com.medvedev.partsparser.utils.html2text
+import com.medvedev.partsparser.utils.safeTakeFirst
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.jsoup.Connection
@@ -25,16 +24,17 @@ class AutoMotorsParser : ProductParser() {
             "/catalog/?q=$article"
         }
 
+
     val Any.printAU
         get() = Timber.tag("developerAU").d(toString())
 
     lateinit var autoMotorsCookies: MutableMap<String, String>
 
     @Suppress("OVERRIDE_BY_INLINE")
-    override inline val workWithServer: (String) -> Flow<Resource<Set<ProductCart>>>
+    override inline val workWithServer: (String) -> Flow<Resource<Set<ReceivedProductData>>>
         get() = { articleToSearch ->
             flow {
-                val productSet: MutableSet<ProductCart> = mutableSetOf()
+                val productSet: MutableSet<ReceivedProductData> = mutableSetOf()
 
                 val fullLink = linkToSite + partOfLinkToCatalog(articleToSearch)
 
@@ -108,7 +108,7 @@ class AutoMotorsParser : ProductParser() {
                         .apply { "price: ${this.toString()}".printAU }
 
 
-                    var count: Pair<ProductExistence, String>
+                    var count: Pair<PartExistence, String>
 
                     element
                         .select("div.m_right20")
@@ -118,15 +118,15 @@ class AutoMotorsParser : ProductParser() {
                         .also { quantityDescription ->
                             count = when (quantityDescription) {
                                 "ПОД" -> {
-                                    ProductExistence.FalseExistence("под заказ") to ""
+                                    PartExistence.FalseExistence("под заказ") to ""
                                 }
 
                                 "50" -> {
-                                    ProductExistence.TrueExistence("болеe 50 шт") to ">50"
+                                    PartExistence.TrueExistence("болеe 50 шт") to ">50"
                                 }
 
                                 else -> {
-                                    ProductExistence.TrueExistence() to quantityDescription
+                                    PartExistence.TrueExistence() to quantityDescription
                                 }
                             }
                         }
@@ -134,7 +134,7 @@ class AutoMotorsParser : ProductParser() {
 
 
                     productSet.add(
-                        ProductCart(
+                        ReceivedProductData(
                             fullLinkToProduct = linkToSite + halfLinkToProduct,
                             fullImageUrl = linkToSite + imgSrc,
                             price = price,
