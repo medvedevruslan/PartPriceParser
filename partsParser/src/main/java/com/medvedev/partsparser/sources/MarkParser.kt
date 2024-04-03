@@ -1,10 +1,10 @@
 package com.medvedev.partsparser.sources
 
-import com.medvedev.partsparser.models.ReceivedProductData
+import com.medvedev.partsparser.models.ProductCartDTO
 import com.medvedev.partsparser.models.getBrand
 import com.medvedev.partsparser.models.getCleanPrice
 import com.medvedev.partsparser.models.getExistence
-import com.medvedev.partsparser.utils.Resource
+import com.medvedev.partsparser.utils.ResourceDTO
 import com.medvedev.partsparser.utils.safeTakeFirst
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -29,9 +29,9 @@ class MarkParser : ProductParser() {
     lateinit var markCookies: MutableMap<String, String>
 
     @Suppress("OVERRIDE_BY_INLINE")
-    override inline val workWithServer: (String) -> Flow<Resource<Set<ReceivedProductData>>>
+    override inline val workWithServer: (String) -> Flow<ResourceDTO<Set<ProductCartDTO>>>
         get() = { articleToSearch ->
-            val productSet: MutableSet<ReceivedProductData> = mutableSetOf()
+            val productSet: MutableSet<ProductCartDTO> = mutableSetOf()
             flow {
                 if (!::markCookies.isInitialized) {
 
@@ -120,7 +120,7 @@ class MarkParser : ProductParser() {
 
 
                     productSet.add(
-                        ReceivedProductData(
+                        ProductCartDTO(
                             fullLinkToProduct = linkToSite + halfLinkToProduct,
                             fullImageUrl = linkToSite + imageUrl,
                             price = price,
@@ -133,7 +133,7 @@ class MarkParser : ProductParser() {
                         )
                     )
                 }
-                emit(Resource.Success(data = productSet))
+                emit(ResourceDTO.Success(data = productSet))
             }
         }
 }

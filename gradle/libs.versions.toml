@@ -10,7 +10,7 @@ hiltNavigationCompose = "1.2.0"
 jsoup = "1.16.1"
 junit = "4.13.2"
 junitVersion = "1.1.5"
-kotlin = "1.9.22"
+kotlin = "1.9.23"
 androidCoreKtx = "1.12.0"
 androidLifecycleRuntimeKtx = "2.7.0"
 androidActivityCompose = "1.8.2"
@@ -40,6 +40,7 @@ androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-com
 
 #compose
 androidx-compose-material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-activity-compose = {module = "androidx.activity:activity-compose",version.ref = "androidActivityCompose"}
 compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
 androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
@@ -78,7 +79,6 @@ androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "d
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinx-coroutines" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp"}

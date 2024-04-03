@@ -1,8 +1,8 @@
 package com.medvedev.partsparser.sources
 
 
-import com.medvedev.partsparser.models.ReceivedProductData
-import com.medvedev.partsparser.utils.Resource
+import com.medvedev.partsparser.models.ProductCartDTO
+import com.medvedev.partsparser.utils.ResourceDTO
 import io.sentry.Sentry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -14,17 +14,17 @@ abstract class ProductParser {
     abstract val partOfLinkToCatalog: (String) -> String
 
 
-    suspend fun getProduct(articleToSearch: String): Flow<Resource<Set<ReceivedProductData>>> = flow {
+    suspend fun getProduct(articleToSearch: String): Flow<ResourceDTO<Set<ProductCartDTO>>> = flow {
         try {
-            emit(Resource.Loading())
+            emit(ResourceDTO.Loading())
             workWithServer(articleToSearch).collect {
                 emit(it)
             }
         } catch (e: Exception) {
             e.printStackTrace()
             Sentry.captureException(e)
-            emit(Resource.Error(e.toString()))
+            emit(ResourceDTO.Error(e.toString()))
         }
     }
-    protected abstract val workWithServer: (String) -> Flow<Resource<Set<ReceivedProductData>>>
+    protected abstract val workWithServer: (String) -> Flow<ResourceDTO<Set<ProductCartDTO>>>
 }

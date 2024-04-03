@@ -1,28 +1,20 @@
 package com.medvedev.partpriceparser.feature_parsers.domain.mappers
 
-import com.medvedev.partpriceparser.feature_parsers.presentation.models.PartParserData
+import com.medvedev.partpriceparser.feature_parsers.presentation.models.ProductBrand
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.ProductCart
-import com.medvedev.partpriceparser.feature_parsers.presentation.models.ProductExistence
-import com.medvedev.partsparser.models.ParserData
-import com.medvedev.partsparser.models.PartExistence
-import com.medvedev.partsparser.models.ReceivedProductData
-import com.medvedev.partsparser.utils.Resource
-
-fun ParserData.toPartParserData(): PartParserData {
-    return PartParserData(
-        linkToSearchCatalog = linkToSearchCatalog,
-        linkToSite = linkToSite,
-        siteName = siteName,
-        productParserData = productParserData.toResourceProductCart()
-    )
-}
+import com.medvedev.partpriceparser.feature_parsers.presentation.models.filter.PartExistence
+import com.medvedev.partsparser.models.PartExistenceDTO
+import com.medvedev.partsparser.models.ProductBrandDTO
+import com.medvedev.partsparser.models.ProductCartDTO
+import com.medvedev.partsparser.utils.ResourceDTO
+import com.medvedev.partpriceparser.feature_parsers.presentation.models.Resource
 
 
-fun Resource<Set<ReceivedProductData>>.toResourceProductCart(): Resource<Set<ProductCart>> {
-    val newResult: Resource<Set<ProductCart>> = when (this) {
-        is Resource.Loading -> Resource.Loading()
-        is Resource.Error -> Resource.Error(message = message ?: "")
-        is Resource.Success -> Resource.Success(
+fun ResourceDTO<Set<ProductCartDTO>>.toResult(): Resource<Set<ProductCart>> {
+    val newResource: Resource<Set<ProductCart>> = when (this) {
+        is ResourceDTO.Loading -> Resource.Loading()
+        is ResourceDTO.Error -> Resource.Error(message = message ?: "")
+        is ResourceDTO.Success -> Resource.Success(
             data = data?.map { product ->
                 ProductCart(
                     fullLinkToProduct = product.fullLinkToProduct,
@@ -31,20 +23,28 @@ fun Resource<Set<ReceivedProductData>>.toResourceProductCart(): Resource<Set<Pro
                     name = product.name,
                     article = product.article,
                     additionalArticles = product.additionalArticles,
-                    brand = product.brand,
+                    brand = product.brand.toProductBrand(),
                     quantity = product.quantity,
-                    existence = product.existence.toProductExistence(),
+                    existence = product.existence.toPartExistence(),
                 )
             }?.toSet()
         )
     }
-    return newResult
+    return newResource
 }
 
-fun PartExistence.toProductExistence(): ProductExistence {
+fun ProductBrandDTO.toProductBrand(): ProductBrand {
+    return when(this) {
+        is ProductBrandDTO.Kamaz -> ProductBrand.Kamaz(name = this.name)
+        is ProductBrandDTO.Repair -> ProductBrand.Repair(name = this.name)
+        is ProductBrandDTO.Unknown -> ProductBrand.Unknown(name = this.name)
+    }
+}
+
+fun PartExistenceDTO.toPartExistence(): PartExistence {
     return when (this) {
-        is PartExistence.TrueExistence -> ProductExistence.Positive(description = description)
-        is PartExistence.FalseExistence -> ProductExistence.Negative(description = description)
-        else -> ProductExistence.Unknown(description = description)
+        is PartExistenceDTO.TrueExistence -> PartExistence.Positive(description = description)
+        is PartExistenceDTO.FalseExistenceDTO -> PartExistence.Negative(description = description)
+        else -> PartExistence.Unknown(description = description)
     }
 }

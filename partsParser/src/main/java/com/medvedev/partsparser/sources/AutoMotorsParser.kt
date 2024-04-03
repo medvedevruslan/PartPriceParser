@@ -1,10 +1,10 @@
 package com.medvedev.partsparser.sources
 
-import com.medvedev.partsparser.models.ReceivedProductData
-import com.medvedev.partsparser.models.PartExistence
+import com.medvedev.partsparser.models.ProductCartDTO
+import com.medvedev.partsparser.models.PartExistenceDTO
 import com.medvedev.partsparser.models.getBrand
 import com.medvedev.partsparser.models.getCleanPrice
-import com.medvedev.partsparser.utils.Resource
+import com.medvedev.partsparser.utils.ResourceDTO
 import com.medvedev.partsparser.utils.html2text
 import com.medvedev.partsparser.utils.safeTakeFirst
 import kotlinx.coroutines.flow.Flow
@@ -31,10 +31,10 @@ class AutoMotorsParser : ProductParser() {
     lateinit var autoMotorsCookies: MutableMap<String, String>
 
     @Suppress("OVERRIDE_BY_INLINE")
-    override inline val workWithServer: (String) -> Flow<Resource<Set<ReceivedProductData>>>
+    override inline val workWithServer: (String) -> Flow<ResourceDTO<Set<ProductCartDTO>>>
         get() = { articleToSearch ->
             flow {
-                val productSet: MutableSet<ReceivedProductData> = mutableSetOf()
+                val productSet: MutableSet<ProductCartDTO> = mutableSetOf()
 
                 val fullLink = linkToSite + partOfLinkToCatalog(articleToSearch)
 
@@ -108,7 +108,7 @@ class AutoMotorsParser : ProductParser() {
                         .apply { "price: ${this.toString()}".printAU }
 
 
-                    var count: Pair<PartExistence, String>
+                    var count: Pair<PartExistenceDTO, String>
 
                     element
                         .select("div.m_right20")
@@ -118,15 +118,15 @@ class AutoMotorsParser : ProductParser() {
                         .also { quantityDescription ->
                             count = when (quantityDescription) {
                                 "ПОД" -> {
-                                    PartExistence.FalseExistence("под заказ") to ""
+                                    PartExistenceDTO.FalseExistenceDTO("под заказ") to ""
                                 }
 
                                 "50" -> {
-                                    PartExistence.TrueExistence("болеe 50 шт") to ">50"
+                                    PartExistenceDTO.TrueExistence("болеe 50 шт") to ">50"
                                 }
 
                                 else -> {
-                                    PartExistence.TrueExistence() to quantityDescription
+                                    PartExistenceDTO.TrueExistence() to quantityDescription
                                 }
                             }
                         }
@@ -134,7 +134,7 @@ class AutoMotorsParser : ProductParser() {
 
 
                     productSet.add(
-                        ReceivedProductData(
+                        ProductCartDTO(
                             fullLinkToProduct = linkToSite + halfLinkToProduct,
                             fullImageUrl = linkToSite + imgSrc,
                             price = price,
@@ -147,7 +147,7 @@ class AutoMotorsParser : ProductParser() {
                         )
                     )
                 }
-                emit(Resource.Success(data = productSet))
+                emit(ResourceDTO.Success(data = productSet))
             }
         }
 }

@@ -1,10 +1,10 @@
 package com.medvedev.partsparser.models
 
-sealed interface ProductBrand {
+sealed interface ProductBrandDTO {
     val name: String
     val possibleNames: ArrayList<String>
 
-    class Kamaz(override val name: String = "ПАО \"КАМАЗ\"") : ProductBrand {
+    class Kamaz(override val name: String = "ПАО \"КАМАЗ\"") : ProductBrandDTO {
 
         override val possibleNames: ArrayList<String> = arrayListOf(
             "пао",
@@ -17,7 +17,7 @@ sealed interface ProductBrand {
         )
     }
 
-    class Repair(override val name: String = "Ремонтный") : ProductBrand {
+    class Repair(override val name: String = "Ремонтный") : ProductBrandDTO {
         override val possibleNames: ArrayList<String> = arrayListOf(
             "ремонтный",
             "ремонтированный",
@@ -27,7 +27,7 @@ sealed interface ProductBrand {
         )
     }
 
-    class Unknown(override val name: String = "Неопределен") : ProductBrand {
+    class Unknown(override val name: String = "Неопределен") : ProductBrandDTO {
         override val possibleNames: ArrayList<String> = arrayListOf("Прочие")
     }
 }
@@ -41,14 +41,14 @@ sealed interface ProductBrand {
 // ООО "Рославльские тормозные системы" РААЗ \ ООО НПО "УРАЛ" \
 
 
-val String.getBrand: ProductBrand
+val String.getBrand: ProductBrandDTO
     get() = this.trim().lowercase().let { lowerString ->
         when {
-            ProductBrand.Kamaz().possibleNames.contains(lowerString) ||
-                    lowerString.contains("камаз") -> ProductBrand.Kamaz(name = this)
+            ProductBrandDTO.Kamaz().possibleNames.contains(lowerString) ||
+                    lowerString.contains("камаз") -> ProductBrandDTO.Kamaz(name = this)
 
-            ProductBrand.Repair().possibleNames.contains(lowerString) -> ProductBrand.Repair(name = this)
-            else -> ProductBrand.Unknown(name = this)
+            ProductBrandDTO.Repair().possibleNames.contains(lowerString) -> ProductBrandDTO.Repair(name = this)
+            else -> ProductBrandDTO.Unknown(name = this)
         }
     }
 

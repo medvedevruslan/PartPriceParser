@@ -69,13 +69,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.medvedev.partpriceparser.R
 import com.medvedev.partpriceparser.core.util.UIEvents
 import com.medvedev.partpriceparser.core.util.printD
-import com.medvedev.partpriceparser.feature_parsers.presentation.models.PartParserData
+import com.medvedev.partpriceparser.feature_parsers.presentation.models.ParserData
+import com.medvedev.partpriceparser.feature_parsers.presentation.models.ProductBrand
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.ProductCart
-import com.medvedev.partpriceparser.feature_parsers.presentation.models.toPriceWithSpace
+import com.medvedev.partpriceparser.feature_parsers.presentation.models.Resource
+import com.medvedev.partpriceparser.feature_parsers.presentation.models.filter.PartExistence
 import com.medvedev.partpriceparser.feature_parsers.presentation.screen_content.CustomFilterDialog
 import com.medvedev.partpriceparser.feature_parsers.presentation.screen_content.TopBarItemButton
-import com.medvedev.partsparser.models.PartExistence
-import com.medvedev.partsparser.models.ProductBrand
+import com.medvedev.partsparser.models.toPriceWithSpace
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -165,7 +166,7 @@ fun ParseScreenContent(
                 .padding(horizontal = 5.dp)
         ) {
 
-            val filteredList: State<List<PartParserData>> = remember(
+            val filteredList: State<List<ParserData>> = remember(
                 viewModel.foundedProductList,
                 viewModel.filterProductState,
                 viewModel.loadingInProgressFlag
@@ -173,23 +174,23 @@ fun ParseScreenContent(
                 derivedStateOf {
 
                     val sortedList = viewModel.foundedProductList
-                    val newList: MutableList<PartParserData> = mutableListOf()
+                    val newList: MutableList<ParserData> = mutableListOf()
 
                     if (!viewModel.loadingInProgressFlag.value && !viewModel.filterProductState.value.showMissingItems) {
                         "updating sorted list".printD
                         sortedList.forEach { parserData ->
 
                             val newPartOfList = when (parserData.productParserData) {
-                                is com.medvedev.partsparser.utils.Resource.Success -> {
+                                is Resource.Success -> {
                                     val partOfList = parserData.productParserData.data?.filter { productElement ->
                                             // "change showMissing in compose: ${productElement.existence.javaClass.simpleName}".printD
-                                            productElement.existence is PartExistence.TrueExistence
+                                            productElement.existence is PartExistence.Positive
                                         }
-                                    parserData.copy(productParserData = com.medvedev.partsparser.utils.Resource.Success(data = partOfList?.toSet()))
+                                    parserData.copy(productParserData = Resource.Success(data = partOfList?.toSet()))
 
                                 }
 
-                                is com.medvedev.partsparser.utils.Resource.Loading, is com.medvedev.partsparser.utils.Resource.Error -> {
+                                is Resource.Loading, is Resource.Error -> {
                                     parserData
                                 }
                             }
@@ -234,7 +235,7 @@ fun ParseScreenContent(
 
 @Composable
 fun ItemColumn(
-    parserData: PartParserData,
+    parserData: ParserData,
     actionGoToBrowser: (String) -> Unit
 ) {
     Surface(
@@ -269,15 +270,15 @@ fun ItemColumn(
                 color = MaterialTheme.colorScheme.secondary
             )
             when (parserData.productParserData) {
-                is com.medvedev.partsparser.utils.Resource.Loading -> {
+                is Resource.Loading -> {
                     ProgressBar(modifier = Modifier.fillMaxSize())
                 }
 
-                is com.medvedev.partsparser.utils.Resource.Error -> {
+                is Resource.Error -> {
                     Text(text = parserData.productParserData.message.toString())
                 }
 
-                is com.medvedev.partsparser.utils.Resource.Success -> {
+                is Resource.Success -> {
                     parserData.productParserData.data?.let { listData ->
 
                         listData.forEach {

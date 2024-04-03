@@ -17,11 +17,11 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,11 +36,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.medvedev.partpriceparser.R
+import com.medvedev.partpriceparser.feature_parsers.presentation.models.ProductBrand
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.filter.BrandFilter
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.filter.ProductFilter
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.filter.ProductSort
 import com.medvedev.partpriceparser.ui.theme.PartPriceParserTheme
-import com.medvedev.partsparser.models.ProductBrand
 
 
 @Composable
@@ -77,12 +77,13 @@ fun CustomFilterDialog(
     sortList: List<ProductSort>,
     onClickOnSortItem: (ProductSort) -> Unit
 ) {
-    AlertDialog(
+    BasicAlertDialog(
+        onDismissRequest = changeDialogState,
         modifier = Modifier
             .background(
                 color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(5.dp)
             )
-            .wrapContentSize(), onDismissRequest = changeDialogState
+            .wrapContentSize()
     ) {
         FilterDialogContent(
             sortList = sortList,
@@ -278,7 +279,7 @@ fun SortItem(
                 )
             }
         }
-        Divider(
+        HorizontalDivider(
             thickness = 1.dp, color = MaterialTheme.colorScheme.surfaceVariant
         )
     }

@@ -11,17 +11,17 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.medvedev.partpriceparser.ProductFilterPreferences.SortOrderProducts
-import com.medvedev.partpriceparser.brands.ProductBrand
 import com.medvedev.partpriceparser.core.util.UIEvents
 import com.medvedev.partpriceparser.core.util.printD
 import com.medvedev.partpriceparser.core.util.printE
 import com.medvedev.partpriceparser.feature_parsers.data.ProductFiltersPreferencesRepository
 import com.medvedev.partpriceparser.feature_parsers.domain.use_cases.GetProductsUseCase
-import com.medvedev.partpriceparser.feature_parsers.presentation.models.PartParserData
+import com.medvedev.partpriceparser.feature_parsers.presentation.models.ParserData
+import com.medvedev.partpriceparser.feature_parsers.presentation.models.ProductBrand
+import com.medvedev.partpriceparser.feature_parsers.presentation.models.Resource
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.filter.BrandFilter
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.filter.ProductFilter
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.filter.ProductSort
-import com.medvedev.partsparser.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -48,9 +48,9 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
     private val _uiEvents = MutableSharedFlow<UIEvents>()
     val uiEvents: SharedFlow<UIEvents> = _uiEvents.asSharedFlow()
 
-    private var _foundedProductList: SnapshotStateList<PartParserData> =
+    private var _foundedProductList: SnapshotStateList<ParserData> =
         mutableStateListOf() // todo решить проблему с дублирующимися данными
-    var foundedProductList: SnapshotStateList<PartParserData> = _foundedProductList
+    var foundedProductList: SnapshotStateList<ParserData> = _foundedProductList
 
 
     private fun addUIEvent(event: UIEvents) {
@@ -159,10 +159,10 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
     val listWithExistences: MutableSet<String> = mutableSetOf()
 
 
-    private val _listToView = MutableSharedFlow<PartParserData>()
-    val listToView: SharedFlow<PartParserData> = _listToView.asSharedFlow()
+    private val _listToView = MutableSharedFlow<ParserData>()
+    val listToView: SharedFlow<ParserData> = _listToView.asSharedFlow()
 
-    private fun listToCompose(data: PartParserData) {
+    private fun listToCompose(data: ParserData) {
         viewModelScope.launch {
             _listToView.emit(data)
         }
@@ -182,7 +182,7 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
                         getProductsUseCase.execute(articleToSearch)
                             .buffer(30)
                             .collect { data ->
-                                val iterator: MutableIterator<PartParserData> =
+                                val iterator: MutableIterator<ParserData> =
                                     _foundedProductList.iterator()
 
                                 while (iterator.hasNext()) {

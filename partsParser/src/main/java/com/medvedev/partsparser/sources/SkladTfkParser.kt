@@ -1,10 +1,10 @@
 package com.medvedev.partsparser.sources
 
-import com.medvedev.partsparser.models.ReceivedProductData
-import com.medvedev.partsparser.models.PartExistence
+import com.medvedev.partsparser.models.ProductCartDTO
+import com.medvedev.partsparser.models.PartExistenceDTO
 import com.medvedev.partsparser.models.getBrand
 import com.medvedev.partsparser.models.getExistence
-import com.medvedev.partsparser.utils.Resource
+import com.medvedev.partsparser.utils.ResourceDTO
 import com.medvedev.partsparser.utils.html2text
 import com.medvedev.partsparser.utils.safeTakeFirst
 import kotlinx.coroutines.flow.Flow
@@ -30,9 +30,9 @@ class SkladTfkParser : ProductParser() {
         }
 
     @Suppress("OVERRIDE_BY_INLINE")
-    override inline val workWithServer: (String) -> Flow<Resource<Set<ReceivedProductData>>>
+    override inline val workWithServer: (String) -> Flow<ResourceDTO<Set<ProductCartDTO>>>
         get() = { articleToSearch ->
-            val productSet: MutableSet<ReceivedProductData> = mutableSetOf()
+            val productSet: MutableSet<ProductCartDTO> = mutableSetOf()
             flow {
 
                 val fullLink = linkToSite + partOfLinkToCatalog(articleToSearch)
@@ -125,7 +125,7 @@ class SkladTfkParser : ProductParser() {
                         }
 
                     productSet.add(
-                        ReceivedProductData(
+                        ProductCartDTO(
                             fullLinkToProduct = linkToSite + partLinkToProduct,
                             fullImageUrl = linkToSite + imageUrl,
                             price = price,
@@ -135,11 +135,11 @@ class SkladTfkParser : ProductParser() {
                             brand = brand.getBrand,
                             quantity = null,
                             existence = existence?.getExistence
-                                ?: PartExistence.UnknownExistence()
+                                ?: PartExistenceDTO.UnknownExistence()
                         )
                     )
                 }
-                emit(Resource.Success(data = productSet))
+                emit(ResourceDTO.Success(data = productSet))
             }
         }
 }

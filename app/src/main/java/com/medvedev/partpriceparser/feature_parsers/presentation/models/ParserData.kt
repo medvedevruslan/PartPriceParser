@@ -1,9 +1,6 @@
 package com.medvedev.partpriceparser.feature_parsers.presentation.models
 
-import com.medvedev.partsparser.utils.Resource
-
-
-data class PartParserData(
+data class ParserData(
     val linkToSearchCatalog: String = "",
     val linkToSite: String = "",
     val siteName: String = "",

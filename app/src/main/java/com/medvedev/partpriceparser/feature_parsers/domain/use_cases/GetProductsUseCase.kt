@@ -1,8 +1,7 @@
 package com.medvedev.partpriceparser.feature_parsers.domain.use_cases
 
-import com.medvedev.partpriceparser.feature_parsers.domain.mappers.toPartParserData
-import com.medvedev.partpriceparser.feature_parsers.presentation.models.PartParserData
-import com.medvedev.partsparser.models.ParserData
+import com.medvedev.partpriceparser.feature_parsers.domain.mappers.toResult
+import com.medvedev.partpriceparser.feature_parsers.presentation.models.ParserData
 import com.medvedev.partsparser.sources.AutoMotorsParser
 import com.medvedev.partsparser.sources.AvtoKamaParser
 import com.medvedev.partsparser.sources.KamaCenterParser
@@ -47,24 +46,23 @@ class GetProductsUseCase {
         nikoParser
     )
 
-    suspend fun execute(article: String): Flow<PartParserData> {
-        return channelFlow {
+    suspend fun execute(article: String): Flow<ParserData> {
 
+        return channelFlow {
             parserSourcesList.forEach { source ->
                 launch(Dispatchers.IO) {
-                    source.getProduct(article).collect { result ->
+                    source.getProduct(article).collect { resultDTO ->
                         val parserData = ParserData(
                             linkToSearchCatalog = source.linkToSite +
                                     source.partOfLinkToCatalog(article),
                             linkToSite = source.linkToSite,
                             siteName = source.siteName,
-                            productParserData = result
+                            productParserData = resultDTO.toResult()
                         )
-                        send(parserData.toPartParserData())
+                        send(parserData)
                     }
                 }
             }
-
         }
     }
 }

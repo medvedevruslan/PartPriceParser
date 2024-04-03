@@ -1,16 +1,16 @@
 package com.medvedev.partsparser.models
 
 
-data class ReceivedProductData(
+data class ProductCartDTO(
     val fullLinkToProduct: String,
     val fullImageUrl: String,
     val price: Float?,
     val name: String,
     val article: String,
     val additionalArticles: String?,
-    val brand: ProductBrand,
+    val brand: ProductBrandDTO,
     val quantity: String?,
-    val existence: PartExistence
+    val existence: PartExistenceDTO
 )
 
 val String.getCleanPrice: Float?

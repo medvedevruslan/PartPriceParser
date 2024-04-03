@@ -1,6 +1,6 @@
 package com.medvedev.partpriceparser.feature_parsers.presentation.models
 
-import com.medvedev.partsparser.models.ProductBrand
+import com.medvedev.partpriceparser.feature_parsers.presentation.models.filter.PartExistence
 
 data class ProductCart(
     val fullLinkToProduct: String,
@@ -11,24 +11,5 @@ data class ProductCart(
     val additionalArticles: String?,
     val brand: ProductBrand,
     val quantity: String?,
-    val existence: ProductExistence
+    val existence: PartExistence
 )
-
-val String.getCleanPrice: Float?
-    get() = run {
-        if (this.isEmpty()) null
-        else {
-            this.replace(",",".")
-                .replace(" ", "")
-                .toFloatOrNull()
-        }
-    }
-
-
-
-val Float.toPriceWithSpace: String
-    get() = toString()
-        .replace(
-            regex = Regex(pattern = """(?!^)(?=(\d{3})+(?=\.|$))"""),
-            replacement = " "
-        )
