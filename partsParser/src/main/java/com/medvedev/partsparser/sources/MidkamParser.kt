@@ -1,10 +1,10 @@
 package com.medvedev.partsparser.sources
 
-import com.medvedev.partsparser.models.ProductBrandDTO
-import com.medvedev.partsparser.models.ProductCartDTO
+import com.medvedev.partsparser.models.ProductBrandParse
+import com.medvedev.partsparser.models.ProductCartParse
 import com.medvedev.partsparser.models.getCleanPrice
 import com.medvedev.partsparser.models.getExistence
-import com.medvedev.partsparser.utils.ResourceDTO
+import com.medvedev.partsparser.utils.ResourceParse
 import com.medvedev.partsparser.utils.safeTakeFirst
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -12,7 +12,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import timber.log.Timber
 
-class MidkamParser : ProductParser() {
+internal class MidkamParser : ProductParser() {
 
     val kamazMrfName = "ПАО КамАЗ"
     val repairText = "ремонт с гарантией"
@@ -29,10 +29,10 @@ class MidkamParser : ProductParser() {
         get() = Timber.tag("developerMK").d(toString())
 
     @Suppress("OVERRIDE_BY_INLINE")
-    override inline val workWithServer: (String) -> Flow<ResourceDTO<Set<ProductCartDTO>>>
+    override inline val workWithServer: (String) -> Flow<ResourceParse<Set<ProductCartParse>>>
         get() = { articleToSearch ->
 
-            val productSet: MutableSet<ProductCartDTO> = mutableSetOf()
+            val productSet: MutableSet<ProductCartParse> = mutableSetOf()
 
             flow {
 
@@ -106,14 +106,14 @@ class MidkamParser : ProductParser() {
                         .apply { "article: $this".printMK }
 
                     val brand = if (name.contains(kamazMrfName)) {
-                        ProductBrandDTO.Kamaz()
+                        ProductBrandParse.Kamaz()
                     } else if (name.contains(repairText)) {
-                        ProductBrandDTO.Repair()
-                    } else ProductBrandDTO.Unknown()
+                        ProductBrandParse.Repair()
+                    } else ProductBrandParse.Unknown()
 
 
                     productSet.add(
-                        ProductCartDTO(
+                        ProductCartParse(
                             fullLinkToProduct = linkToSite + partLinkToProduct,
                             fullImageUrl = linkToSite + imageUrl,
                             price = price,
@@ -126,7 +126,7 @@ class MidkamParser : ProductParser() {
                         )
                     )
                 }
-                emit(ResourceDTO.Success(data = productSet))
+                emit(ResourceParse.Success(data = productSet))
             }
         }
 }

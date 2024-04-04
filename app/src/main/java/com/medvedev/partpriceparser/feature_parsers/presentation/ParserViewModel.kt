@@ -15,13 +15,17 @@ import com.medvedev.partpriceparser.core.util.UIEvents
 import com.medvedev.partpriceparser.core.util.printD
 import com.medvedev.partpriceparser.core.util.printE
 import com.medvedev.partpriceparser.feature_parsers.data.ProductFiltersPreferencesRepository
-import com.medvedev.partpriceparser.feature_parsers.domain.use_cases.GetProductsUseCase
-import com.medvedev.partpriceparser.feature_parsers.presentation.models.ParserData
+import com.medvedev.partpriceparser.feature_parsers.domain.mappers.toPartsData
+import com.medvedev.partpriceparser.feature_parsers.presentation.models.PartsData
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.ProductBrand
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.Resource
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.filter.BrandFilter
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.filter.ProductFilter
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.filter.ProductSort
+import com.medvedev.parts_domain.PartsRepository
+import com.medvedev.parts_domain.models.PartsDataDTO
+import com.medvedev.parts_domain.usecases.GetPartsDataUseCase
+import com.medvedev.partsparser.PartsParser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -29,6 +33,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -37,7 +42,11 @@ import javax.inject.Inject
 class ParserViewModel @Inject constructor(private val productFiltersPreferencesRepository: ProductFiltersPreferencesRepository) :
     ViewModel() {
 
-    private val getProductsUseCase = GetProductsUseCase()
+
+        // todo вынести зависимости в di
+    private val parserData = PartsParser()
+    private val partsRepository = PartsRepository(parserData)
+    private val getPartsDataUseCase = GetPartsDataUseCase(partsRepository)
 
     val sortListByBrands: ArrayList<ProductSort> = arrayListOf(
         ProductSort.ByStoreNameAlphabetically,
@@ -48,9 +57,9 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
     private val _uiEvents = MutableSharedFlow<UIEvents>()
     val uiEvents: SharedFlow<UIEvents> = _uiEvents.asSharedFlow()
 
-    private var _foundedProductList: SnapshotStateList<ParserData> =
+    private var _foundedProductList: SnapshotStateList<PartsData> =
         mutableStateListOf() // todo решить проблему с дублирующимися данными
-    var foundedProductList: SnapshotStateList<ParserData> = _foundedProductList
+    var foundedProductList: SnapshotStateList<PartsData> = _foundedProductList
 
 
     private fun addUIEvent(event: UIEvents) {
@@ -159,10 +168,10 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
     val listWithExistences: MutableSet<String> = mutableSetOf()
 
 
-    private val _listToView = MutableSharedFlow<ParserData>()
-    val listToView: SharedFlow<ParserData> = _listToView.asSharedFlow()
+    private val _listToView = MutableSharedFlow<PartsData>()
+    val listToView: SharedFlow<PartsData> = _listToView.asSharedFlow()
 
-    private fun listToCompose(data: ParserData) {
+    private fun listToCompose(data: PartsData) {
         viewModelScope.launch {
             _listToView.emit(data)
         }
@@ -179,10 +188,13 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
                         withContext(Dispatchers.Main) {
                             _foundedProductList.clear()
                         }
-                        getProductsUseCase.execute(articleToSearch)
+                        getPartsDataUseCase.getPartsData(articleToSearch)
                             .buffer(30)
+                            .map { partsDataDTO: PartsDataDTO ->
+                                partsDataDTO.toPartsData()
+                            }
                             .collect { data ->
-                                val iterator: MutableIterator<ParserData> =
+                                val iterator: MutableIterator<PartsData> =
                                     _foundedProductList.iterator()
 
                                 while (iterator.hasNext()) {
@@ -198,7 +210,7 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
 
                                 listToCompose(data)
 
-                                data.productParserData.data?.forEach {
+                                data.partsResult.data?.forEach {
                                     // todo нужно только для выведения логов
                                     it.existence.also { existence ->
                                         listWithExistences.add(existence.description)
@@ -222,8 +234,8 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
         job.cancel()
         viewModelScope.launch(Dispatchers.Main) {
             _foundedProductList.replaceAll { parserData ->
-                when (parserData.productParserData) {
-                    is Resource.Loading -> parserData.copy(productParserData = Resource.Error("Parser is stopped"))
+                when (parserData.partsResult) {
+                    is Resource.Loading -> parserData.copy(partsResult = Resource.Error("Parser is stopped"))
                     else -> parserData
                 }
             }
@@ -242,7 +254,7 @@ class ParserViewModel @Inject constructor(private val productFiltersPreferencesR
     private fun changeStateOfCommonLoading() {
         var loadingWork = false
         for (productData in _foundedProductList) {
-            if (productData.productParserData is Resource.Loading) {
+            if (productData.partsResult is Resource.Loading) {
                 loadingWork = true
                 break
             }

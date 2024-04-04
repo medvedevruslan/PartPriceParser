@@ -1,9 +1,9 @@
 package com.medvedev.partsparser.sources
 
-import com.medvedev.partsparser.models.ProductCartDTO
+import com.medvedev.partsparser.models.ProductCartParse
 import com.medvedev.partsparser.models.getBrand
 import com.medvedev.partsparser.models.getExistence
-import com.medvedev.partsparser.utils.ResourceDTO
+import com.medvedev.partsparser.utils.ResourceParse
 import com.medvedev.partsparser.utils.html2text
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -13,7 +13,7 @@ import org.jsoup.nodes.Document
 import org.jsoup.nodes.TextNode
 import timber.log.Timber
 
-class RiatParser : ProductParser() {
+internal class RiatParser : ProductParser() {
 
     override val linkToSite: String = "https://tdriat.ru"
     override val siteName: String = "РИАТ"
@@ -25,9 +25,9 @@ class RiatParser : ProductParser() {
         get() = Timber.tag("developerRT").d(toString())
 
     @Suppress("OVERRIDE_BY_INLINE")
-    override inline val workWithServer: (String) -> Flow<ResourceDTO<Set<ProductCartDTO>>>
+    override inline val workWithServer: (String) -> Flow<ResourceParse<Set<ProductCartParse>>>
         get() = { articleToSearch ->
-            val productSet: MutableSet<ProductCartDTO> = mutableSetOf()
+            val productSet: MutableSet<ProductCartParse> = mutableSetOf()
             flow {
 
                 val fullLink = linkToSite + partOfLinkToCatalog(articleToSearch)
@@ -148,7 +148,7 @@ class RiatParser : ProductParser() {
                     }*/
 
                     productSet.add(
-                        ProductCartDTO(
+                        ProductCartParse(
                             fullLinkToProduct = linkToSite + partLinkToProduct,
                             fullImageUrl = linkToSite + imageUrl,
                             price = price,
@@ -161,7 +161,7 @@ class RiatParser : ProductParser() {
                         )
                     )
                 }
-                emit(ResourceDTO.Success(data = productSet))
+                emit(ResourceParse.Success(data = productSet))
             }
         }
 }

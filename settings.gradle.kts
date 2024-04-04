@@ -22,3 +22,4 @@ dependencyResolutionManagement {
 rootProject.name = "PartPriceParser"
 include(":app")
 include(":partsParser")
+include(":parts-domain")

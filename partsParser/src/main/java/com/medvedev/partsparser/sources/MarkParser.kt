@@ -1,10 +1,10 @@
 package com.medvedev.partsparser.sources
 
-import com.medvedev.partsparser.models.ProductCartDTO
+import com.medvedev.partsparser.models.ProductCartParse
 import com.medvedev.partsparser.models.getBrand
 import com.medvedev.partsparser.models.getCleanPrice
 import com.medvedev.partsparser.models.getExistence
-import com.medvedev.partsparser.utils.ResourceDTO
+import com.medvedev.partsparser.utils.ResourceParse
 import com.medvedev.partsparser.utils.safeTakeFirst
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -13,7 +13,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import timber.log.Timber
 
-class MarkParser : ProductParser() {
+internal class MarkParser : ProductParser() {
     override val linkToSite: String
         get() = "https://klassauto.ru"
     override val siteName: String
@@ -29,9 +29,9 @@ class MarkParser : ProductParser() {
     lateinit var markCookies: MutableMap<String, String>
 
     @Suppress("OVERRIDE_BY_INLINE")
-    override inline val workWithServer: (String) -> Flow<ResourceDTO<Set<ProductCartDTO>>>
+    override inline val workWithServer: (String) -> Flow<ResourceParse<Set<ProductCartParse>>>
         get() = { articleToSearch ->
-            val productSet: MutableSet<ProductCartDTO> = mutableSetOf()
+            val productSet: MutableSet<ProductCartParse> = mutableSetOf()
             flow {
                 if (!::markCookies.isInitialized) {
 
@@ -120,7 +120,7 @@ class MarkParser : ProductParser() {
 
 
                     productSet.add(
-                        ProductCartDTO(
+                        ProductCartParse(
                             fullLinkToProduct = linkToSite + halfLinkToProduct,
                             fullImageUrl = linkToSite + imageUrl,
                             price = price,
@@ -133,7 +133,7 @@ class MarkParser : ProductParser() {
                         )
                     )
                 }
-                emit(ResourceDTO.Success(data = productSet))
+                emit(ResourceParse.Success(data = productSet))
             }
         }
 }

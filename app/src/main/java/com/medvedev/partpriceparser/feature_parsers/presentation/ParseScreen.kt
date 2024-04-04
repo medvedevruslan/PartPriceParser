@@ -69,7 +69,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.medvedev.partpriceparser.R
 import com.medvedev.partpriceparser.core.util.UIEvents
 import com.medvedev.partpriceparser.core.util.printD
-import com.medvedev.partpriceparser.feature_parsers.presentation.models.ParserData
+import com.medvedev.partpriceparser.feature_parsers.presentation.models.PartsData
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.ProductBrand
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.ProductCart
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.Resource
@@ -166,7 +166,7 @@ fun ParseScreenContent(
                 .padding(horizontal = 5.dp)
         ) {
 
-            val filteredList: State<List<ParserData>> = remember(
+            val filteredList: State<List<PartsData>> = remember(
                 viewModel.foundedProductList,
                 viewModel.filterProductState,
                 viewModel.loadingInProgressFlag
@@ -174,19 +174,19 @@ fun ParseScreenContent(
                 derivedStateOf {
 
                     val sortedList = viewModel.foundedProductList
-                    val newList: MutableList<ParserData> = mutableListOf()
+                    val newList: MutableList<PartsData> = mutableListOf()
 
                     if (!viewModel.loadingInProgressFlag.value && !viewModel.filterProductState.value.showMissingItems) {
                         "updating sorted list".printD
                         sortedList.forEach { parserData ->
 
-                            val newPartOfList = when (parserData.productParserData) {
+                            val newPartOfList = when (parserData.partsResult) {
                                 is Resource.Success -> {
-                                    val partOfList = parserData.productParserData.data?.filter { productElement ->
+                                    val partOfList = parserData.partsResult.data?.filter { productElement ->
                                             // "change showMissing in compose: ${productElement.existence.javaClass.simpleName}".printD
                                             productElement.existence is PartExistence.Positive
                                         }
-                                    parserData.copy(productParserData = Resource.Success(data = partOfList?.toSet()))
+                                    parserData.copy(partsResult = Resource.Success(data = partOfList?.toSet()))
 
                                 }
 
@@ -218,7 +218,7 @@ fun ParseScreenContent(
                         val localContext = LocalContext.current
 
                         ItemColumn(
-                            parserData = parserData,
+                            partsData = parserData,
                             actionGoToBrowser = { link ->
                                 viewModel.openBrowser(
                                     context = localContext,
@@ -235,7 +235,7 @@ fun ParseScreenContent(
 
 @Composable
 fun ItemColumn(
-    parserData: ParserData,
+    partsData: PartsData,
     actionGoToBrowser: (String) -> Unit
 ) {
     Surface(
@@ -254,11 +254,11 @@ fun ItemColumn(
                     .fillMaxWidth(),
                 shape = RoundedCornerShape(4.dp),
                 onClick = {
-                    actionGoToBrowser.invoke(parserData.linkToSearchCatalog)
+                    actionGoToBrowser.invoke(partsData.linkToSearchCatalog)
                 }) {
                 Text(
                     modifier = Modifier.padding(2.dp),
-                    text = parserData.linkToSearchCatalog,
+                    text = partsData.linkToSearchCatalog,
                     style = MaterialTheme.typography.bodySmall,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -269,17 +269,17 @@ fun ItemColumn(
                 thickness = 1.dp,
                 color = MaterialTheme.colorScheme.secondary
             )
-            when (parserData.productParserData) {
+            when (partsData.partsResult) {
                 is Resource.Loading -> {
                     ProgressBar(modifier = Modifier.fillMaxSize())
                 }
 
                 is Resource.Error -> {
-                    Text(text = parserData.productParserData.message.toString())
+                    Text(text = partsData.partsResult.message.toString())
                 }
 
                 is Resource.Success -> {
-                    parserData.productParserData.data?.let { listData ->
+                    partsData.partsResult.data?.let { listData ->
 
                         listData.forEach {
                             ProductCardItem(

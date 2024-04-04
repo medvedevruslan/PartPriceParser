@@ -1,10 +1,10 @@
 package com.medvedev.partsparser.models
 
-sealed interface PartExistenceDTO {
+sealed interface PartExistenceParse {
     val description: String
     val possibleDescription: ArrayList<String>
 
-    class TrueExistence(override val description: String = "В наличии") : PartExistenceDTO {
+    class TrueExistence(override val description: String = "В наличии") : PartExistenceParse {
         override val possibleDescription: ArrayList<String> =
             arrayListOf(
                 "в наличии",
@@ -15,13 +15,13 @@ sealed interface PartExistenceDTO {
             )
     }
 
-    class FalseExistenceDTO(override val description: String = "Отсутствует") : PartExistenceDTO {
+    class FalseExistenceParse(override val description: String = "Отсутствует") : PartExistenceParse {
         override val possibleDescription: ArrayList<String> =
             arrayListOf("нет в наличии", "под заказ")
     }
 
     class UnknownExistence(override val description: String = "наличие неизвестно") :
-        PartExistenceDTO {
+        PartExistenceParse {
         override val possibleDescription: ArrayList<String> = arrayListOf("наличие уточняйте")
     }
 }
@@ -29,12 +29,12 @@ sealed interface PartExistenceDTO {
 val String.getExistence
     get() = this.trim().lowercase().let { lowerExistence ->
         when {
-            PartExistenceDTO.FalseExistenceDTO().possibleDescription.contains(lowerExistence) ->
-                PartExistenceDTO.FalseExistenceDTO(description = this)
+            PartExistenceParse.FalseExistenceParse().possibleDescription.contains(lowerExistence) ->
+                PartExistenceParse.FalseExistenceParse(description = this)
 
-            PartExistenceDTO.TrueExistence().possibleDescription.contains(lowerExistence) ->
-                PartExistenceDTO.TrueExistence(description = this)
+            PartExistenceParse.TrueExistence().possibleDescription.contains(lowerExistence) ->
+                PartExistenceParse.TrueExistence(description = this)
 
-            else -> PartExistenceDTO.UnknownExistence(description = this)
+            else -> PartExistenceParse.UnknownExistence(description = this)
         }
     }

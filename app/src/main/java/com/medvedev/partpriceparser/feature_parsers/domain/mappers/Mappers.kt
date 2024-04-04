@@ -1,16 +1,27 @@
 package com.medvedev.partpriceparser.feature_parsers.domain.mappers
 
+import com.medvedev.partpriceparser.feature_parsers.presentation.models.PartsData
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.ProductBrand
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.ProductCart
-import com.medvedev.partpriceparser.feature_parsers.presentation.models.filter.PartExistence
-import com.medvedev.partsparser.models.PartExistenceDTO
-import com.medvedev.partsparser.models.ProductBrandDTO
-import com.medvedev.partsparser.models.ProductCartDTO
-import com.medvedev.partsparser.utils.ResourceDTO
 import com.medvedev.partpriceparser.feature_parsers.presentation.models.Resource
+import com.medvedev.partpriceparser.feature_parsers.presentation.models.filter.PartExistence
+import com.medvedev.parts_domain.models.PartExistenceDTO
+import com.medvedev.parts_domain.models.PartsDataDTO
+import com.medvedev.parts_domain.models.ProductBrandDTO
+import com.medvedev.parts_domain.models.ProductCartDTO
+import com.medvedev.parts_domain.utils.ResourceDTO
 
 
-fun ResourceDTO<Set<ProductCartDTO>>.toResult(): Resource<Set<ProductCart>> {
+fun PartsDataDTO.toPartsData(): PartsData {
+    return PartsData(
+        linkToSearchCatalog = this.linkToSearchCatalog,
+        linkToSite = linkToSite,
+        siteName = this.siteName,
+        partsResult = this.partsResultDTO.toResource()
+    )
+}
+
+fun ResourceDTO<Set<ProductCartDTO>>.toResource(): Resource<Set<ProductCart>> {
     val newResource: Resource<Set<ProductCart>> = when (this) {
         is ResourceDTO.Loading -> Resource.Loading()
         is ResourceDTO.Error -> Resource.Error(message = message ?: "")
@@ -34,7 +45,7 @@ fun ResourceDTO<Set<ProductCartDTO>>.toResult(): Resource<Set<ProductCart>> {
 }
 
 fun ProductBrandDTO.toProductBrand(): ProductBrand {
-    return when(this) {
+    return when (this) {
         is ProductBrandDTO.Kamaz -> ProductBrand.Kamaz(name = this.name)
         is ProductBrandDTO.Repair -> ProductBrand.Repair(name = this.name)
         is ProductBrandDTO.Unknown -> ProductBrand.Unknown(name = this.name)
@@ -43,8 +54,8 @@ fun ProductBrandDTO.toProductBrand(): ProductBrand {
 
 fun PartExistenceDTO.toPartExistence(): PartExistence {
     return when (this) {
-        is PartExistenceDTO.TrueExistence -> PartExistence.Positive(description = description)
-        is PartExistenceDTO.FalseExistenceDTO -> PartExistence.Negative(description = description)
-        else -> PartExistence.Unknown(description = description)
+        is PartExistenceDTO.Positive -> PartExistence.Positive(description = description)
+        is PartExistenceDTO.Negative -> PartExistence.Negative(description = description)
+        is PartExistenceDTO.Unknown -> PartExistence.Unknown(description = description)
     }
 }

@@ -1,10 +1,10 @@
 package com.medvedev.partsparser.sources
 
-import com.medvedev.partsparser.models.ProductCartDTO
+import com.medvedev.partsparser.models.ProductCartParse
 import com.medvedev.partsparser.models.getBrand
 import com.medvedev.partsparser.models.getCleanPrice
 import com.medvedev.partsparser.models.getExistence
-import com.medvedev.partsparser.utils.ResourceDTO
+import com.medvedev.partsparser.utils.ResourceParse
 import com.medvedev.partsparser.utils.html2text
 import com.medvedev.partsparser.utils.safeTakeFirst
 import kotlinx.coroutines.flow.Flow
@@ -13,7 +13,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import timber.log.Timber
 
-class AvtoKamaParser : ProductParser() {
+internal class AvtoKamaParser : ProductParser() {
     override val linkToSite: String
         get() = "https://avtokama.ru"
     override val siteName: String
@@ -27,9 +27,9 @@ class AvtoKamaParser : ProductParser() {
         get() = Timber.tag("developerAK").d(toString())
 
     @Suppress("OVERRIDE_BY_INLINE")
-    override inline val workWithServer: (String) -> Flow<ResourceDTO<Set<ProductCartDTO>>>
+    override inline val workWithServer: (String) -> Flow<ResourceParse<Set<ProductCartParse>>>
         get() = { articleToSearch ->
-            val productSet: MutableSet<ProductCartDTO> = mutableSetOf()
+            val productSet: MutableSet<ProductCartParse> = mutableSetOf()
             flow {
 
 
@@ -112,7 +112,7 @@ class AvtoKamaParser : ProductParser() {
 
 
                     productSet.add(
-                        ProductCartDTO(
+                        ProductCartParse(
                             fullLinkToProduct = linkToSite + partLinkToProduct,
                             fullImageUrl = linkToSite + imageUrl,
                             price = price,
@@ -125,7 +125,7 @@ class AvtoKamaParser : ProductParser() {
                         )
                     )
                 }
-                emit(ResourceDTO.Success(data = productSet))
+                emit(ResourceParse.Success(data = productSet))
             }
         }
 }

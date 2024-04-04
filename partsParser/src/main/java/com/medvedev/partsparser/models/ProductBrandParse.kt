@@ -1,10 +1,10 @@
 package com.medvedev.partsparser.models
 
-sealed interface ProductBrandDTO {
+sealed interface ProductBrandParse {
     val name: String
     val possibleNames: ArrayList<String>
 
-    class Kamaz(override val name: String = "ПАО \"КАМАЗ\"") : ProductBrandDTO {
+    class Kamaz(override val name: String = "ПАО \"КАМАЗ\"") : ProductBrandParse {
 
         override val possibleNames: ArrayList<String> = arrayListOf(
             "пао",
@@ -17,7 +17,7 @@ sealed interface ProductBrandDTO {
         )
     }
 
-    class Repair(override val name: String = "Ремонтный") : ProductBrandDTO {
+    class Repair(override val name: String = "Ремонтный") : ProductBrandParse {
         override val possibleNames: ArrayList<String> = arrayListOf(
             "ремонтный",
             "ремонтированный",
@@ -27,7 +27,7 @@ sealed interface ProductBrandDTO {
         )
     }
 
-    class Unknown(override val name: String = "Неопределен") : ProductBrandDTO {
+    class Unknown(override val name: String = "Неопределен") : ProductBrandParse {
         override val possibleNames: ArrayList<String> = arrayListOf("Прочие")
     }
 }
@@ -41,14 +41,14 @@ sealed interface ProductBrandDTO {
 // ООО "Рославльские тормозные системы" РААЗ \ ООО НПО "УРАЛ" \
 
 
-val String.getBrand: ProductBrandDTO
+val String.getBrand: ProductBrandParse
     get() = this.trim().lowercase().let { lowerString ->
         when {
-            ProductBrandDTO.Kamaz().possibleNames.contains(lowerString) ||
-                    lowerString.contains("камаз") -> ProductBrandDTO.Kamaz(name = this)
+            ProductBrandParse.Kamaz().possibleNames.contains(lowerString) ||
+                    lowerString.contains("камаз") -> ProductBrandParse.Kamaz(name = this)
 
-            ProductBrandDTO.Repair().possibleNames.contains(lowerString) -> ProductBrandDTO.Repair(name = this)
-            else -> ProductBrandDTO.Unknown(name = this)
+            ProductBrandParse.Repair().possibleNames.contains(lowerString) -> ProductBrandParse.Repair(name = this)
+            else -> ProductBrandParse.Unknown(name = this)
         }
     }
 

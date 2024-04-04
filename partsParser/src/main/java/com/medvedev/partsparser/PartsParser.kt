@@ -1,7 +1,6 @@
-package com.medvedev.partpriceparser.feature_parsers.domain.use_cases
+package com.medvedev.partsparser
 
-import com.medvedev.partpriceparser.feature_parsers.domain.mappers.toResult
-import com.medvedev.partpriceparser.feature_parsers.presentation.models.ParserData
+import com.medvedev.partsparser.models.PartsDataParse
 import com.medvedev.partsparser.sources.AutoMotorsParser
 import com.medvedev.partsparser.sources.AvtoKamaParser
 import com.medvedev.partsparser.sources.KamaCenterParser
@@ -16,8 +15,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.launch
 
-
-class GetProductsUseCase {
+class PartsParser {
 
     private val autoMotorsParser = AutoMotorsParser()
 
@@ -46,18 +44,17 @@ class GetProductsUseCase {
         nikoParser
     )
 
-    suspend fun execute(article: String): Flow<ParserData> {
-
+    suspend fun getPartsData(article: String): Flow<PartsDataParse> {
         return channelFlow {
             parserSourcesList.forEach { source ->
                 launch(Dispatchers.IO) {
-                    source.getProduct(article).collect { resultDTO ->
-                        val parserData = ParserData(
+                    source.getProduct(article).collect { resultParse ->
+                        val parserData = PartsDataParse(
                             linkToSearchCatalog = source.linkToSite +
                                     source.partOfLinkToCatalog(article),
                             linkToSite = source.linkToSite,
                             siteName = source.siteName,
-                            productParserData = resultDTO.toResult()
+                            partsResultParse = resultParse
                         )
                         send(parserData)
                     }

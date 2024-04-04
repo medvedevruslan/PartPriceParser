@@ -1,10 +1,10 @@
 package com.medvedev.partsparser.sources
 
-import com.medvedev.partsparser.models.ProductCartDTO
-import com.medvedev.partsparser.models.PartExistenceDTO
+import com.medvedev.partsparser.models.ProductCartParse
+import com.medvedev.partsparser.models.PartExistenceParse
 import com.medvedev.partsparser.models.getBrand
 import com.medvedev.partsparser.models.getExistence
-import com.medvedev.partsparser.utils.ResourceDTO
+import com.medvedev.partsparser.utils.ResourceParse
 import com.medvedev.partsparser.utils.html2text
 import com.medvedev.partsparser.utils.safeTakeFirst
 import kotlinx.coroutines.flow.Flow
@@ -14,7 +14,7 @@ import org.jsoup.nodes.Document
 import timber.log.Timber
 
 
-class SkladTfkParser : ProductParser() {
+internal class SkladTfkParser : ProductParser() {
 
     // todo магазин имеет несколько складов с разным наличием и разными ценами, взят самый основной склад,
     //  где больше всех наличие и самая актуально-низкая цена
@@ -30,9 +30,9 @@ class SkladTfkParser : ProductParser() {
         }
 
     @Suppress("OVERRIDE_BY_INLINE")
-    override inline val workWithServer: (String) -> Flow<ResourceDTO<Set<ProductCartDTO>>>
+    override inline val workWithServer: (String) -> Flow<ResourceParse<Set<ProductCartParse>>>
         get() = { articleToSearch ->
-            val productSet: MutableSet<ProductCartDTO> = mutableSetOf()
+            val productSet: MutableSet<ProductCartParse> = mutableSetOf()
             flow {
 
                 val fullLink = linkToSite + partOfLinkToCatalog(articleToSearch)
@@ -125,7 +125,7 @@ class SkladTfkParser : ProductParser() {
                         }
 
                     productSet.add(
-                        ProductCartDTO(
+                        ProductCartParse(
                             fullLinkToProduct = linkToSite + partLinkToProduct,
                             fullImageUrl = linkToSite + imageUrl,
                             price = price,
@@ -135,11 +135,11 @@ class SkladTfkParser : ProductParser() {
                             brand = brand.getBrand,
                             quantity = null,
                             existence = existence?.getExistence
-                                ?: PartExistenceDTO.UnknownExistence()
+                                ?: PartExistenceParse.UnknownExistence()
                         )
                     )
                 }
-                emit(ResourceDTO.Success(data = productSet))
+                emit(ResourceParse.Success(data = productSet))
             }
         }
 }
