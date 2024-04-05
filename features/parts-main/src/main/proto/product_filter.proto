@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option java_package = "com.medvedev.parts.main";
+option java_multiple_files = true;
+
+message ProductFilterPreferences {
+
+  bool show_missing_product = 1;
+
+  bool show_kamaz_brand = 2;
+  bool show_repair_brand = 3;
+  bool show_unknown_brand = 4;
+
+  SortOrderProducts sort_order = 6;
+
+  enum SortOrderProducts {
+    BY_NAME = 0;
+    BY_FIRST_CHEAP = 1;
+    BY_FIRST_EXPENSIVE = 2;
+  }
+}

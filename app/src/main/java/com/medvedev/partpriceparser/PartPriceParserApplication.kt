@@ -2,7 +2,7 @@ package com.medvedev.partpriceparser
 
 import android.app.Application
 import android.content.pm.PackageManager
-import com.medvedev.partpriceparser.core.util.printE
+import com.medvedev.parts.main.utils.printE
 import dagger.hilt.android.HiltAndroidApp
 import io.sentry.android.core.SentryAndroid
 import timber.log.Timber

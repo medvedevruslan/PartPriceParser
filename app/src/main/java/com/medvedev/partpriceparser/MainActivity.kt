@@ -8,8 +8,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.medvedev.partpriceparser.feature_parsers.presentation.ParseScreen
-import com.medvedev.partpriceparser.ui.theme.PartPriceParserTheme
+import com.medvedev.parts.main.presentation.ParseScreen
+import com.medvedev.parts.main.ui.theme.PartPriceParserTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

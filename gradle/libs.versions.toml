@@ -25,6 +25,8 @@ timber = "5.0.1"
 appcompat = "1.6.1"
 material = "1.11.0"
 
+
+
 [libraries]
 
 #android
@@ -79,6 +81,9 @@ androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "d
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinx-coroutines" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+
+
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp"}
