@@ -1,3 +1,9 @@
+import com.medvedev.buildsrc.ProjectConfig.COMPILE_SDK
+import com.medvedev.buildsrc.ProjectConfig.JAVA_VERSION
+import com.medvedev.buildsrc.ProjectConfig.JVM_TARGET
+import com.medvedev.buildsrc.ProjectConfig.KOTLIN_COMPILER_EXTENSION_VERSION
+import com.medvedev.buildsrc.ProjectConfig.MIN_SDK
+
 plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -9,10 +15,10 @@ plugins {
 android {
 
     namespace = "com.medvedev.parts.main"
-    compileSdk = 34
+    compileSdk = COMPILE_SDK
 
     defaultConfig {
-        minSdk = 24
+        minSdk = MIN_SDK
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -28,14 +34,14 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JAVA_VERSION
+        targetCompatibility = JAVA_VERSION
     }
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = JVM_TARGET
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.11"
+        kotlinCompilerExtensionVersion = KOTLIN_COMPILER_EXTENSION_VERSION
     }
 
     buildFeatures {

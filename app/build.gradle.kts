@@ -1,4 +1,12 @@
+import com.medvedev.buildsrc.ProjectConfig.ANDROID
+import com.medvedev.buildsrc.ProjectConfig.COMPILE_SDK
+import com.medvedev.buildsrc.ProjectConfig.JAVA_VERSION
+import com.medvedev.buildsrc.ProjectConfig.JVM_TARGET
+import com.medvedev.buildsrc.ProjectConfig.KOTLIN_COMPILER_EXTENSION_VERSION
+import com.medvedev.buildsrc.ProjectConfig.MIN_SDK
+
 val sentryToken = providers.gradleProperty("SENTRY_AUTH_TOKEN").get()
+
 
 plugins {
     alias(libs.plugins.android.application)
@@ -10,14 +18,14 @@ plugins {
 
 android {
     namespace = "com.medvedev.partpriceparser"
-    compileSdk = 34
+    compileSdk = COMPILE_SDK
 
     defaultConfig {
         applicationId = "com.medvedev.partpriceparser"
-        minSdk = 24
-        targetSdk = 34
-        versionCode = 36
-        versionName = "0.1.36"
+        minSdk = MIN_SDK
+        targetSdk = COMPILE_SDK
+        versionCode = 37
+        versionName = "0.1.37"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -37,20 +45,20 @@ android {
 
     signingConfigs {
         create("release") {
-            keyAlias = "android"
-            keyPassword = "android"
             storeFile = file("$rootDir/key/platform1.jks")
-            storePassword = "android"
+            keyAlias = ANDROID
+            keyPassword = ANDROID
+            storePassword = ANDROID
         }
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JAVA_VERSION
+        targetCompatibility = JAVA_VERSION
     }
 
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = JVM_TARGET
     }
 
     buildFeatures {
@@ -58,7 +66,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.11"
+        kotlinCompilerExtensionVersion =  KOTLIN_COMPILER_EXTENSION_VERSION
     }
 
     packaging {
