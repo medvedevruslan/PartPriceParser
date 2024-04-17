@@ -50,5 +50,4 @@ class ProductFiltersPreferencesRepository(private val filterPreferencesStore: Da
         }
     }
 
-
 }

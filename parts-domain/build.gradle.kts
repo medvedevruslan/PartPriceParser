@@ -38,7 +38,10 @@ android {
 }
 
 dependencies {
+
+    implementation(project(":parts-parser"))
+
+    implementation(libs.jakarta.inject)
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)
-    implementation(project(":parts-parser"))
 }

@@ -7,9 +7,10 @@ import com.medvedev.buildsrc.ProjectConfig.MIN_SDK
 plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.google.protobuf)
+
     alias(libs.plugins.google.dagger.hilt.android)
     alias(libs.plugins.jetbrains.kotlin.kapt)
-    alias(libs.plugins.google.protobuf)
 }
 
 android {

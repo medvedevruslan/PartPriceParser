@@ -21,10 +21,8 @@ import com.medvedev.parts.main.presentation.models.filter.ProductSort
 import com.medvedev.parts.main.utils.printD
 import com.medvedev.parts.main.utils.printE
 import com.medvedev.parts.main.utils.toPartsData
-import com.medvedev.parts_domain.PartsRepository
 import com.medvedev.parts_domain.models.PartsDataDTO
 import com.medvedev.parts_domain.usecases.GetPartsDataUseCase
-import com.medvedev.partsparser.PartsParser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -38,14 +36,10 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
-class ParserViewModel @Inject constructor(private val productFiltersPreferencesRepository: ProductFiltersPreferencesRepository) :
-    ViewModel() {
-
-
-        // todo вынести зависимости в di
-    private val parserData = PartsParser()
-    private val partsRepository = PartsRepository(parserData)
-    private val getPartsDataUseCase = GetPartsDataUseCase(partsRepository)
+class ParserViewModel @Inject constructor(
+    private val productFiltersPreferencesRepository: ProductFiltersPreferencesRepository,
+    private val getPartsDataUseCase: GetPartsDataUseCase
+    ) : ViewModel() {
 
     val sortListByBrands: ArrayList<ProductSort> = arrayListOf(
         ProductSort.ByStoreNameAlphabetically,
