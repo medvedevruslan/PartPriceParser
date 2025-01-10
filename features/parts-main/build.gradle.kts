@@ -78,7 +78,7 @@ dependencies {
 
     // Hilt for DI
     implementation(libs.hilt.android)
-    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     kapt(libs.hilt.compiler)
 
 }

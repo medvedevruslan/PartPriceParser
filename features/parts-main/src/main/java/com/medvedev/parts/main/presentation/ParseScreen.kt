@@ -65,9 +65,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.medvedev.parts.main.R
-import com.medvedev.parts.main.utils.printD
 import com.medvedev.parts.main.presentation.models.PartsData
 import com.medvedev.parts.main.presentation.models.ProductBrand
 import com.medvedev.parts.main.presentation.models.ProductCart
@@ -76,11 +75,17 @@ import com.medvedev.parts.main.presentation.models.filter.PartExistence
 import com.medvedev.parts.main.presentation.screen_content.CustomFilterDialog
 import com.medvedev.parts.main.presentation.screen_content.TopBarItemButton
 import com.medvedev.parts.main.utils.UIEvents
+import com.medvedev.parts.main.utils.printD
 import com.medvedev.partsparser.models.toPriceWithSpace
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
-fun ParseScreen(viewModel: ParserViewModel = hiltViewModel()) {
+fun ParseScreen() {
+    Parse(viewModel = viewModel())
+}
+
+@Composable
+internal fun Parse(viewModel: ParserViewModel) {
 
     if (viewModel.loadingInProgressFlag.value) {
         "allExistence: ${viewModel.listWithExistences}".printD
@@ -182,7 +187,8 @@ fun ParseScreenContent(
 
                             val newPartOfList = when (parserData.partsResult) {
                                 is Resource.Success -> {
-                                    val partOfList = parserData.partsResult.data?.filter { productElement ->
+                                    val partOfList =
+                                        parserData.partsResult.data?.filter { productElement ->
                                             // "change showMissing in compose: ${productElement.existence.javaClass.simpleName}".printD
                                             productElement.existence is PartExistence.Positive
                                         }

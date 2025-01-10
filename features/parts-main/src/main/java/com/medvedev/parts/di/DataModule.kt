@@ -27,13 +27,13 @@ private const val DATA_STORE_FILE_NAME = "product_filter.proto"
 object DataModule {
 
     @Provides
-    fun provideGetPartsDataUseCase(): GetPartsDataUseCase {
-        return GetPartsDataUseCase(providePartsRepository())
+    fun provideGetPartsDataUseCase(repository: PartsRepository): GetPartsDataUseCase {
+        return GetPartsDataUseCase(repository)
     }
 
     @Provides
-    fun providePartsRepository(): PartsRepository {
-        return PartsRepository(providePartsParser())
+    fun providePartsRepository(parser: PartsParser): PartsRepository {
+        return PartsRepository(parser)
     }
 
     @Provides
@@ -44,7 +44,9 @@ object DataModule {
 
     @Provides
     @Singleton
-    fun provideProductFilterProtoDataStore(@ApplicationContext appContext: Context): DataStore<ProductFilterPreferences> =
+    fun provideProductFilterProtoDataStore(
+        @ApplicationContext appContext: Context
+    ): DataStore<ProductFilterPreferences> =
         DataStoreFactory.create(
             serializer = ProductFilterPreferencesSerializer,
             produceFile = { appContext.dataStoreFile(DATA_STORE_FILE_NAME) },

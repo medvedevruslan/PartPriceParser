@@ -11,6 +11,8 @@ message ProductFilterPreferences {
   bool show_repair_brand = 3;
   bool show_unknown_brand = 4;
 
+  string nothing = 5;
+
   SortOrderProducts sort_order = 6;
 
   enum SortOrderProducts {

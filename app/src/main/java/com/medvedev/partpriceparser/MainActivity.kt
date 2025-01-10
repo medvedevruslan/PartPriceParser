@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.medvedev.parts.main.presentation.ParseScreen
 import com.medvedev.parts.main.ui.theme.PartPriceParserTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -24,7 +23,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.surface
                 ) {
-                    ParseScreen(viewModel = hiltViewModel())
+                    ParseScreen()
                 }
             }
         }
